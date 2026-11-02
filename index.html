@@ -20,7 +20,7 @@
       overflow: hidden;
     }
 
-    /* CONTAINER UTAMA SIDE-BY-SIDE */
+    /* CONTAINER UTAMA 3 KOLOM SIDE-BY-SIDE */
     .dashboard-grid {
       display: flex;
       flex-direction: row;
@@ -46,7 +46,7 @@
       z-index: 10;
     }
 
-    /* AREA TABEL TOP DAILY SALES (DI TENGAH) */
+    /* AREA TABEL LIVE TOP SALES TODAY (DI TENGAH) */
     .custom-table-container {
       width: 600px;               
       height: 520px;            
@@ -73,7 +73,7 @@
       animation: goldGlow 2s infinite ease-in-out;
     }
 
-    /* Animasi Scrolling */
+    /* Animasi Scrolling Vertikal */
     @keyframes scrollUp {
       0% { transform: translateY(0); }
       100% { transform: translateY(-50%); }
@@ -87,7 +87,7 @@
       animation-play-state: paused;
     }
 
-    /* OUTLINE PUTIH TIPIS PADA TEKS KHUSUS TOP 3 */
+    /* OUTLINE PUTIH TIPIS PADA TEKS KHUSUS RANKING */
     .text-outline-white {
       text-shadow: 
         -0.75px -0.75px 0 #fff,  
@@ -97,7 +97,7 @@
          0px     1px    2px rgba(0, 0, 0, 0.12);
     }
 
-    /* EFEK API / GLOW DI BAGIAN LUAR (OUTLINE) UNTUK TOP 3 & TOP 1 MTD */
+    /* EFEK GLOW / API UNTUK RANKING & TOP 1 MTD */
     @keyframes goldGlow {
       0%, 100% { box-shadow: 0 0 10px rgba(234, 179, 8, 0.5), 0 0 20px rgba(245, 158, 11, 0.3); }
       50% { box-shadow: 0 0 20px rgba(234, 179, 8, 0.9), 0 0 30px rgba(239, 68, 68, 0.6); }
@@ -409,26 +409,14 @@
     }
 
 
-    // 2. Fetch & Render Top 1 MTD Sales (Berdasarkan mtd_nip / mtd_total)
+    // 2. Fetch & Render Top 1 MTD Sales (Berdasarkan mtd_total dan mtd_nip)
     async function fetchTop1MtdSales() {
       try {
-        // Coba urutkan berdasarkan mtd_total terlebih dahulu
-        let { data, error } = await supabaseClient
+        const { data, error } = await supabaseClient
           .from('mtd_sales')
           .select('*')
           .order('mtd_total', { ascending: false })
           .limit(1);
-
-        // Jika kolom mtd_total tidak ada / error, fallback ke kolom total
-        if (error || !data || data.length === 0) {
-          const altQuery = await supabaseClient
-            .from('mtd_sales')
-            .select('*')
-            .order('total', { ascending: false })
-            .limit(1);
-          data = altQuery.data;
-          error = altQuery.error;
-        }
 
         const container = document.getElementById('mtdTop1Content');
 
@@ -444,11 +432,11 @@
         }
 
         const topMtd = data[0];
-        // Mendukung berbagai variasi penamaan kolom (mtd_nip / nip, mtd_nama / nama, dll)
-        const nip = topMtd.mtd_nip || topMtd.nip || '-';
-        const nama = topMtd.mtd_nama || topMtd.nama || 'NONAME';
-        const dept = topMtd.mtd_dept || topMtd.dept || '-';
-        const total = Number(topMtd.mtd_total || topMtd.total || 0);
+        
+        const nip = topMtd.mtd_nip || '-';
+        const nama = topMtd.mtd_nama || 'NONAME';
+        const dept = topMtd.mtd_alldept || '-';
+        const total = Number(topMtd.mtd_total || 0);
 
         const bucketName = 'FOTO SALES';
         const imageUrl = `${SUPABASE_URL}/storage/v1/object/public/${encodeURIComponent(bucketName)}/${nip}.jpg`;
