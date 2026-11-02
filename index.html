@@ -159,7 +159,7 @@
     <!-- CONTAINER UTAMA SIDE-BY-SIDE -->
     <div class="dashboard-grid">
 
-      <!-- ================= GAUGE CHART SECTION (DI SEBELAH KIRI TABEL TOP DAILY SALES) ================= -->
+      <!-- ================= GAUGE CHART SECTION ================= -->
       <div id="gaugeContainer" class="gauge-section-container">
         
         <!-- Header Gauge -->
@@ -170,13 +170,22 @@
         <!-- Konten Grafik Gauge -->
         <div class="flex-1 flex flex-col items-center justify-center p-6 relative bg-gradient-to-b from-slate-50 to-white">
           
-          <!-- SVG Gauge Semi-Circle -->
+          <!-- SVG Gauge Semi-Circle dengan Garis Diperlebar & Jarum Animasi -->
           <div class="relative w-72 h-36 flex items-center justify-center">
             <svg class="w-full h-full overflow-visible" viewBox="0 0 200 100">
-              <!-- Background Track Arc -->
-              <path d="M 20 90 A 80 80 0 0 1 180 90" fill="none" stroke="#e2e8f0" stroke-width="18" stroke-linecap="round"/>
-              <!-- Dynamic Progress Arc -->
-              <path id="gaugeProgressArc" d="M 20 90 A 80 80 0 0 1 180 90" fill="none" stroke="#3b82f6" stroke-width="18" stroke-linecap="round" stroke-dasharray="251.2" stroke-dashoffset="251.2" style="transition: stroke-dashoffset 1s ease-in-out, stroke 0.5s ease;"/>
+              <!-- Background Track Arc (Diperlebar menjadi stroke-width 24) -->
+              <path d="M 20 90 A 80 80 0 0 1 180 90" fill="none" stroke="#e2e8f0" stroke-width="24" stroke-linecap="round"/>
+              <!-- Dynamic Progress Arc (Diperlebar menjadi stroke-width 24) -->
+              <path id="gaugeProgressArc" d="M 20 90 A 80 80 0 0 1 180 90" fill="none" stroke="#3b82f6" stroke-width="24" stroke-linecap="round" stroke-dasharray="251.2" stroke-dashoffset="251.2" style="transition: stroke-dashoffset 1s ease-in-out, stroke 0.5s ease;"/>
+              
+              <!-- Jarum Penunjuk (Needle) dengan Animasi Rotasi -->
+              <g id="gaugeNeedle" style="transform-origin: 100px 90px; transition: transform 1s cubic-bezier(0.4, 0, 0.2, 1); transform: rotate(-90deg);">
+                <!-- Batang Jarum -->
+                <line x1="100" y1="90" x2="100" y2="28" stroke="#1e293b" stroke-width="4" stroke-linecap="round"/>
+                <!-- Lingkaran Poros Jarum di Tengah -->
+                <circle cx="100" cy="90" r="7" fill="#1e293b"/>
+                <circle cx="100" cy="90" r="3" fill="#ffffff"/>
+              </g>
             </svg>
             
             <!-- Presentase di Tengah Gauge -->
@@ -187,23 +196,13 @@
           </div>
 
           <!-- Keterangan Nilai Realtime vs Target -->
-          <!-- 
-            [PENGATURAN KETERANGAN GAUGE]:
-            - text-sm / text-lg: Mengatur ukuran teks (bisa diubah ke text-xl, text-2xl, dsb jika ingin lebih besar)
-            - font-bold / font-extrabold: Mengatur ketebalan teks (membuat bold)
-            - text-emerald-600 / text-red-600: Mengatur warna teks (Target diubah menjadi merah menggunakan text-red-600)
-          -->
           <div class="w-full grid grid-cols-2 gap-4 mt-6 bg-slate-100 p-4 rounded-xl border border-slate-200 shadow-inner">
             <div class="text-center border-r border-slate-200 pr-2">
-              <!-- Label Realisasi (Bisa diubah teksnya di bawah ini) -->
               <div class="text-xl text-slate-500 font-bold uppercase">Realisasi</div>
-              <!-- Nilai Realisasi: text-2xl (ukuran), font-extrabold (ketebalan) -->
               <div id="gaugeRealtimeValue" class="text-2xl font-extrabold font-mono text-emerald-600 mt-1">Rp 0</div>
             </div>
             <div class="text-center pl-2">
-              <!-- Label Target Today (Bisa diubah teksnya di bawah ini) -->
               <div class="text-xl text-slate-500 font-bold uppercase">Target Today</div>
-              <!-- Nilai Target: text-2xl (ukuran diperbesar), font-extrabold (ketebalan/bold), text-red-600 (warna merah sesuai permintaan) -->
               <div id="gaugeTargetValue" class="text-2xl font-extrabold font-mono text-red-600 mt-1">Rp 0</div>
             </div>
           </div>
@@ -213,10 +212,10 @@
       <!-- ================= AKHIR GAUGE CHART SECTION ================= -->
 
 
-      <!-- ================= AREA TABEL LAPORAN SALES (TOP DAILY SALES) ================= -->
+      <!-- ================= AREA TABEL LAPORAN SALES ================= -->
       <div class="custom-table-container flex flex-col relative z-10">
         
-        <!-- Header Tabel (LIVE TOP SALES TODAY) -->
+        <!-- Header Tabel -->
         <div class="bg-slate-900 text-white font-extrabold text-center text-2xl py-3.5 rounded-t-xl border-b border-slate-800 shadow-md z-10 shrink-0 tracking-wider">
           LIVE TOP SALES TODAY
         </div>
@@ -228,7 +227,7 @@
           <p class="text-slate-400 text-xs mt-1">Silakan input data melalui Admin Panel.</p>
         </div>
 
-        <!-- Area Konten Berjalan Vertikal (Background Putih) -->
+        <!-- Area Konten Berjalan Vertikal -->
         <div class="flex-1 overflow-hidden relative border-x border-b border-blue-200 rounded-b-xl bg-white scroll-container shadow-lg">
           <div id="scrollWrapper" class="absolute w-full animate-scroll-infinite">
             <div id="tableContentOriginal" class="space-y-3 p-3"></div>
@@ -412,7 +411,7 @@
         }
         if (targetValue <= 0) targetValue = 250000000; // Fallback default target
 
-        // B. Ambil Realtime Sales dari tabel 'laporan_departemen' dengan select('*') untuk menangani perbedaan huruf besar/kecil
+        // B. Ambil Realtime Sales dari tabel 'laporan_departemen'
         const { data: deptData, error: deptError } = await supabaseClient
           .from('laporan_departemen')
           .select('*');
@@ -425,7 +424,6 @@
         if (!deptError && deptData && deptData.length > 0) {
           deptData.forEach(row => {
             const keys = Object.keys(row);
-            // Cari kolom exclude_ppn secara case-insensitive (mengabaikan perbedaan huruf besar/kecil/simbol)
             const matchingKey = keys.find(k => k.toLowerCase().replace(/[^a-z0-9]/g, '') === 'excludeppn');
             
             let val = 0;
@@ -440,32 +438,37 @@
           });
         }
 
-        // C. Hitung Persentase & Render Gauge
+        // C. Hitung Persentase & Render Gauge + Rotasi Jarum Animasi
         const percentage = targetValue > 0 ? (realtimeSumExcludePpn / targetValue) * 100 : 0;
-        const clampedPercent = Math.min(percentage, 100);
+        const clampedPercent = Math.min(Math.max(percentage, 0), 100);
         
         const maxDash = 251.2;
         const dashOffset = maxDash - (clampedPercent / 100) * maxDash;
 
         document.getElementById('gaugeProgressArc').style.strokeDashoffset = dashOffset;
+        
+        // Kalkulasi sudut rotasi jarum (dari -90deg di kiri/0% hingga +90deg di kanan/100%)
+        const needleRotation = -90 + (clampedPercent / 100) * 180;
+        document.getElementById('gaugeNeedle').style.transform = `rotate(${needleRotation}deg)`;
+
         document.getElementById('gaugePercentage').innerText = percentage.toFixed(1) + '%';
         document.getElementById('gaugeRealtimeValue').innerText = 'Rp ' + realtimeSumExcludePpn.toLocaleString('id-ID');
         document.getElementById('gaugeTargetValue').innerText = 'Rp ' + targetValue.toLocaleString('id-ID');
 
-        // Ubah warna indikator berdasarkan pencapaian
+        // Ubah warna indikator & jarum berdasarkan pencapaian
         const arcElement = document.getElementById('gaugeProgressArc');
         const statusElement = document.getElementById('gaugeStatusText');
 
         if (percentage >= 100) {
-          arcElement.style.stroke = '#10b981'; // Hijau (Tercapai)
+          arcElement.style.stroke = '#10b981'; // Hijau
           statusElement.innerText = 'Target Tercapai 🎉';
           statusElement.className = 'text-xs font-bold text-emerald-600 uppercase tracking-wider mt-0.5';
         } else if (percentage >= 75) {
-          arcElement.style.stroke = '#3b82f6'; // Biru (On Track)
+          arcElement.style.stroke = '#3b82f6'; // Biru
           statusElement.className = 'text-xs font-bold text-blue-600 uppercase tracking-wider mt-0.5';
           statusElement.innerText = 'On Track 🚀';
         } else {
-          arcElement.style.stroke = '#f59e0b'; // Kuning/Amber (Tambah Lagi)
+          arcElement.style.stroke = '#f59e0b'; // Amber
           statusElement.className = 'text-xs font-bold text-amber-600 uppercase tracking-wider mt-0.5';
           statusElement.innerText = 'Tambah Salesnya ⚡';
         }
@@ -478,7 +481,6 @@
 
     // 3. Setup Supabase Realtime Sync Channels
     function setupRealtime() {
-      // Sync untuk laporan_sales (tabel top sales)
       supabaseClient
         .channel('public:laporan_sales')
         .on('postgres_changes', { event: '*', schema: 'public', table: 'laporan_sales' }, () => {
@@ -486,7 +488,6 @@
         })
         .subscribe();
 
-      // Sync untuk laporan_departemen & target_today (untuk gauge chart)
       supabaseClient
         .channel('public:gauge_sync_channels')
         .on('postgres_changes', { event: '*', schema: 'public', table: 'laporan_departemen' }, () => {
