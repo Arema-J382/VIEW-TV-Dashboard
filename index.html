@@ -400,17 +400,33 @@
             targetValue += val;
           });
         }
-        if (targetValue <= 0) targetValue = 250000000; // Fallback target default jika kosong
+        if (targetValue <= 0) targetValue = 250000000; // Fallback default target
 
-        // B. Ambil Realtime Sales dari tabel 'laporan_departemen' (menjumlahkan kolom exclude_ppn)
+        // B. Ambil Realtime Sales dari tabel 'laporan_departemen' dengan select('*') untuk menangani perbedaan huruf besar/kecil
         const { data: deptData, error: deptError } = await supabaseClient
           .from('laporan_departemen')
-          .select('exclude_ppn');
+          .select('*');
+
+        if (deptError) {
+          console.error('Gagal mengambil laporan_departemen:', deptError);
+        }
 
         let realtimeSumExcludePpn = 0;
         if (!deptError && deptData && deptData.length > 0) {
           deptData.forEach(row => {
-            realtimeSumExcludePpn += Number(row.exclude_ppn) || 0;
+            const keys = Object.keys(row);
+            // Cari kolom exclude_ppn secara case-insensitive (mengabaikan perbedaan huruf besar/kecil/simbol)
+            const matchingKey = keys.find(k => k.toLowerCase().replace(/[^a-z0-9]/g, '') === 'excludeppn');
+            
+            let val = 0;
+            if (matchingKey && row[matchingKey] !== undefined) {
+              val = Number(row[matchingKey]) || 0;
+            } else if (row.exclude_ppn !== undefined) {
+              val = Number(row.exclude_ppn) || 0;
+            } else if (keys.length >= 5) {
+              val = Number(row[keys[4]]) || 0;
+            }
+            realtimeSumExcludePpn += val;
           });
         }
 
