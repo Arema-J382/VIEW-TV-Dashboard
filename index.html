@@ -22,9 +22,9 @@
 
     /* AREA TABEL */
     .custom-table-container {
-      width: 30%;               
+      width: 40%;               
       max-width: 1200px;
-      height: 500px;            
+      height: 600px;            
       margin-left: auto;        
       margin-right: auto;
       margin-top: 10px;         
@@ -116,10 +116,10 @@
     }
   </style>
 </head>
-<body class="bg-slate-950 text-white flex flex-col font-sans select-none">
+<body class="bg-blue-50 text-slate-800 flex flex-col font-sans select-none">
 
   <!-- ================= HEADER DASHBOARD ================= -->
-  <header class="bg-slate-900 border-b border-slate-800 px-12 py-5 flex justify-between items-center shadow-md z-20 shrink-0">
+  <header class="bg-slate-900 border-b border-slate-800 px-12 py-5 flex justify-between items-center shadow-md z-20 shrink-0 text-white">
     <div class="flex items-center gap-4">
       <div class="bg-blue-600 p-3 rounded-2xl text-white shadow-lg shadow-blue-600/30">
         <i data-lucide="tv" class="w-7 h-7"></i>
@@ -143,7 +143,7 @@
   </header>
 
   <!-- ================= SUB-HEADER STATISTIK ================= -->
-  <div class="bg-slate-900/60 border-b border-slate-800/80 px-12 py-3 flex justify-between items-center text-xs text-slate-400 z-20 shrink-0">
+  <div class="bg-slate-900/90 border-b border-slate-800 px-12 py-3 flex justify-between items-center text-xs text-slate-300 z-20 shrink-0">
     <div class="flex items-center gap-10">
       <span>Total Sales: <strong id="totalDataCount" class="text-white font-mono text-sm">0</strong> Orang</span>
       <span>Akumulasi Penjualan: <strong id="totalSumSales" class="text-green-400 font-mono text-base">Rp 0</strong></span>
@@ -151,7 +151,8 @@
   </div>
 
   <!-- ================= MAIN VIEW (KONTEN UTAMA) ================= -->
-  <main class="flex-1 relative overflow-hidden bg-slate-950 p-6 flex flex-col">
+  <!-- Background utama diganti warna Biru Tipis (bg-blue-50) -->
+  <main class="flex-1 relative overflow-hidden bg-blue-50 p-6 flex flex-col">
     
     <!-- AREA TABEL LAPORAN SALES -->
     <div class="custom-table-container flex flex-col relative z-10">
@@ -169,7 +170,7 @@
       </div>
 
       <!-- Area Konten Berjalan Vertikal (Background Putih) -->
-      <div class="flex-1 overflow-hidden relative border-x border-b border-slate-200 rounded-b-xl bg-white scroll-container shadow-inner">
+      <div class="flex-1 overflow-hidden relative border-x border-b border-blue-200 rounded-b-xl bg-white scroll-container shadow-lg">
         <div id="scrollWrapper" class="absolute w-full animate-scroll-infinite">
           <div id="tableContentOriginal" class="space-y-3 p-3"></div>
           <div id="tableContentClone" class="space-y-3 p-3" aria-hidden="true"></div>
