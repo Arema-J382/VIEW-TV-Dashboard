@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=1920, height=1080, initial-scale=1.0">
-  <title>TV Dashboard - Laporan Sales (Full HD Layout Custom)</title>
+  <title>TV Dashboard - Laporan Sales & Gauge (Full HD Layout Custom)</title>
   
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -20,15 +20,41 @@
       overflow: hidden;
     }
 
-    /* AREA TABEL */
+    /* CONTAINER UTAMA SIDE-BY-SIDE */
+    .dashboard-grid {
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+      align-items: center;
+      gap: 3rem;
+      width: 100%;
+      height: 100%;
+    }
+
+    /* AREA GAUGE CHART (DI SEBELAH KIRI) */
+    .gauge-section-container {
+      width: 550px;
+      height: 520px;
+      background: #ffffff;
+      border-radius: 1rem;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+      border: 1px solid #bfdbfe;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      position: relative;
+      z-index: 10;
+    }
+
+    /* AREA TABEL TOP DAILY SALES (DI SEBELAH KANAN) */
     .custom-table-container {
-      width: 30%;               
-      max-width: 1200px;
-      height: 400px;            
-      margin-left: auto;        
-      margin-right: auto;
-      margin-top: 10px;         
-      margin-bottom: 0px;       
+      width: 650px;               
+      height: 520px;            
+      margin: 0;         
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      z-index: 10;
     }
 
     /* Animasi Scrolling */
@@ -72,21 +98,21 @@
     }
 
     .fire-box-1 {
-      background-color: #fefce8; /* Emas Tipis Solid */
+      background-color: #fefce8;
       border: 2px solid #eab308;
       border-radius: 0.75rem;
       animation: goldGlow 1.8s infinite ease-in-out;
     }
 
     .fire-box-2 {
-      background-color: #f8fafc; /* Perak Tipis Solid */
+      background-color: #f8fafc;
       border: 2px solid #94a3b8;
       border-radius: 0.75rem;
       animation: silverGlow 2.2s infinite ease-in-out;
     }
 
     .fire-box-3 {
-      background-color: #fff7ed; /* Perunggu Tipis Solid */
+      background-color: #fff7ed;
       border: 2px solid #d97706;
       border-radius: 0.75rem;
       animation: bronzeGlow 2s infinite ease-in-out;
@@ -123,38 +149,87 @@
   <div class="bg-slate-900/90 border-b border-slate-800 px-12 py-3 flex justify-between items-center text-xs text-slate-300 z-20 shrink-0">
     <div class="flex items-center gap-10">
       <span>Total Sales: <strong id="totalDataCount" class="text-white font-mono text-sm">0</strong> Orang</span>
-      <span>Akumulasi Penjualan: <strong id="totalSumSales" class="text-green-400 font-mono text-base">Rp 0</strong></span>
+      <span>Akumulasi Penjualan Sales: <strong id="totalSumSales" class="text-green-400 font-mono text-base">Rp 0</strong></span>
     </div>
   </div>
 
   <!-- ================= MAIN VIEW (KONTEN UTAMA) ================= -->
-  <main class="flex-1 relative overflow-hidden bg-blue-50 p-6 flex flex-col">
+  <main class="flex-1 relative overflow-hidden bg-blue-50 p-6 flex items-center justify-center">
     
-    <!-- AREA TABEL LAPORAN SALES -->
-    <div class="custom-table-container flex flex-col relative z-10">
-      
-      <!-- Header Tabel (LIVE TOP SALES TODAY) -->
-      <div class="bg-slate-900 text-white font-extrabold text-center text-lg py-3.5 rounded-t-xl border-b border-slate-800 shadow-md z-10 shrink-0 tracking-wider">
-        LIVE TOP SALES TODAY
-      </div>
+    <!-- CONTAINER UTAMA SIDE-BY-SIDE -->
+    <div class="dashboard-grid">
 
-      <!-- Area Status Kosong / Error -->
-      <div id="emptyStatus" class="hidden absolute inset-0 pt-16 flex flex-col items-center justify-center z-20 bg-white/90 backdrop-blur-sm rounded-b-xl">
-        <i data-lucide="database-backup" class="w-16 h-16 text-slate-400 mb-3"></i>
-        <div id="statusMessage" class="text-slate-600 text-base font-medium">Belum ada data laporan sales di database.</div>
-        <p class="text-slate-400 text-xs mt-1">Silakan input data melalui Admin Panel.</p>
-      </div>
+      <!-- ================= GAUGE CHART SECTION (DI SEBELAH KIRI TABEL TOP DAILY SALES) ================= -->
+      <div id="gaugeContainer" class="gauge-section-container">
+        
+        <!-- Header Gauge -->
+        <div class="bg-slate-900 text-white font-extrabold text-center text-lg py-3.5 border-b border-slate-800 shadow-md tracking-wider">
+          REALTIME SALES PERFORMANCE GAUGE
+        </div>
 
-      <!-- Area Konten Berjalan Vertikal (Background Putih) -->
-      <div class="flex-1 overflow-hidden relative border-x border-b border-blue-200 rounded-b-xl bg-white scroll-container shadow-lg">
-        <div id="scrollWrapper" class="absolute w-full animate-scroll-infinite">
-          <div id="tableContentOriginal" class="space-y-3 p-3"></div>
-          <div id="tableContentClone" class="space-y-3 p-3" aria-hidden="true"></div>
+        <!-- Konten Grafik Gauge -->
+        <div class="flex-1 flex flex-col items-center justify-center p-6 relative bg-gradient-to-b from-slate-50 to-white">
+          
+          <!-- SVG Gauge Semi-Circle -->
+          <div class="relative w-72 h-36 flex items-center justify-center">
+            <svg class="w-full h-full overflow-visible" viewBox="0 0 200 100">
+              <!-- Background Track Arc -->
+              <path d="M 20 90 A 80 80 0 0 1 180 90" fill="none" stroke="#e2e8f0" stroke-width="18" stroke-linecap="round"/>
+              <!-- Dynamic Progress Arc -->
+              <path id="gaugeProgressArc" d="M 20 90 A 80 80 0 0 1 180 90" fill="none" stroke="#3b82f6" stroke-width="18" stroke-linecap="round" stroke-dasharray="251.2" stroke-dashoffset="251.2" style="transition: stroke-dashoffset 1s ease-in-out, stroke 0.5s ease;"/>
+            </svg>
+            
+            <!-- Presentase di Tengah Gauge -->
+            <div class="absolute bottom-1 flex flex-col items-center">
+              <span id="gaugePercentage" class="text-3xl font-black font-mono text-slate-800">0%</span>
+              <span id="gaugeStatusText" class="text-xs font-semibold text-blue-600 uppercase tracking-wider mt-0.5">Menunggu Data</span>
+            </div>
+          </div>
+
+          <!-- Keterangan Nilai Realtime vs Target -->
+          <div class="w-full grid grid-cols-2 gap-4 mt-6 bg-slate-100 p-4 rounded-xl border border-slate-200 shadow-inner">
+            <div class="text-center border-r border-slate-200 pr-2">
+              <div class="text-xs text-slate-500 font-semibold uppercase">Realisasi (Dept)</div>
+              <div id="gaugeRealtimeValue" class="text-sm font-bold font-mono text-emerald-600 mt-1">Rp 0</div>
+            </div>
+            <div class="text-center pl-2">
+              <div class="text-xs text-slate-500 font-semibold uppercase">Target (Target Today)</div>
+              <div id="gaugeTargetValue" class="text-sm font-bold font-mono text-slate-700 mt-1">Rp 0</div>
+            </div>
+          </div>
+
         </div>
       </div>
+      <!-- ================= AKHIR GAUGE CHART SECTION ================= -->
+
+
+      <!-- ================= AREA TABEL LAPORAN SALES (TOP DAILY SALES) ================= -->
+      <div class="custom-table-container flex flex-col relative z-10">
+        
+        <!-- Header Tabel (LIVE TOP SALES TODAY) -->
+        <div class="bg-slate-900 text-white font-extrabold text-center text-lg py-3.5 rounded-t-xl border-b border-slate-800 shadow-md z-10 shrink-0 tracking-wider">
+          LIVE TOP SALES TODAY
+        </div>
+
+        <!-- Area Status Kosong / Error -->
+        <div id="emptyStatus" class="hidden absolute inset-0 pt-16 flex flex-col items-center justify-center z-20 bg-white/90 backdrop-blur-sm rounded-b-xl">
+          <i data-lucide="database-backup" class="w-16 h-16 text-slate-400 mb-3"></i>
+          <div id="statusMessage" class="text-slate-600 text-base font-medium">Belum ada data laporan sales di database.</div>
+          <p class="text-slate-400 text-xs mt-1">Silakan input data melalui Admin Panel.</p>
+        </div>
+
+        <!-- Area Konten Berjalan Vertikal (Background Putih) -->
+        <div class="flex-1 overflow-hidden relative border-x border-b border-blue-200 rounded-b-xl bg-white scroll-container shadow-lg">
+          <div id="scrollWrapper" class="absolute w-full animate-scroll-infinite">
+            <div id="tableContentOriginal" class="space-y-3 p-3"></div>
+            <div id="tableContentClone" class="space-y-3 p-3" aria-hidden="true"></div>
+          </div>
+        </div>
+
+      </div>
+      <!-- ================= AKHIR TABEL TOP DAILY SALES ================= -->
 
     </div>
-
   </main>
 
   <script>
@@ -176,6 +251,7 @@
     const scrollWrapper = document.getElementById('scrollWrapper');
     scrollWrapper.style.animationDuration = '100s';
 
+    // 1. Fetch & Render Top Sales Data
     async function fetchSalesData() {
       const emptyStatus = document.getElementById('emptyStatus');
       const statusMessage = document.getElementById('statusMessage');
@@ -187,7 +263,7 @@
           .order('total', { ascending: false });
 
         if (error) {
-          console.error('Gagal mengambil data:', error);
+          console.error('Gagal mengambil data sales:', error);
           emptyStatus.classList.remove('hidden');
           statusMessage.innerText = 'Gagal memuat data: ' + error.message;
           return;
@@ -270,9 +346,7 @@
         htmlRows += `
           <div class="grid grid-cols-12 items-center px-4 py-3 transition shadow-sm ${rowClass}">
             <div class="col-span-4 flex items-center justify-center gap-3">
-              <!-- Nomor Urut dengan Outline Putih Tipis -->
               <span class="font-bold text-lg w-6 text-right ${numberStyle}">${rank}.</span>
-              <!-- Foto dengan Mahkota -->
               <div class="relative w-16 h-16 rounded-lg border-2 ${borderPhotoStyle} bg-slate-200 shrink-0 shadow-md">
                 ${crownMarkup}
                 <div class="w-full h-full rounded-[6px] overflow-hidden relative z-10">
@@ -298,11 +372,112 @@
       scrollWrapper.style.animationDuration = '100s';
     }
 
+
+    // 2. Fetch & Compute Realtime Gauge Chart Data (target_today & laporan_departemen kolom ke-5)
+    async function updateGaugeData() {
+      try {
+        // A. Ambil Target dari tabel 'target_today'
+        const { data: targetData, error: targetError } = await supabaseClient
+          .from('target_today')
+          .select('*');
+
+        let targetValue = 0;
+        if (!targetError && targetData && targetData.length > 0) {
+          targetData.forEach(row => {
+            const keys = Object.keys(row);
+            let val = 0;
+            if (row.target !== undefined) val = Number(row.target) || 0;
+            else if (row.nilai !== undefined) val = Number(row.nilai) || 0;
+            else if (row.jumlah !== undefined) val = Number(row.jumlah) || 0;
+            else if (keys.length > 0) {
+              // Ambil nilai numerik pertama/kedua jika nama kolom kustom
+              for (let k of keys) {
+                if (!isNaN(Number(row[k])) && Number(row[k]) > 0) {
+                  val = Number(row[k]) || 0;
+                  break;
+                }
+              }
+            }
+            targetValue += val;
+          });
+        }
+        if (targetValue <= 0) targetValue = 100000000; // Fallback default target jika kosong
+
+        // B. Ambil Realtime Sales dari tabel 'laporan_departemen' (total dari kolom ke-5)
+        const { data: deptData, error: deptError } = await supabaseClient
+          .from('laporan_departemen')
+          .select('*');
+
+        let realtimeSumCol5 = 0;
+        if (!deptError && deptData && deptData.length > 0) {
+          deptData.forEach(row => {
+            const keys = Object.keys(row);
+            let colVal = 0;
+            // Kolom ke-5 (index 4)
+            if (keys.length >= 5) {
+              colVal = Number(row[keys[4]]) || 0;
+            } else {
+              colVal = Number(row.total || row.nilai || row.jumlah || 0);
+            }
+            realtimeSumCol5 += colVal;
+          });
+        }
+
+        // C. Hitung Persentase & Render Gauge
+        const percentage = targetValue > 0 ? (realtimeSumCol5 / targetValue) * 100 : 0;
+        const clampedPercent = Math.min(percentage, 100);
+        
+        // Panjang arc semi-circle SVG = 251.2
+        const maxDash = 251.2;
+        const dashOffset = maxDash - (clampedPercent / 100) * maxDash;
+
+        document.getElementById('gaugeProgressArc').style.strokeDashoffset = dashOffset;
+        document.getElementById('gaugePercentage').innerText = percentage.toFixed(1) + '%';
+        document.getElementById('gaugeRealtimeValue').innerText = 'Rp ' + realtimeSumCol5.toLocaleString('id-ID');
+        document.getElementById('gaugeTargetValue').innerText = 'Rp ' + targetValue.toLocaleString('id-ID');
+
+        // Ubah warna indikator berdasarkan pencapaian
+        const arcElement = document.getElementById('gaugeProgressArc');
+        const statusElement = document.getElementById('gaugeStatusText');
+
+        if (percentage >= 100) {
+          arcElement.style.stroke = '#10b981'; // Hijau (Tercapai)
+          statusElement.innerText = 'Target Tercapai 🎉';
+          statusElement.className = 'text-xs font-bold text-emerald-600 uppercase tracking-wider mt-0.5';
+        } else if (percentage >= 75) {
+          arcElement.style.stroke = '#3b82f6'; // Biru (On Track)
+          statusElement.className = 'text-xs font-bold text-blue-600 uppercase tracking-wider mt-0.5';
+          statusElement.innerText = 'On Track 🚀';
+        } else {
+          arcElement.style.stroke = '#f59e0b'; // Kuning/Amber (Perlu Dorongan)
+          statusElement.className = 'text-xs font-bold text-amber-600 uppercase tracking-wider mt-0.5';
+          statusElement.innerText = 'Perlu Dorongan ⚡';
+        }
+
+      } catch (err) {
+        console.error('Gagal memperbarui gauge:', err);
+      }
+    }
+
+
+    // 3. Setup Supabase Realtime Sync Channels
     function setupRealtime() {
+      // Sync untuk laporan_sales (tabel top sales)
       supabaseClient
         .channel('public:laporan_sales')
         .on('postgres_changes', { event: '*', schema: 'public', table: 'laporan_sales' }, () => {
           fetchSalesData();
+        })
+        .subscribe();
+
+      // Sync untuk laporan_departemen & target_today (untuk gauge chart)
+      supabaseClient
+        .channel('public:gauge_sync_channels')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'laporan_departemen' }, () => {
+          updateGaugeData();
+        })
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'target_today' }, () => {
+          updateGaugeData();
         })
         .subscribe();
     }
@@ -310,6 +485,7 @@
     document.addEventListener("DOMContentLoaded", () => {
       lucide.createIcons();
       fetchSalesData();
+      updateGaugeData();
       setupRealtime();
     });
   </script>
