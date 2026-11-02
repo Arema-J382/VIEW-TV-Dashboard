@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TV Dashboard - Laporan Sales</title>
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Supabase JS SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    /* Animasi Scrolling Berjalan dari Bawah ke Atas secara Looping Tanpa Batas */
+    @keyframes scrollUp {
+      0% {
+        transform: translateY(0);
+      }
+      100% {
+        transform: translateY(-50%);
+      }
+    }
+
+    .animate-scroll-infinite {
+      animation: scrollUp linear infinite;
+    }
+    
+    /* Jeda animasi saat kursor diarahkan ke tabel */
+    .scroll-container:hover .animate-scroll-infinite {
+      animation-play-state: paused;
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-white h-screen overflow-hidden flex flex-col font-sans">
+
+  <!-- ================= HEADER DASHBOARD ================= -->
+  <header class="bg-slate-900 border-b border-slate-800 px-8 py-4 flex justify-between items-center shadow-md z-20">
+    <div class="flex items-center gap-3">
+      <div class="bg-blue-600 p-2.5 rounded-xl text-white shadow-lg shadow-blue-600/30">
+        <i data-lucide="tv" class="w-6 h-6"></i>
+      </div>
+      <div>
+        <h1 class="text-xl font-bold tracking-wide">INFORMA MOG MALANG (J382)</h1>
+        <p class="text-xs text-blue-400 font-medium">LIVE TV DASHBOARD - LAPORAN SALES</p>
+      </div>
+    </div>
+    
+    <div class="flex items-center gap-6">
+      <div class="text-right">
+        <div id="currentTime" class="text-xl font-mono font-bold text-slate-100">00:00:00</div>
+        <div id="currentDate" class="text-xs text-slate-400">-</div>
+      </div>
+      <div class="bg-green-500/10 border border-green-500/20 text-green-400 px-3.5 py-1.5 rounded-full text-xs font-semibold flex items-center gap-2">
+        <span class="w-2.5 h-2.5 rounded-full bg-green-500 animate-pulse"></span>
+        LIVE SYNC ACTIVE
+      </div>
+    </div>
+  </header>
+
+  <!-- ================= SUB-HEADER STATISTIK & KONTROL ================= -->
+  <div class="bg-slate-900/60 border-b border-slate-800/80 px-8 py-2.5 flex justify-between items-center text-xs text-slate-400 z-20">
+    <div class="flex items-center gap-8">
+      <span>Total Sales: <strong id="totalDataCount" class="text-white font-mono text-sm">0</strong> Orang</span>
+      <span>Akumulasi Penjualan: <strong id="totalSumSales" class="text-green-400 font-mono text-sm">Rp 0</strong></span>
+    </div>
+    <div class="flex items-center gap-2">
+      <span>Kecepatan Scroll:</span>
+      <input type="range" id="speedRange" min="10" max="80" value="35" class="accent-blue-500 cursor-pointer">
+      <span id="speedLabel" class="font-mono text-white w-8">35s</span>
+    </div>
+  </div>
+
+  <!-- ================= MAIN VIEW (RUNNING TABLE) ================= -->
+  <main class="flex-1 relative overflow-hidden bg-slate-950 p-6 flex flex-col">
+    <!-- Header Tabel Tetap (Sticky Header) -->
+    <div class="grid grid-cols-12 bg-slate-900 text-slate-300 font-bold text-sm px-6 py-3.5 rounded-t-xl border border-slate-800 shadow-xl z-10">
+      <div class="col-span-1 text-center">FOTO / NIP</div>
+      <div class="col-span-4">NAMA SALES</div>
+      <div class="col-span-3 text-center">DEPARTEMEN</div>
+      <div class="col-span-4 text-right">TOTAL PENJUALAN</div>
+    </div>
+
+    <!-- Area Konten Berjalan Vertikal -->
+    <div class="flex-1 overflow-hidden relative border-x border-b border-slate-800 rounded-b-xl bg-slate-900/30 scroll-container shadow-inner">
+      <div id="scrollWrapper" class="absolute w-full animate-scroll-infinite">
+        <!-- Konten Original -->
+        <div id="tableContentOriginal" class="space-y-2 p-2">
+          <div class="text-center py-20 text-slate-500 italic">Memuat data dari database...</div>
+        </div>
+        <!-- Konten Duplikasi untuk Efek Looping Mulus Tanpa Jeda -->
+        <div id="tableContentClone" class="space-y-2 p-2" aria-hidden="true"></div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    // Konfigurasi Supabase (Diselaraskan dengan Admin Panel)[cite: 1]
+    const SUPABASE_URL = 'https://vxsopsnopeurnxdkfsbe.supabase.co'; 
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ4c29wc25vcGV1cm54ZGtmc2JlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM1NzM4MjgsImV4cCI6MjEwOTE0OTgyOH0.53GRhBd5Pvjjcqbh4M9ok7HKfqJs7klyxPqomXMEzus'; 
+
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    let salesList = [];
+
+    // Fungsi Jam & Tanggal Realtime
+    function updateClock() {
+      const now = new Date();
+      document.getElementById('currentTime').innerText = now.toLocaleTimeString('id-ID');
+      document.getElementById('currentDate').innerText = now.toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    // Pengaturan Kecepatan Animasi
+    const speedRange = document.getElementById('speedRange');
+    const speedLabel = document.getElementById('speedLabel');
+    const scrollWrapper = document.getElementById('scrollWrapper');
+
+    speedRange.addEventListener('input', (e) => {
+      const val = e.target.value;
+      speedLabel.innerText = val + 's';
+      scrollWrapper.style.animationDuration = val + 's';
+    });
+    scrollWrapper.style.animationDuration = '35s';
+
+    // Ambil Data dari Tabel `laporan_sales` Supabase
+    async function fetchSalesData() {
+      try {
+        const { data, error } = await supabaseClient
+          .from('laporan_sales')
+          .select('*')
+          .order('total', { ascending: false });
+
+        if (error) {
+          console.error('Gagal mengambil data:', error);
+          return;
+        }
+
+        if (data) {
+          salesList = data;
+          renderDashboard();
+        }
+      } catch (err) {
+        console.error('Terjadi kesalahan:', err);
+      }
+    }
+
+    // Render Data ke Dalam Tabel Berjalan
+    function renderDashboard() {
+      const origContainer = document.getElementById('tableContentOriginal');
+      const cloneContainer = document.getElementById('tableContentClone');
+      const totalDataCount = document.getElementById('totalDataCount');
+      const totalSumSales = document.getElementById('totalSumSales');
+
+      totalDataCount.innerText = salesList.length;
+
+      // Hitung total akumulasi penjualan
+      let sumTotal = salesList.reduce((acc, curr) => acc + (Number(curr.total) || 0), 0);
+      totalSumSales.innerText = 'Rp ' + sumTotal.toLocaleString('id-ID');
+
+      if (salesList.length === 0) {
+        origContainer.innerHTML = `<div class="text-center py-20 text-slate-500 italic">Belum ada data laporan sales di database.</div>`;
+        cloneContainer.innerHTML = '';
+        return;
+      }
+
+      let htmlRows = '';
+      salesList.forEach((item) => {
+        // Mengambil gambar dari bucket 'FOTO SALES' berdasarkan NIP (Primary Key)
+        const bucketName = 'FOTO SALES';
+        const imageUrl = `${SUPABASE_URL}/storage/v1/object/public/${encodeURIComponent(bucketName)}/${item.nip}.jpg`;
+        
+        // Fallback otomatis ke avatar inisial nama jika file gambar belum diunggah ke storage
+        const fallbackAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(item.nama)}&background=0D8ABC&color=fff&size=128`;
+
+        htmlRows += `
+          <div class="grid grid-cols-12 items-center bg-slate-900/80 hover:bg-slate-800/90 border border-slate-800/80 rounded-xl px-6 py-3 transition shadow-sm">
+            <!-- FOTO & NIP -->
+            <div class="col-span-1 flex items-center">
+              <div class="relative w-12 h-12 rounded-full overflow-hidden border-2 border-blue-500/50 bg-slate-800 shrink-0 shadow">
+                <img src="${imageUrl}" alt="${item.nama}" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='${fallbackAvatar}';">
+              </div>
+            </div>
+            <!-- NAMA & NIP -->
+            <div class="col-span-4 pl-2">
+              <div class="font-bold text-white text-base tracking-wide">${item.nama}</div>
+              <div class="text-xs font-mono text-blue-400">NIP: ${item.nip}</div>
+            </div>
+            <!-- DEPARTEMEN -->
+            <div class="col-span-3 text-center">
+              <span class="bg-blue-500/10 border border-blue-500/30 text-blue-300 px-3.5 py-1 rounded-full text-xs font-semibold">
+                ${item.dept}
+              </span>
+            </div>
+            <!-- TOTAL PENJUALAN -->
+            <div class="col-span-4 text-right font-mono font-bold text-green-400 text-lg">
+              Rp ${Number(item.total).toLocaleString('id-ID')}
+            </div>
+          </div>
+        `;
+      });
+
+      origContainer.innerHTML = htmlRows;
+      cloneContainer.innerHTML = htmlRows;
+
+      // Sesuaikan kecepatan otomatis berdasarkan jumlah data baris
+      const dynamicSpeed = Math.max(20, salesList.length * 3.5);
+      speedRange.value = dynamicSpeed;
+      speedLabel.innerText = dynamicSpeed + 's';
+      scrollWrapper.style.animationDuration = dynamicSpeed + 's';
+    }
+
+    // Realtime Listener Supabase (Auto Refresh Tampilan saat Admin Memperbarui Data)
+    function setupRealtime() {
+      supabaseClient
+        .channel('public:laporan_sales')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'laporan_sales' }, () => {
+          fetchSalesData();
+        })
+        .subscribe();
+    }
+
+    // Inisialisasi Saat Halaman Dimuat
+    document.addEventListener("DOMContentLoaded", () => {
+      lucide.createIcons();
+      fetchSalesData();
+      setupRealtime();
+    });
+  </script>
+</body>
+</html>
