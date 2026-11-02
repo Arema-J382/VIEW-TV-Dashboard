@@ -176,8 +176,6 @@
               <defs>
                 <!-- Path khusus untuk penempatan teks persentase terisi secara melengkung -->
                 <path id="textArcAchieved" d="M 20 90 A 80 80 0 0 1 180 90" />
-                <!-- Path khusus untuk penempatan teks persentase belum terisi (terbalik dari kanan ke kiri) -->
-                <path id="textArcRemaining" d="M 180 90 A 80 80 0 0 0 20 90" />
               </defs>
 
               <!-- Background Track Arc (Sisa Kekurangan / Belum Terisi) -->
@@ -190,13 +188,6 @@
               <text dy="4.5" fill="#ffffff" font-size="9.5" font-weight="900" font-family="monospace">
                 <textPath id="gaugeTextAchieved" href="#textArcAchieved" startOffset="0%" text-anchor="start" style="transition: startOffset 1s ease-in-out;">
                   0.0%
-                </textPath>
-              </text>
-
-              <!-- Teks Persentase BELUM TERISI (Kekurangan) di dalam Arc -->
-              <text dy="4.5" fill="#475569" font-size="9.5" font-weight="900" font-family="monospace">
-                <textPath id="gaugeTextRemaining" href="#textArcRemaining" startOffset="0%" text-anchor="start" style="transition: startOffset 1s ease-in-out;">
-                  -100.0%
                 </textPath>
               </text>
 
@@ -257,7 +248,7 @@
 
   <script>
     const SUPABASE_URL = 'https://vxsopsnopeurnxdkfsbe.supabase.co'; 
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ4c29wc25vcGV1cm54ZGtmc2JlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM1NzM4MjgsImV4cCI6MjEwOTE0OTgyOH0.53GRhBd5Pvjjcqbh4M9ok7HKfqJs7klyxPqomXMEzus'; 
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ4c29wc25vcGV1cm54dktmc2JlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM1NzM4MjgsImV4cCI6MjEwOTE0OTgyOH0.53GRhBd5Pvjjcqbh4M9ok7HKfqJs7klyxPqomXMEzus'; 
 
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -455,7 +446,6 @@
         // C. Hitung Persentase & Render Gauge
         const percentage = targetValue > 0 ? (realtimeSumExcludePpn / targetValue) * 100 : 0;
         const clampedPercent = Math.min(Math.max(percentage, 0), 100);
-        const remainingPercent = 100 - clampedPercent;
         
         const maxDash = 251.2;
         const dashOffset = maxDash - (clampedPercent / 100) * maxDash;
@@ -466,24 +456,14 @@
         const needleRotation = -90 + (clampedPercent / 100) * 180;
         document.getElementById('gaugeNeedle').style.transform = `rotate(${needleRotation}deg)`;
 
-        // Pembaruan Teks Persentase di Dalam Garis Gauge
+        // Pembaruan Teks Persentase Tercapai di Dalam Garis Gauge
         const textAchieved = document.getElementById('gaugeTextAchieved');
-        const textRemaining = document.getElementById('gaugeTextRemaining');
 
         if (clampedPercent > 8) {
           textAchieved.textContent = percentage.toFixed(1) + '%';
-          // Menyesuaikan posisi teks terisi sesuai panjang busur (sedikit bergeser ke tengah busur biru)
           textAchieved.setAttribute('startOffset', Math.max(2, (clampedPercent / 2) - 4) + '%');
         } else {
           textAchieved.textContent = ''; // Sembunyikan jika area biru terlalu pendek
-        }
-
-        if (remainingPercent > 8) {
-          textRemaining.textContent = '-' + remainingPercent.toFixed(1) + '%';
-          // Menyesuaikan posisi teks kekurangan di garis kelabu
-          textRemaining.setAttribute('startOffset', Math.max(2, (remainingPercent / 2) - 4) + '%');
-        } else {
-          textRemaining.textContent = ''; // Sembunyikan jika area sisa kelabu terlalu pendek
         }
 
         document.getElementById('gaugeRealtimeValue').innerText = 'Rp ' + realtimeSumExcludePpn.toLocaleString('id-ID');
