@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=1920, height=1080, initial-scale=1.0">
-  <title>TV Dashboard - Laporan Sales (Fixed 100s Scroll)</title>
+  <title>TV Dashboard - Laporan Sales (Full HD Layout Custom)</title>
   
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -26,27 +26,27 @@
        ========================================================================== */
     .custom-table-container {
       /* 1. PANJANG / LEBAR TABEL */
-      width: 70%;               /* Persentase lebar terhadap layar */
+      width: 70%;               /* Persentase lebar terhadap layar (misal: 60%, 70%, 80%) */
       max-width: 1200px;        /* Batas lebar maksimal dalam piksel */
 
       /* 2. TINGGI TABEL */
-      height: 600px;            /* Tinggi kontainer tabel */
+      height: 600px;            /* Tinggi kontainer tabel (atur sesuai kebutuhan ruang di bawah) */
 
       /* 3. POSISI TABEL (TENGAH ATAS) */
-      margin-left: auto;        
+      margin-left: auto;        /* Membuat posisi horisontal berada di tengah (Center) */
       margin-right: auto;
-      margin-top: 10px;         
-      margin-bottom: 0px;       
+      margin-top: 10px;         /* Jarak dari header atas */
+      margin-bottom: 0px;       /* Jarak ke elemen bawah */
     }
 
-    /* Animasi Scrolling Berjalan dari Bawah ke Atas (Dikunci 100s) */
+    /* Animasi Scrolling Berjalan dari Bawah ke Atas secara Looping Tanpa Batas */
     @keyframes scrollUp {
       0% { transform: translateY(0); }
       100% { transform: translateY(-50%); }
     }
 
     .animate-scroll-infinite {
-      animation: scrollUp 100s linear infinite; /* Kecepatan dikunci 100 detik */
+      animation: scrollUp linear infinite;
     }
     
     .scroll-container:hover .animate-scroll-infinite {
@@ -80,21 +80,27 @@
     </div>
   </header>
 
-  <!-- ================= SUB-HEADER STATISTIK (Tanpa Tombol Kecepatan) ================= -->
+  <!-- ================= SUB-HEADER STATISTIK & KONTROL ================= -->
   <div class="bg-slate-900/60 border-b border-slate-800/80 px-12 py-3 flex justify-between items-center text-xs text-slate-400 z-20 shrink-0">
     <div class="flex items-center gap-10">
       <span>Total Sales: <strong id="totalDataCount" class="text-white font-mono text-sm">0</strong> Orang</span>
       <span>Akumulasi Penjualan: <strong id="totalSumSales" class="text-green-400 font-mono text-base">Rp 0</strong></span>
     </div>
-    <div class="text-slate-500 font-mono text-xs">
-      Scroll Speed: <span class="text-white font-semibold">100s (Fixed)</span>
+    <div class="flex items-center gap-3">
+      <span>Kecepatan Scroll:</span>
+      <input type="range" id="speedRange" min="10" max="80" value="35" class="accent-blue-500 cursor-pointer w-28">
+      <span id="speedLabel" class="font-mono text-white w-8">35s</span>
     </div>
   </div>
 
   <!-- ================= MAIN VIEW (KONTEN UTAMA) ================= -->
+  <!-- Dibuat flex-1 agar mengisi sisa ruang layar Full HD -->
   <main class="flex-1 relative overflow-hidden bg-slate-950 p-6 flex flex-col">
     
-    <!-- AREA TABEL LAPORAN SALES -->
+    <!-- 
+      AREA TABEL LAPORAN SALES (Custom Container)
+      Anda bisa menambah widget/elemen lain di luar container ini (misal di samping kanan/kiri/bawah)
+    -->
     <div class="custom-table-container flex flex-col relative z-10">
       
       <!-- Header Tabel Tetap (Sticky Header) -->
@@ -121,11 +127,16 @@
 
     </div>
 
+    <!-- 
+      [TEMPAT WIDGET / DATA LAIN]
+      Anda dapat menambahkan section baru di bawah atau samping custom-table-container ini
+    -->
+
   </main>
 
   <script>
     const SUPABASE_URL = 'https://vxsopsnopeurnxdkfsbe.supabase.co'; 
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ4c29wc25vcGV1cm54dkprZnNiZSIsInJvbGUiOiJhbm9uIiwiaWF0IjoxNzkzNTczODI4LCJleHAiOjIxMDkxNDk4Mjh9.53GRhBd5Pvjjcqbh4M9ok7HKfqJs7klyxPqomXMEzus'; 
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ4c29wc25vcGV1cm54ZGtmc2JlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM1NzM4MjgsImV4cCI6MjEwOTE0OTgyOH0.53GRhBd5Pvjjcqbh4M9ok7HKfqJs7klyxPqomXMEzus'; 
 
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -138,6 +149,17 @@
     }
     setInterval(updateClock, 1000);
     updateClock();
+
+    const speedRange = document.getElementById('speedRange');
+    const speedLabel = document.getElementById('speedLabel');
+    const scrollWrapper = document.getElementById('scrollWrapper');
+
+    speedRange.addEventListener('input', (e) => {
+      const val = e.target.value;
+      speedLabel.innerText = val + 's';
+      scrollWrapper.style.animationDuration = val + 's';
+    });
+    scrollWrapper.style.animationDuration = '35s';
 
     async function fetchSalesData() {
       const emptyStatus = document.getElementById('emptyStatus');
@@ -214,6 +236,11 @@
 
       origContainer.innerHTML = htmlRows;
       cloneContainer.innerHTML = htmlRows;
+
+      const dynamicSpeed = Math.max(20, salesList.length * 3.5);
+      speedRange.value = dynamicSpeed;
+      speedLabel.innerText = dynamicSpeed + 's';
+      scrollWrapper.style.animationDuration = dynamicSpeed + 's';
     }
 
     function setupRealtime() {
