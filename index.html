@@ -170,33 +170,47 @@
         <!-- Konten Grafik Gauge -->
         <div class="flex-1 flex flex-col items-center justify-center p-6 relative bg-gradient-to-b from-slate-50 to-white">
           
-          <!-- SVG Gauge Semi-Circle dengan Garis Diperlebar & Jarum Animasi -->
-          <div class="relative w-72 h-36 flex items-center justify-center">
+          <!-- SVG Gauge Semi-Circle dengan Persentase di Dalam Garis Arc & Tanpa Teks Tengah -->
+          <div class="relative w-80 h-40 flex items-center justify-center mt-2">
             <svg class="w-full h-full overflow-visible" viewBox="0 0 200 100">
-              <!-- Background Track Arc (Diperlebar menjadi stroke-width 24) -->
-              <path d="M 20 90 A 80 80 0 0 1 180 90" fill="none" stroke="#e2e8f0" stroke-width="24" stroke-linecap="round"/>
-              <!-- Dynamic Progress Arc (Diperlebar menjadi stroke-width 24) -->
-              <path id="gaugeProgressArc" d="M 20 90 A 80 80 0 0 1 180 90" fill="none" stroke="#3b82f6" stroke-width="24" stroke-linecap="round" stroke-dasharray="251.2" stroke-dashoffset="251.2" style="transition: stroke-dashoffset 1s ease-in-out, stroke 0.5s ease;"/>
+              <defs>
+                <!-- Path khusus untuk penempatan teks persentase terisi secara melengkung -->
+                <path id="textArcAchieved" d="M 20 90 A 80 80 0 0 1 180 90" />
+                <!-- Path khusus untuk penempatan teks persentase belum terisi (terbalik dari kanan ke kiri) -->
+                <path id="textArcRemaining" d="M 180 90 A 80 80 0 0 0 20 90" />
+              </defs>
+
+              <!-- Background Track Arc (Sisa Kekurangan / Belum Terisi) -->
+              <path id="gaugeBackgroundArc" d="M 20 90 A 80 80 0 0 1 180 90" fill="none" stroke="#cbd5e1" stroke-width="26" stroke-linecap="round"/>
               
+              <!-- Dynamic Progress Arc (Pencapaian / Terisi) -->
+              <path id="gaugeProgressArc" d="M 20 90 A 80 80 0 0 1 180 90" fill="none" stroke="#3b82f6" stroke-width="26" stroke-linecap="round" stroke-dasharray="251.2" stroke-dashoffset="251.2" style="transition: stroke-dashoffset 1s ease-in-out, stroke 0.5s ease;"/>
+              
+              <!-- Teks Persentase TERISI di dalam Arc -->
+              <text dy="4.5" fill="#ffffff" font-size="9.5" font-weight="900" font-family="monospace">
+                <textPath id="gaugeTextAchieved" href="#textArcAchieved" startOffset="0%" text-anchor="start" style="transition: startOffset 1s ease-in-out;">
+                  0.0%
+                </textPath>
+              </text>
+
+              <!-- Teks Persentase BELUM TERISI (Kekurangan) di dalam Arc -->
+              <text dy="4.5" fill="#475569" font-size="9.5" font-weight="900" font-family="monospace">
+                <textPath id="gaugeTextRemaining" href="#textArcRemaining" startOffset="0%" text-anchor="start" style="transition: startOffset 1s ease-in-out;">
+                  -100.0%
+                </textPath>
+              </text>
+
               <!-- Jarum Penunjuk (Needle) dengan Animasi Rotasi -->
               <g id="gaugeNeedle" style="transform-origin: 100px 90px; transition: transform 1s cubic-bezier(0.4, 0, 0.2, 1); transform: rotate(-90deg);">
-                <!-- Batang Jarum -->
-                <line x1="100" y1="90" x2="100" y2="28" stroke="#1e293b" stroke-width="4" stroke-linecap="round"/>
-                <!-- Lingkaran Poros Jarum di Tengah -->
-                <circle cx="100" cy="90" r="7" fill="#1e293b"/>
+                <line x1="100" y1="90" x2="100" y2="24" stroke="#0f172a" stroke-width="4.5" stroke-linecap="round"/>
+                <circle cx="100" cy="90" r="7.5" fill="#0f172a"/>
                 <circle cx="100" cy="90" r="3" fill="#ffffff"/>
               </g>
             </svg>
-            
-            <!-- Presentase di Tengah Gauge -->
-            <div class="absolute bottom-1 flex flex-col items-center">
-              <span id="gaugePercentage" class="text-3xl font-black font-mono text-slate-800">0%</span>
-              <span id="gaugeStatusText" class="text-xs font-semibold text-blue-600 uppercase tracking-wider mt-0.5">Menunggu Data</span>
-            </div>
           </div>
 
           <!-- Keterangan Nilai Realtime vs Target -->
-          <div class="w-full grid grid-cols-2 gap-4 mt-6 bg-slate-100 p-4 rounded-xl border border-slate-200 shadow-inner">
+          <div class="w-full grid grid-cols-2 gap-4 mt-8 bg-slate-100 p-4 rounded-xl border border-slate-200 shadow-inner">
             <div class="text-center border-r border-slate-200 pr-2">
               <div class="text-xl text-slate-500 font-bold uppercase">Realisasi</div>
               <div id="gaugeRealtimeValue" class="text-2xl font-extrabold font-mono text-emerald-600 mt-1">Rp 0</div>
@@ -382,7 +396,7 @@
     }
 
 
-    // 2. Fetch & Compute Realtime Gauge Chart Data (target_today & laporan_departemen kolom exclude_ppn)
+    // 2. Fetch & Compute Realtime Gauge Chart Data
     async function updateGaugeData() {
       try {
         // A. Ambil Target dari tabel 'target_today'
@@ -438,39 +452,51 @@
           });
         }
 
-        // C. Hitung Persentase & Render Gauge + Rotasi Jarum Animasi
+        // C. Hitung Persentase & Render Gauge
         const percentage = targetValue > 0 ? (realtimeSumExcludePpn / targetValue) * 100 : 0;
         const clampedPercent = Math.min(Math.max(percentage, 0), 100);
+        const remainingPercent = 100 - clampedPercent;
         
         const maxDash = 251.2;
         const dashOffset = maxDash - (clampedPercent / 100) * maxDash;
 
         document.getElementById('gaugeProgressArc').style.strokeDashoffset = dashOffset;
         
-        // Kalkulasi sudut rotasi jarum (dari -90deg di kiri/0% hingga +90deg di kanan/100%)
+        // Rotasi Jarum
         const needleRotation = -90 + (clampedPercent / 100) * 180;
         document.getElementById('gaugeNeedle').style.transform = `rotate(${needleRotation}deg)`;
 
-        document.getElementById('gaugePercentage').innerText = percentage.toFixed(1) + '%';
+        // Pembaruan Teks Persentase di Dalam Garis Gauge
+        const textAchieved = document.getElementById('gaugeTextAchieved');
+        const textRemaining = document.getElementById('gaugeTextRemaining');
+
+        if (clampedPercent > 8) {
+          textAchieved.textContent = percentage.toFixed(1) + '%';
+          // Menyesuaikan posisi teks terisi sesuai panjang busur (sedikit bergeser ke tengah busur biru)
+          textAchieved.setAttribute('startOffset', Math.max(2, (clampedPercent / 2) - 4) + '%');
+        } else {
+          textAchieved.textContent = ''; // Sembunyikan jika area biru terlalu pendek
+        }
+
+        if (remainingPercent > 8) {
+          textRemaining.textContent = '-' + remainingPercent.toFixed(1) + '%';
+          // Menyesuaikan posisi teks kekurangan di garis kelabu
+          textRemaining.setAttribute('startOffset', Math.max(2, (remainingPercent / 2) - 4) + '%');
+        } else {
+          textRemaining.textContent = ''; // Sembunyikan jika area sisa kelabu terlalu pendek
+        }
+
         document.getElementById('gaugeRealtimeValue').innerText = 'Rp ' + realtimeSumExcludePpn.toLocaleString('id-ID');
         document.getElementById('gaugeTargetValue').innerText = 'Rp ' + targetValue.toLocaleString('id-ID');
 
-        // Ubah warna indikator & jarum berdasarkan pencapaian
+        // Ubah warna indikator berdasarkan pencapaian
         const arcElement = document.getElementById('gaugeProgressArc');
-        const statusElement = document.getElementById('gaugeStatusText');
-
         if (percentage >= 100) {
           arcElement.style.stroke = '#10b981'; // Hijau
-          statusElement.innerText = 'Target Tercapai 🎉';
-          statusElement.className = 'text-xs font-bold text-emerald-600 uppercase tracking-wider mt-0.5';
         } else if (percentage >= 75) {
           arcElement.style.stroke = '#3b82f6'; // Biru
-          statusElement.className = 'text-xs font-bold text-blue-600 uppercase tracking-wider mt-0.5';
-          statusElement.innerText = 'On Track 🚀';
         } else {
           arcElement.style.stroke = '#f59e0b'; // Amber
-          statusElement.className = 'text-xs font-bold text-amber-600 uppercase tracking-wider mt-0.5';
-          statusElement.innerText = 'Tambah Salesnya ⚡';
         }
 
       } catch (err) {
