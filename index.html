@@ -26,11 +26,11 @@
        ========================================================================== */
     .custom-table-container {
       /* 1. PANJANG / LEBAR TABEL */
-      width: 30%;               /* Persentase lebar terhadap layar */
+      width: 70%;               /* Persentase lebar terhadap layar */
       max-width: 1200px;        /* Batas lebar maksimal dalam piksel */
 
       /* 2. TINGGI TABEL */
-      height: 500px;            /* Tinggi kontainer tabel */
+      height: 600px;            /* Tinggi kontainer tabel */
 
       /* 3. POSISI TABEL (TENGAH ATAS) */
       margin-left: auto;        
@@ -191,8 +191,8 @@
       let htmlRows = '';
       salesList.forEach((item) => {
         const bucketName = 'FOTO SALES';
-        const SUPABASE_URL = 'https://vxsopsnopeurnxdkfsbe.supabase.co'; 
-		const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ4c29wc25vcGV1cm54ZGtmc2JlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM1NzM4MjgsImV4cCI6MjEwOTE0OTgyOH0.53GRhBd5Pvjjcqbh4M9ok7HKfqJs7klyxPqomXMEzus'; 
+        const imageUrl = `${SUPABASE_URL}/storage/v1/object/public/${encodeURIComponent(bucketName)}/${item.nip}.jpg`;
+        const fallbackAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(item.nama)}&background=0D8ABC&color=fff&size=128`;
 
         htmlRows += `
           <div class="grid grid-cols-12 items-center bg-slate-900/80 hover:bg-slate-800/90 border border-slate-800/80 rounded-xl px-6 py-3 transition shadow-sm">
