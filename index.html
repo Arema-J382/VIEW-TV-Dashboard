@@ -22,21 +22,15 @@
 
     /* ==========================================================================
        [PENGATURAN AREA TABEL] 
-       Ubah nilai di bawah ini untuk mengatur Ukuran & Posisi Tabel Laporan Sales
        ========================================================================== */
     .custom-table-container {
-      /* 1. PANJANG / LEBAR TABEL */
-      width: 30%;               /* Persentase lebar terhadap layar (misal: 60%, 70%, 80%) */
-      max-width: 1200px;        /* Batas lebar maksimal dalam piksel */
-
-      /* 2. TINGGI TABEL */
-      height: 500px;            /* Tinggi kontainer tabel (atur sesuai kebutuhan ruang di bawah) */
-
-      /* 3. POSISI TABEL (TENGAH ATAS) */
-      margin-left: auto;        /* Membuat posisi horisontal berada di tengah (Center) */
+      width: 40%;               /* Ditingkatkan sedikit agar muat dengan foto lebih besar & nomor */
+      max-width: 1200px;
+      height: 600px;            
+      margin-left: auto;        
       margin-right: auto;
-      margin-top: 10px;         /* Jarak dari header atas */
-      margin-bottom: 0px;       /* Jarak ke elemen bawah */
+      margin-top: 10px;         
+      margin-bottom: 0px;       
     }
 
     /* Animasi Scrolling Berjalan dari Bawah ke Atas secara Looping Tanpa Batas */
@@ -80,45 +74,41 @@
     </div>
   </header>
 
-  <!-- ================= SUB-HEADER STATISTIK & KONTROL ================= -->
+  <!-- ================= SUB-HEADER STATISTIK ================= -->
   <div class="bg-slate-900/60 border-b border-slate-800/80 px-12 py-3 flex justify-between items-center text-xs text-slate-400 z-20 shrink-0">
     <div class="flex items-center gap-10">
       <span>Total Sales: <strong id="totalDataCount" class="text-white font-mono text-sm">0</strong> Orang</span>
       <span>Akumulasi Penjualan: <strong id="totalSumSales" class="text-green-400 font-mono text-base">Rp 0</strong></span>
     </div>
-    <div class="flex items-center gap-3">
-      <span>Kecepatan Scroll:</span>
-      <input type="range" id="speedRange" min="10" max="80" value="35" class="accent-blue-500 cursor-pointer w-28">
-      <span id="speedLabel" class="font-mono text-white w-8">35s</span>
-    </div>
   </div>
 
   <!-- ================= MAIN VIEW (KONTEN UTAMA) ================= -->
-  <!-- Dibuat flex-1 agar mengisi sisa ruang layar Full HD -->
   <main class="flex-1 relative overflow-hidden bg-slate-950 p-6 flex flex-col">
     
-    <!-- 
-      AREA TABEL LAPORAN SALES (Custom Container)
-      Anda bisa menambah widget/elemen lain di luar container ini (misal di samping kanan/kiri/bawah)
-    -->
+    <!-- AREA TABEL LAPORAN SALES -->
     <div class="custom-table-container flex flex-col relative z-10">
       
-      <!-- Header Tabel Tetap (Sticky Header) -->
-      <div class="grid grid-cols-12 bg-slate-900 text-slate-300 font-bold text-sm px-6 py-3.5 rounded-t-xl border border-slate-800 shadow-xl z-10 shrink-0">
-        <div class="col-span-2 text-center">FOTO / NIP</div>
-        <div class="col-span-6">NAMA SALES</div>
-        <div class="col-span-4 text-right">TOTAL PENJUALAN</div>
+      <!-- Header Tabel (LIVE TOP SALES TODAY) -->
+      <div class="bg-white text-slate-800 font-extrabold text-center text-lg py-3 rounded-t-xl border-b-2 border-slate-200 shadow-md z-10 shrink-0 tracking-wider">
+        LIVE TOP SALES TODAY
+      </div>
+
+      <!-- Header Kolom Tabel -->
+      <div class="grid grid-cols-12 bg-slate-100 text-slate-700 font-bold text-sm px-6 py-2.5 border-b border-slate-200 z-10 shrink-0">
+        <div class="col-span-4 text-center">NO / FOTO / NIP</div>
+        <div class="col-span-4 flex items-center">NAMA SALES</div>
+        <div class="col-span-4 text-right flex items-center justify-end">TOTAL PENJUALAN</div>
       </div>
 
       <!-- Area Status Kosong / Error -->
-      <div id="emptyStatus" class="hidden absolute inset-0 pt-16 flex flex-col items-center justify-center z-20 bg-slate-950/80 backdrop-blur-sm rounded-xl">
-        <i data-lucide="database-backup" class="w-16 h-16 text-slate-600 mb-3"></i>
-        <div id="statusMessage" class="text-slate-400 text-base font-medium">Belum ada data laporan sales di database.</div>
-        <p class="text-slate-600 text-xs mt-1">Silakan input data melalui Admin Panel.</p>
+      <div id="emptyStatus" class="hidden absolute inset-0 pt-16 flex flex-col items-center justify-center z-20 bg-white/90 backdrop-blur-sm rounded-b-xl">
+        <i data-lucide="database-backup" class="w-16 h-16 text-slate-400 mb-3"></i>
+        <div id="statusMessage" class="text-slate-600 text-base font-medium">Belum ada data laporan sales di database.</div>
+        <p class="text-slate-400 text-xs mt-1">Silakan input data melalui Admin Panel.</p>
       </div>
 
-      <!-- Area Konten Berjalan Vertikal -->
-      <div class="flex-1 overflow-hidden relative border-x border-b border-slate-800 rounded-b-xl bg-slate-900/40 scroll-container shadow-inner">
+      <!-- Area Konten Berjalan Vertikal (Background Putih) -->
+      <div class="flex-1 overflow-hidden relative border-x border-b border-slate-200 rounded-b-xl bg-white scroll-container shadow-inner">
         <div id="scrollWrapper" class="absolute w-full animate-scroll-infinite">
           <div id="tableContentOriginal" class="space-y-2 p-2"></div>
           <div id="tableContentClone" class="space-y-2 p-2" aria-hidden="true"></div>
@@ -126,11 +116,6 @@
       </div>
 
     </div>
-
-    <!-- 
-      [TEMPAT WIDGET / DATA LAIN]
-      Anda dapat menambahkan section baru di bawah atau samping custom-table-container ini
-    -->
 
   </main>
 
@@ -150,16 +135,9 @@
     setInterval(updateClock, 1000);
     updateClock();
 
-    const speedRange = document.getElementById('speedRange');
-    const speedLabel = document.getElementById('speedLabel');
     const scrollWrapper = document.getElementById('scrollWrapper');
-
-    speedRange.addEventListener('input', (e) => {
-      const val = e.target.value;
-      speedLabel.innerText = val + 's';
-      scrollWrapper.style.animationDuration = val + 's';
-    });
-    scrollWrapper.style.animationDuration = '35s';
+    // Penguncian Kecepatan Scroll ke 100 Detik
+    scrollWrapper.style.animationDuration = '100s';
 
     async function fetchSalesData() {
       const emptyStatus = document.getElementById('emptyStatus');
@@ -211,23 +189,26 @@
       emptyStatus.classList.add('hidden');
 
       let htmlRows = '';
-      salesList.forEach((item) => {
+      salesList.forEach((item, index) => {
         const bucketName = 'FOTO SALES';
         const imageUrl = `${SUPABASE_URL}/storage/v1/object/public/${encodeURIComponent(bucketName)}/${item.nip}.jpg`;
         const fallbackAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(item.nama)}&background=0D8ABC&color=fff&size=128`;
 
         htmlRows += `
-          <div class="grid grid-cols-12 items-center bg-slate-900/80 hover:bg-slate-800/90 border border-slate-800/80 rounded-xl px-6 py-3 transition shadow-sm">
-            <div class="col-span-2 flex items-center justify-center">
-              <div class="relative w-12 h-12 rounded-full overflow-hidden border-2 border-blue-500/50 bg-slate-800 shrink-0 shadow">
+          <div class="grid grid-cols-12 items-center bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl px-4 py-3 transition shadow-sm">
+            <div class="col-span-4 flex items-center justify-center gap-3">
+              <!-- Nomor Urut -->
+              <span class="font-extrabold text-lg text-slate-700 w-6 text-right">${index + 1}.</span>
+              <!-- Foto Kotak dan Lebih Besar (w-16 h-16 / 64px) -->
+              <div class="relative w-16 h-16 rounded-lg overflow-hidden border-2 border-blue-500 bg-slate-200 shrink-0 shadow-md">
                 <img src="${imageUrl}" alt="${item.nama}" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='${fallbackAvatar}';">
               </div>
             </div>
-            <div class="col-span-6 pl-2">
-              <div class="font-bold text-white text-base tracking-wide">${item.nama}</div>
-              <div class="text-xs font-mono text-blue-400 mt-0.5">NIP: ${item.nip}</div>
+            <div class="col-span-4 pl-2">
+              <div class="font-bold text-slate-900 text-base tracking-wide">${item.nama}</div>
+              <div class="text-xs font-mono text-blue-600 font-semibold mt-0.5">NIP: ${item.nip}</div>
             </div>
-            <div class="col-span-4 text-right font-mono font-bold text-green-400 text-lg">
+            <div class="col-span-4 text-right font-mono font-bold text-emerald-600 text-lg">
               Rp ${Number(item.total).toLocaleString('id-ID')}
             </div>
           </div>
@@ -237,10 +218,8 @@
       origContainer.innerHTML = htmlRows;
       cloneContainer.innerHTML = htmlRows;
 
-      const dynamicSpeed = Math.max(20, salesList.length * 3.5);
-      speedRange.value = dynamicSpeed;
-      speedLabel.innerText = dynamicSpeed + 's';
-      scrollWrapper.style.animationDuration = dynamicSpeed + 's';
+      // Tetap dikunci pada kecepatan 100s
+      scrollWrapper.style.animationDuration = '100s';
     }
 
     function setupRealtime() {
