@@ -7,7 +7,7 @@
   
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Supabase JS SDK -->
+  <!-- Supabase JS SDK v2 -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
@@ -154,9 +154,9 @@
         <div id="currentTime" class="text-3xl font-mono font-bold text-slate-100">00:00:00</div>
         <div id="currentDate" class="text-xs text-slate-400">-</div>
       </div>
-      <div class="bg-green-500/10 border border-green-500/20 text-green-400 px-4 py-2 rounded-full text-xs font-semibold flex items-center gap-2">
+      <div id="syncStatusBadge" class="bg-green-500/10 border border-green-500/20 text-green-400 px-4 py-2 rounded-full text-xs font-semibold flex items-center gap-2">
         <span class="w-2.5 h-2.5 rounded-full bg-green-500 animate-pulse"></span>
-        LIVE SYNC ACTIVE
+        <span id="syncStatusText">LIVE SYNC ACTIVE</span>
       </div>
     </div>
   </header>
@@ -276,6 +276,7 @@
 
     let salesList = [];
 
+    // Jam Digital Dashboard
     function updateClock() {
       const now = new Date();
       document.getElementById('currentTime').innerText = now.toLocaleTimeString('id-ID');
@@ -409,7 +410,7 @@
     }
 
 
-    // 2. Fetch & Render Top 1 MTD Sales (Berdasarkan mtd_total dan mtd_nip) - Tanpa Dept & Foto Diperbesar
+    // 2. Fetch & Render Top 1 MTD Sales (Foto Diperbesar & Tanpa DEPT)
     async function fetchTop1MtdSales() {
       try {
         const { data, error } = await supabaseClient
@@ -437,7 +438,6 @@
         }
 
         const topMtd = data[0];
-        
         const nip = topMtd.mtd_nip || '-';
         const nama = topMtd.mtd_nama || 'NONAME';
         const total = Number(topMtd.mtd_total || 0);
@@ -448,7 +448,6 @@
 
         container.innerHTML = `
           <div class="flex flex-col items-center justify-center text-center w-full relative">
-            <!-- Foto & Mahkota Diperbesar (w-48 h-48 & w-12 h-12) -->
             <div class="relative w-48 h-48 rounded-2xl border-4 border-yellow-500 shadow-xl bg-slate-200 overflow-hidden mb-4">
               <div class="absolute -top-4 left-1/2 -translate-x-1/2 z-20 text-yellow-500 drop-shadow-[0_2px_4px_rgba(234,179,8,0.9)]">
                 <i data-lucide="crown" class="w-12 h-12 fill-yellow-400"></i>
@@ -457,11 +456,9 @@
             </div>
 
             <div class="text-sm font-mono uppercase tracking-widest text-amber-600 font-extrabold mb-1">CHAMPION OF THE MONTH</div>
-            <!-- Nama & NIP (DEPT Dihilangkan) -->
             <h3 class="text-3xl font-extrabold text-slate-900 mb-1">${nama}</h3>
             <div class="text-sm font-semibold text-slate-600 mb-4">NIP: <span class="font-mono text-blue-600 font-bold">${nip}</span></div>
             
-            <!-- Box Total MTD Sales Diperbesar (p-6 & text-3xl) -->
             <div class="w-full bg-amber-50 border border-amber-200 rounded-xl p-6 shadow-inner">
               <div class="text-xs font-bold text-amber-800 uppercase tracking-wider">Total MTD Sales</div>
               <div class="text-3xl font-extrabold font-mono text-emerald-600 mt-1">Rp ${total.toLocaleString('id-ID')}</div>
@@ -563,31 +560,53 @@
     }
 
 
-    // 4. Setup Supabase Realtime Sync Channels
+    // 4. Saluran Supabase Realtime Sync Terintegrasi Lengkap
     function setupRealtime() {
+      // Channel 1: Laporan Sales Realtime Sync
       supabaseClient
-        .channel('public:laporan_sales')
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'laporan_sales' }, () => {
+        .channel('realtime_laporan_sales')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'laporan_sales' }, (payload) => {
+          console.log('Perubahan terdeteksi di laporan_sales:', payload);
           fetchSalesData();
         })
-        .subscribe();
+        .subscribe((status) => {
+          console.log('Status Realtime Sales:', status);
+        });
 
+      // Channel 2: MTD Sales Realtime Sync
       supabaseClient
-        .channel('public:mtd_sales')
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'mtd_sales' }, () => {
+        .channel('realtime_mtd_sales')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'mtd_sales' }, (payload) => {
+          console.log('Perubahan terdeteksi di mtd_sales:', payload);
           fetchTop1MtdSales();
         })
-        .subscribe();
+        .subscribe((status) => {
+          console.log('Status Realtime MTD:', status);
+        });
 
+      // Channel 3: Gauge & Target Realtime Sync
       supabaseClient
-        .channel('public:gauge_sync_channels')
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'laporan_departemen' }, () => {
+        .channel('realtime_gauge')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'laporan_departemen' }, (payload) => {
+          console.log('Perubahan terdeteksi di laporan_departemen:', payload);
           updateGaugeData();
         })
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'target_today' }, () => {
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'target_today' }, (payload) => {
+          console.log('Perubahan terdeteksi di target_today:', payload);
           updateGaugeData();
         })
-        .subscribe();
+        .subscribe((status) => {
+          console.log('Status Realtime Gauge:', status);
+        });
+    }
+
+    // Polling Cadangan (Backup Sync setiap 30 detik agar tampilan tetap pasti up-to-date)
+    function startBackupPolling() {
+      setInterval(() => {
+        fetchSalesData();
+        fetchTop1MtdSales();
+        updateGaugeData();
+      }, 30000);
     }
 
     document.addEventListener("DOMContentLoaded", () => {
@@ -596,6 +615,7 @@
       fetchTop1MtdSales();
       updateGaugeData();
       setupRealtime();
+      startBackupPolling();
     });
   </script>
 </body>
