@@ -170,7 +170,7 @@
         <!-- Konten Grafik Gauge -->
         <div class="flex-1 flex flex-col items-center justify-center p-6 relative bg-gradient-to-b from-slate-50 to-white">
           
-          <!-- SVG Gauge Semi-Circle dengan Persentase di Dalam Garis Arc & Tanpa Teks Tengah -->
+          <!-- SVG Gauge Semi-Circle dengan Persentase di Dalam Garis Arc -->
           <div class="relative w-80 h-40 flex items-center justify-center mt-2">
             <svg class="w-full h-full overflow-visible" viewBox="0 0 200 100">
               <defs>
@@ -248,7 +248,7 @@
 
   <script>
     const SUPABASE_URL = 'https://vxsopsnopeurnxdkfsbe.supabase.co'; 
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ4c29wc25vcGV1cm54dktmc2JlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM1NzM4MjgsImV4cCI6MjEwOTE0OTgyOH0.53GRhBd5Pvjjcqbh4M9ok7HKfqJs7klyxPqomXMEzus'; 
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ4c29wc25vcGV1cm54ZGtmc2JlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM1NzM4MjgsImV4cCI6MjEwOTE0OTgyOH0.53GRhBd5Pvjjcqbh4M9ok7HKfqJs7klyxPqomXMEzus'; 
 
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -456,14 +456,14 @@
         const needleRotation = -90 + (clampedPercent / 100) * 180;
         document.getElementById('gaugeNeedle').style.transform = `rotate(${needleRotation}deg)`;
 
-        // Pembaruan Teks Persentase Tercapai di Dalam Garis Gauge
+        // Pembaruan Teks Persentase di Dalam Garis Gauge (Hanya untuk yang Terisi)
         const textAchieved = document.getElementById('gaugeTextAchieved');
 
         if (clampedPercent > 8) {
           textAchieved.textContent = percentage.toFixed(1) + '%';
           textAchieved.setAttribute('startOffset', Math.max(2, (clampedPercent / 2) - 4) + '%');
         } else {
-          textAchieved.textContent = ''; // Sembunyikan jika area biru terlalu pendek
+          textAchieved.textContent = ''; 
         }
 
         document.getElementById('gaugeRealtimeValue').innerText = 'Rp ' + realtimeSumExcludePpn.toLocaleString('id-ID');
