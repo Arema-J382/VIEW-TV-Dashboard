@@ -170,14 +170,14 @@
         <!-- Konten Grafik Gauge -->
         <div class="flex-1 flex flex-col items-center justify-center p-6 relative bg-gradient-to-b from-slate-50 to-white">
           
-          <!-- SVG Gauge Semi-Circle dengan Persentase di Dalam Garis Arc & Tanpa Teks Tengah -->
+          <!-- SVG Gauge Semi-Circle -->
           <div class="relative w-80 h-40 flex items-center justify-center mt-2">
             <svg class="w-full h-full overflow-visible" viewBox="0 0 200 100">
               <defs>
-                <!-- Path khusus untuk penempatan teks persentase terisi secara melengkung -->
-                <path id="textArcAchieved" d="M 20 90 A 80 80 0 0 1 180 90" />
-                <!-- Path khusus untuk penempatan teks persentase belum terisi (terbalik dari kanan ke kiri) -->
-                <path id="textArcRemaining" d="M 180 90 A 80 80 0 0 0 20 90" />
+                <!-- Path untuk teks pencapaian (terisi) -->
+                <path id="textArcAchieved" d="M 20 90 A 80 80 0 0 1 20 90" />
+                <!-- Path untuk teks kekurangan (belum terisi) - searah kiri ke kanan agar tidak terbalik -->
+                <path id="textArcRemaining" d="M 20 90 A 80 80 0 0 1 180 90" />
               </defs>
 
               <!-- Background Track Arc (Sisa Kekurangan / Belum Terisi) -->
@@ -186,16 +186,16 @@
               <!-- Dynamic Progress Arc (Pencapaian / Terisi) -->
               <path id="gaugeProgressArc" d="M 20 90 A 80 80 0 0 1 180 90" fill="none" stroke="#3b82f6" stroke-width="26" stroke-linecap="round" stroke-dasharray="251.2" stroke-dashoffset="251.2" style="transition: stroke-dashoffset 1s ease-in-out, stroke 0.5s ease;"/>
               
-              <!-- Teks Persentase TERISI di dalam Arc -->
-              <text dy="4.5" fill="#ffffff" font-size="9.5" font-weight="900" font-family="monospace">
-                <textPath id="gaugeTextAchieved" href="#textArcAchieved" startOffset="0%" text-anchor="start" style="transition: startOffset 1s ease-in-out;">
+              <!-- Teks Persentase TERISI di dalam Arc (Ukuran Diperbesar) -->
+              <text fill="#ffffff" font-size="13" font-weight="900" font-family="monospace">
+                <textPath id="gaugeTextAchieved" href="#textArcAchieved" startOffset="50%" text-anchor="middle">
                   0.0%
                 </textPath>
               </text>
 
-              <!-- Teks Persentase BELUM TERISI (Kekurangan) di dalam Arc -->
-              <text dy="4.5" fill="#475569" font-size="9.5" font-weight="900" font-family="monospace">
-                <textPath id="gaugeTextRemaining" href="#textArcRemaining" startOffset="0%" text-anchor="start" style="transition: startOffset 1s ease-in-out;">
+              <!-- Teks Persentase BELUM TERISI / Kekurangan (Ukuran Diperbesar & Tidak Terbalik) -->
+              <text fill="#475569" font-size="13" font-weight="900" font-family="monospace">
+                <textPath id="gaugeTextRemaining" href="#textArcRemaining" startOffset="50%" text-anchor="middle">
                   -100.0%
                 </textPath>
               </text>
@@ -466,24 +466,32 @@
         const needleRotation = -90 + (clampedPercent / 100) * 180;
         document.getElementById('gaugeNeedle').style.transform = `rotate(${needleRotation}deg)`;
 
+        // Kalkulasi titik koordinat batas persentase (xp, yp) pada arc radius 80
+        const angleRad = Math.PI - (clampedPercent / 100) * Math.PI;
+        const xp = 100 + 80 * Math.cos(angleRad);
+        const yp = 90 - 80 * Math.sin(angleRad);
+
+        const achievedLargeArc = clampedPercent > 50 ? 1 : 0;
+        const remainingLargeArc = remainingPercent > 50 ? 1 : 0;
+
+        // Update path untuk teks terisi dan sisa kekurangan agar orientasinya searah dan tidak terbalik
+        document.getElementById('textArcAchieved').setAttribute('d', `M 20 90 A 80 80 0 ${achievedLargeArc} 1 ${xp} ${yp}`);
+        document.getElementById('textArcRemaining').setAttribute('d', `M ${xp} ${yp} A 80 80 0 ${remainingLargeArc} 1 180 90`);
+
         // Pembaruan Teks Persentase di Dalam Garis Gauge
         const textAchieved = document.getElementById('gaugeTextAchieved');
         const textRemaining = document.getElementById('gaugeTextRemaining');
 
-        if (clampedPercent > 8) {
+        if (clampedPercent > 7) {
           textAchieved.textContent = percentage.toFixed(1) + '%';
-          // Menyesuaikan posisi teks terisi sesuai panjang busur (sedikit bergeser ke tengah busur biru)
-          textAchieved.setAttribute('startOffset', Math.max(2, (clampedPercent / 2) - 4) + '%');
         } else {
-          textAchieved.textContent = ''; // Sembunyikan jika area biru terlalu pendek
+          textAchieved.textContent = ''; 
         }
 
-        if (remainingPercent > 8) {
+        if (remainingPercent > 7) {
           textRemaining.textContent = '-' + remainingPercent.toFixed(1) + '%';
-          // Menyesuaikan posisi teks kekurangan di garis kelabu
-          textRemaining.setAttribute('startOffset', Math.max(2, (remainingPercent / 2) - 4) + '%');
         } else {
-          textRemaining.textContent = ''; // Sembunyikan jika area sisa kelabu terlalu pendek
+          textRemaining.textContent = ''; 
         }
 
         document.getElementById('gaugeRealtimeValue').innerText = 'Rp ' + realtimeSumExcludePpn.toLocaleString('id-ID');
