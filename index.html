@@ -373,7 +373,7 @@
     }
 
 
-    // 2. Fetch & Compute Realtime Gauge Chart Data (target_today & laporan_departemen kolom ke-5)
+    // 2. Fetch & Compute Realtime Gauge Chart Data (target_today & laporan_departemen kolom exclude_ppn)
     async function updateGaugeData() {
       try {
         // A. Ambil Target dari tabel 'target_today'
@@ -390,7 +390,6 @@
             else if (row.nilai !== undefined) val = Number(row.nilai) || 0;
             else if (row.jumlah !== undefined) val = Number(row.jumlah) || 0;
             else if (keys.length > 0) {
-              // Ambil nilai numerik pertama/kedua jika nama kolom kustom
               for (let k of keys) {
                 if (!isNaN(Number(row[k])) && Number(row[k]) > 0) {
                   val = Number(row[k]) || 0;
@@ -401,39 +400,30 @@
             targetValue += val;
           });
         }
-        if (targetValue <= 0) targetValue = 100000000; // Fallback default target jika kosong
+        if (targetValue <= 0) targetValue = 250000000; // Fallback target default jika kosong
 
-        // B. Ambil Realtime Sales dari tabel 'laporan_departemen' (total dari kolom ke-5)
+        // B. Ambil Realtime Sales dari tabel 'laporan_departemen' (menjumlahkan kolom exclude_ppn)
         const { data: deptData, error: deptError } = await supabaseClient
           .from('laporan_departemen')
-          .select('*');
+          .select('exclude_ppn');
 
-        let realtimeSumCol5 = 0;
+        let realtimeSumExcludePpn = 0;
         if (!deptError && deptData && deptData.length > 0) {
           deptData.forEach(row => {
-            const keys = Object.keys(row);
-            let colVal = 0;
-            // Kolom ke-5 (index 4)
-            if (keys.length >= 5) {
-              colVal = Number(row[keys[4]]) || 0;
-            } else {
-              colVal = Number(row.total || row.nilai || row.jumlah || 0);
-            }
-            realtimeSumCol5 += colVal;
+            realtimeSumExcludePpn += Number(row.exclude_ppn) || 0;
           });
         }
 
         // C. Hitung Persentase & Render Gauge
-        const percentage = targetValue > 0 ? (realtimeSumCol5 / targetValue) * 100 : 0;
+        const percentage = targetValue > 0 ? (realtimeSumExcludePpn / targetValue) * 100 : 0;
         const clampedPercent = Math.min(percentage, 100);
         
-        // Panjang arc semi-circle SVG = 251.2
         const maxDash = 251.2;
         const dashOffset = maxDash - (clampedPercent / 100) * maxDash;
 
         document.getElementById('gaugeProgressArc').style.strokeDashoffset = dashOffset;
         document.getElementById('gaugePercentage').innerText = percentage.toFixed(1) + '%';
-        document.getElementById('gaugeRealtimeValue').innerText = 'Rp ' + realtimeSumCol5.toLocaleString('id-ID');
+        document.getElementById('gaugeRealtimeValue').innerText = 'Rp ' + realtimeSumExcludePpn.toLocaleString('id-ID');
         document.getElementById('gaugeTargetValue').innerText = 'Rp ' + targetValue.toLocaleString('id-ID');
 
         // Ubah warna indikator berdasarkan pencapaian
