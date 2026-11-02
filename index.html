@@ -45,14 +45,14 @@
       animation-play-state: paused;
     }
 
-    /* OUTLINE PUTIH PADA TEKS KHUSUS TOP 3 */
+    /* OUTLINE PUTIH TIPIS PADA TEKS KHUSUS TOP 3 */
     .text-outline-white {
       text-shadow: 
-        -1.5px -1.5px 0 #fff,  
-         1.5px -1.5px 0 #fff,
-        -1.5px  1.5px 0 #fff,
-         1.5px  1.5px 0 #fff,
-         0px    2px   4px rgba(0, 0, 0, 0.15);
+        -0.75px -0.75px 0 #fff,  
+         0.75px -0.75px 0 #fff,
+        -0.75px  0.75px 0 #fff,
+         0.75px  0.75px 0 #fff,
+         0px     1px    2px rgba(0, 0, 0, 0.12);
     }
 
     /* ANIMASI BORDER API (FIRE OUTLINE EFFECT) */
@@ -151,7 +151,6 @@
   </div>
 
   <!-- ================= MAIN VIEW (KONTEN UTAMA) ================= -->
-  <!-- Background utama diganti warna Biru Tipis (bg-blue-50) -->
   <main class="flex-1 relative overflow-hidden bg-blue-50 p-6 flex flex-col">
     
     <!-- AREA TABEL LAPORAN SALES -->
@@ -265,8 +264,8 @@
         if (rank === 1) {
           rowClass = "fire-box-1";
           borderPhotoStyle = "border-yellow-500 shadow-yellow-300";
-          textEffectClass = "text-outline-white font-extrabold";
-          numberStyle = "text-outline-white font-black text-xl";
+          textEffectClass = "text-outline-white font-bold";
+          numberStyle = "text-outline-white font-extrabold text-xl";
           crownMarkup = `
             <div class="absolute -top-3.5 left-1/2 -translate-x-1/2 z-20 text-yellow-500 drop-shadow-[0_2px_4px_rgba(234,179,8,0.8)]">
               <i data-lucide="crown" class="w-6 h-6 fill-yellow-400"></i>
@@ -274,8 +273,8 @@
         } else if (rank === 2) {
           rowClass = "fire-box-2";
           borderPhotoStyle = "border-slate-400 shadow-slate-300";
-          textEffectClass = "text-outline-white font-extrabold";
-          numberStyle = "text-outline-white font-black text-xl";
+          textEffectClass = "text-outline-white font-bold";
+          numberStyle = "text-outline-white font-extrabold text-xl";
           crownMarkup = `
             <div class="absolute -top-3.5 left-1/2 -translate-x-1/2 z-20 text-slate-400 drop-shadow-[0_2px_4px_rgba(148,163,184,0.8)]">
               <i data-lucide="crown" class="w-6 h-6 fill-slate-300"></i>
@@ -283,8 +282,8 @@
         } else if (rank === 3) {
           rowClass = "fire-box-3";
           borderPhotoStyle = "border-amber-600 shadow-amber-300";
-          textEffectClass = "text-outline-white font-extrabold";
-          numberStyle = "text-outline-white font-black text-xl";
+          textEffectClass = "text-outline-white font-bold";
+          numberStyle = "text-outline-white font-extrabold text-xl";
           crownMarkup = `
             <div class="absolute -top-3.5 left-1/2 -translate-x-1/2 z-20 text-amber-600 drop-shadow-[0_2px_4px_rgba(217,119,6,0.8)]">
               <i data-lucide="crown" class="w-6 h-6 fill-amber-500"></i>
@@ -294,7 +293,7 @@
         htmlRows += `
           <div class="grid grid-cols-12 items-center px-4 py-3 transition shadow-sm ${rowClass}">
             <div class="col-span-4 flex items-center justify-center gap-3">
-              <!-- Nomor Urut dengan Outline Putih Top 3 -->
+              <!-- Nomor Urut dengan Outline Putih Tipis -->
               <span class="font-bold text-lg w-6 text-right ${numberStyle}">${rank}.</span>
               <!-- Foto dengan Mahkota -->
               <div class="relative w-16 h-16 rounded-lg border-2 ${borderPhotoStyle} bg-slate-200 shrink-0 shadow-md">
