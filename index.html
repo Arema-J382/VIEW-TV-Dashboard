@@ -20,9 +20,7 @@
       overflow: hidden;
     }
 
-    /* ==========================================================================
-       [PENGATURAN AREA TABEL] 
-       ========================================================================== */
+    /* AREA TABEL */
     .custom-table-container {
       width: 30%;               
       max-width: 1200px;
@@ -33,7 +31,7 @@
       margin-bottom: 0px;       
     }
 
-    /* Animasi Scrolling Berjalan dari Bawah ke Atas secara Looping Tanpa Batas */
+    /* Animasi Scrolling */
     @keyframes scrollUp {
       0% { transform: translateY(0); }
       100% { transform: translateY(-50%); }
@@ -45,6 +43,66 @@
     
     .scroll-container:hover .animate-scroll-infinite {
       animation-play-state: paused;
+    }
+
+    /* ANIMASI BORDER API (FIRE OUTLINE EFFECT) */
+    @keyframes fireRotate {
+      0% { filter: hue-rotate(0deg) blur(2px); }
+      50% { filter: hue-rotate(15deg) blur(4px); }
+      100% { filter: hue-rotate(0deg) blur(2px); }
+    }
+
+    @keyframes pulseGlow {
+      0%, 100% { opacity: 0.8; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.01); }
+    }
+
+    .fire-box-1 {
+      position: relative;
+      background: #fefce8;
+      border-radius: 0.75rem;
+      z-index: 1;
+    }
+    .fire-box-1::before {
+      content: '';
+      position: absolute;
+      inset: -3px;
+      border-radius: 0.85rem;
+      background: linear-gradient(45deg, #eab308, #f59e0b, #ef4444, #eab308);
+      z-index: -1;
+      animation: fireRotate 1.5s infinite linear, pulseGlow 2s infinite ease-in-out;
+    }
+
+    .fire-box-2 {
+      position: relative;
+      background: #f8fafc;
+      border-radius: 0.75rem;
+      z-index: 1;
+    }
+    .fire-box-2::before {
+      content: '';
+      position: absolute;
+      inset: -3px;
+      border-radius: 0.85rem;
+      background: linear-gradient(45deg, #94a3b8, #cbd5e1, #38bdf8, #94a3b8);
+      z-index: -1;
+      animation: fireRotate 2s infinite linear, pulseGlow 2.5s infinite ease-in-out;
+    }
+
+    .fire-box-3 {
+      position: relative;
+      background: #fff7ed;
+      border-radius: 0.75rem;
+      z-index: 1;
+    }
+    .fire-box-3::before {
+      content: '';
+      position: absolute;
+      inset: -3px;
+      border-radius: 0.85rem;
+      background: linear-gradient(45deg, #d97706, #ea580c, #dc2626, #d97706);
+      z-index: -1;
+      animation: fireRotate 1.8s infinite linear, pulseGlow 2.2s infinite ease-in-out;
     }
   </style>
 </head>
@@ -93,13 +151,6 @@
         LIVE TOP SALES TODAY
       </div>
 
-      <!-- Header Kolom Tabel -->
-      <div class="grid grid-cols-12 bg-slate-100 text-slate-700 font-bold text-sm px-6 py-2.5 border-b border-slate-200 z-10 shrink-0">
-        <div class="col-span-4 text-center">NO / FOTO / NIP</div>
-        <div class="col-span-4 flex items-center">NAMA SALES</div>
-        <div class="col-span-4 text-right flex items-center justify-end">TOTAL PENJUALAN</div>
-      </div>
-
       <!-- Area Status Kosong / Error -->
       <div id="emptyStatus" class="hidden absolute inset-0 pt-16 flex flex-col items-center justify-center z-20 bg-white/90 backdrop-blur-sm rounded-b-xl">
         <i data-lucide="database-backup" class="w-16 h-16 text-slate-400 mb-3"></i>
@@ -110,8 +161,8 @@
       <!-- Area Konten Berjalan Vertikal (Background Putih) -->
       <div class="flex-1 overflow-hidden relative border-x border-b border-slate-200 rounded-b-xl bg-white scroll-container shadow-inner">
         <div id="scrollWrapper" class="absolute w-full animate-scroll-infinite">
-          <div id="tableContentOriginal" class="space-y-2 p-2"></div>
-          <div id="tableContentClone" class="space-y-2 p-2" aria-hidden="true"></div>
+          <div id="tableContentOriginal" class="space-y-3 p-3"></div>
+          <div id="tableContentClone" class="space-y-3 p-3" aria-hidden="true"></div>
         </div>
       </div>
 
@@ -194,43 +245,39 @@
         const imageUrl = `${SUPABASE_URL}/storage/v1/object/public/${encodeURIComponent(bucketName)}/${item.nip}.jpg`;
         const fallbackAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(item.nama)}&background=0D8ABC&color=fff&size=128`;
 
-        // Styling khusus untuk Rank 1, 2, dan 3
-        let rowBgStyle = "bg-slate-50 hover:bg-slate-100 border-slate-200";
+        let rowClass = "bg-slate-50 border border-slate-200 hover:bg-slate-100 rounded-xl";
         let crownMarkup = "";
         let borderPhotoStyle = "border-blue-500";
 
         if (rank === 1) {
-          // EMAS (Gold)
-          rowBgStyle = "bg-yellow-50/90 hover:bg-yellow-100/90 border-yellow-300";
-          borderPhotoStyle = "border-yellow-500 shadow-yellow-200";
+          rowClass = "fire-box-1";
+          borderPhotoStyle = "border-yellow-500 shadow-yellow-300";
           crownMarkup = `
-            <div class="absolute -top-3.5 left-1/2 -translate-x-1/2 z-20 text-yellow-500 drop-shadow-[0_2px_4px_rgba(234,179,8,0.6)]">
+            <div class="absolute -top-3.5 left-1/2 -translate-x-1/2 z-20 text-yellow-500 drop-shadow-[0_2px_4px_rgba(234,179,8,0.8)]">
               <i data-lucide="crown" class="w-6 h-6 fill-yellow-400"></i>
             </div>`;
         } else if (rank === 2) {
-          // PERAK (Silver)
-          rowBgStyle = "bg-slate-100/90 hover:bg-slate-200/90 border-slate-300";
+          rowClass = "fire-box-2";
           borderPhotoStyle = "border-slate-400 shadow-slate-300";
           crownMarkup = `
-            <div class="absolute -top-3.5 left-1/2 -translate-x-1/2 z-20 text-slate-400 drop-shadow-[0_2px_4px_rgba(148,163,184,0.6)]">
+            <div class="absolute -top-3.5 left-1/2 -translate-x-1/2 z-20 text-slate-400 drop-shadow-[0_2px_4px_rgba(148,163,184,0.8)]">
               <i data-lucide="crown" class="w-6 h-6 fill-slate-300"></i>
             </div>`;
         } else if (rank === 3) {
-          // PERUNGGU (Bronze)
-          rowBgStyle = "bg-amber-50/90 hover:bg-amber-100/90 border-amber-300";
-          borderPhotoStyle = "border-amber-600 shadow-amber-200";
+          rowClass = "fire-box-3";
+          borderPhotoStyle = "border-amber-600 shadow-amber-300";
           crownMarkup = `
-            <div class="absolute -top-3.5 left-1/2 -translate-x-1/2 z-20 text-amber-600 drop-shadow-[0_2px_4px_rgba(217,119,6,0.6)]">
+            <div class="absolute -top-3.5 left-1/2 -translate-x-1/2 z-20 text-amber-600 drop-shadow-[0_2px_4px_rgba(217,119,6,0.8)]">
               <i data-lucide="crown" class="w-6 h-6 fill-amber-500"></i>
             </div>`;
         }
 
         htmlRows += `
-          <div class="grid grid-cols-12 items-center border rounded-xl px-4 py-3 transition shadow-sm ${rowBgStyle}">
+          <div class="grid grid-cols-12 items-center px-4 py-3 transition shadow-sm ${rowClass}">
             <div class="col-span-4 flex items-center justify-center gap-3">
               <!-- Nomor Urut -->
               <span class="font-extrabold text-lg text-slate-700 w-6 text-right">${rank}.</span>
-              <!-- Container Foto dengan Atribut Mahkota -->
+              <!-- Foto dengan Mahkota -->
               <div class="relative w-16 h-16 rounded-lg border-2 ${borderPhotoStyle} bg-slate-200 shrink-0 shadow-md">
                 ${crownMarkup}
                 <div class="w-full h-full rounded-[6px] overflow-hidden relative z-10">
@@ -252,9 +299,7 @@
       origContainer.innerHTML = htmlRows;
       cloneContainer.innerHTML = htmlRows;
 
-      // Render ulang ikon lucide untuk mahkota baru
       lucide.createIcons();
-
       scrollWrapper.style.animationDuration = '100s';
     }
 
