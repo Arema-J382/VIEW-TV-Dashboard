@@ -298,13 +298,21 @@
       scrollWrapper.style.animationDuration = '100s';
     }
 
+    // Fungsi setupRealtime yang sudah diperbarui
     function setupRealtime() {
       supabaseClient
-        .channel('public:laporan_sales')
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'laporan_sales' }, () => {
-          fetchSalesData();
-        })
-        .subscribe();
+        .channel('realtime_laporan_sales')
+        .on(
+          'postgres_changes',
+          { event: '*', schema: 'public', table: 'laporan_sales' },
+          (payload) => {
+            console.log('Perubahan data terdeteksi:', payload);
+            fetchSalesData();
+          }
+        )
+        .subscribe((status) => {
+          console.log('Status Realtime Supabase:', status);
+        });
     }
 
     document.addEventListener("DOMContentLoaded", () => {
