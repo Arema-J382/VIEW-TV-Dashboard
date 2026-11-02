@@ -24,7 +24,7 @@
        [PENGATURAN AREA TABEL] 
        ========================================================================== */
     .custom-table-container {
-      width: 40%;               /* Ditingkatkan sedikit agar muat dengan foto lebih besar & nomor */
+      width: 40%;               
       max-width: 1200px;
       height: 600px;            
       margin-left: auto;        
@@ -88,8 +88,8 @@
     <!-- AREA TABEL LAPORAN SALES -->
     <div class="custom-table-container flex flex-col relative z-10">
       
-      <!-- Header Tabel (LIVE TOP SALES TODAY) -->
-      <div class="bg-white text-slate-800 font-extrabold text-center text-lg py-3 rounded-t-xl border-b-2 border-slate-200 shadow-md z-10 shrink-0 tracking-wider">
+      <!-- Header Tabel (LIVE TOP SALES TODAY - Background Biru Gelap & Teks Putih) -->
+      <div class="bg-slate-900 text-white font-extrabold text-center text-lg py-3.5 rounded-t-xl border-b border-slate-800 shadow-md z-10 shrink-0 tracking-wider">
         LIVE TOP SALES TODAY
       </div>
 
@@ -199,7 +199,7 @@
             <div class="col-span-4 flex items-center justify-center gap-3">
               <!-- Nomor Urut -->
               <span class="font-extrabold text-lg text-slate-700 w-6 text-right">${index + 1}.</span>
-              <!-- Foto Kotak dan Lebih Besar (w-16 h-16 / 64px) -->
+              <!-- Foto Kotak (w-16 h-16 / 64px) -->
               <div class="relative w-16 h-16 rounded-lg overflow-hidden border-2 border-blue-500 bg-slate-200 shrink-0 shadow-md">
                 <img src="${imageUrl}" alt="${item.nama}" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='${fallbackAvatar}';">
               </div>
