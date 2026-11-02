@@ -164,7 +164,7 @@
         
         <!-- Header Gauge -->
         <div class="bg-slate-900 text-white font-extrabold text-center text-lg py-3.5 border-b border-slate-800 shadow-md tracking-wider">
-          REALTIME SALES PERFORMANCE GAUGE
+          TARGET TODAY
         </div>
 
         <!-- Konten Grafik Gauge -->
@@ -189,11 +189,11 @@
           <!-- Keterangan Nilai Realtime vs Target -->
           <div class="w-full grid grid-cols-2 gap-4 mt-6 bg-slate-100 p-4 rounded-xl border border-slate-200 shadow-inner">
             <div class="text-center border-r border-slate-200 pr-2">
-              <div class="text-xs text-slate-500 font-semibold uppercase">Realisasi (Dept)</div>
+              <div class="text-xs text-slate-500 font-semibold uppercase">Realisasi</div>
               <div id="gaugeRealtimeValue" class="text-sm font-bold font-mono text-emerald-600 mt-1">Rp 0</div>
             </div>
             <div class="text-center pl-2">
-              <div class="text-xs text-slate-500 font-semibold uppercase">Target (Target Today)</div>
+              <div class="text-xs text-slate-500 font-semibold uppercase">Target Today</div>
               <div id="gaugeTargetValue" class="text-sm font-bold font-mono text-slate-700 mt-1">Rp 0</div>
             </div>
           </div>
@@ -455,7 +455,7 @@
           statusElement.className = 'text-xs font-bold text-blue-600 uppercase tracking-wider mt-0.5';
           statusElement.innerText = 'On Track 🚀';
         } else {
-          arcElement.style.stroke = '#f59e0b'; // Kuning/Amber (Perlu Dorongan)
+          arcElement.style.stroke = '#f59e0b'; // Kuning/Amber (Tambah Lagi)
           statusElement.className = 'text-xs font-bold text-amber-600 uppercase tracking-wider mt-0.5';
           statusElement.innerText = 'Perlu Dorongan ⚡';
         }
