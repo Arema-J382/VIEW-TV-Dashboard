@@ -409,7 +409,7 @@
     }
 
 
-    // 2. Fetch & Render Top 1 MTD Sales (Berdasarkan mtd_total dan mtd_nip)
+    // 2. Fetch & Render Top 1 MTD Sales (Berdasarkan mtd_total dan mtd_nip) - Tanpa Dept & Foto Diperbesar
     async function fetchTop1MtdSales() {
       try {
         const { data, error } = await supabaseClient
@@ -440,7 +440,6 @@
         
         const nip = topMtd.mtd_nip || '-';
         const nama = topMtd.mtd_nama || 'NONAME';
-        const dept = topMtd.mtd_alldept || '-';
         const total = Number(topMtd.mtd_total || 0);
 
         const bucketName = 'FOTO SALES';
@@ -449,20 +448,23 @@
 
         container.innerHTML = `
           <div class="flex flex-col items-center justify-center text-center w-full relative">
-            <div class="relative w-36 h-36 rounded-2xl border-4 border-yellow-500 shadow-xl bg-slate-200 overflow-hidden mb-4">
+            <!-- Foto & Mahkota Diperbesar (w-48 h-48 & w-12 h-12) -->
+            <div class="relative w-48 h-48 rounded-2xl border-4 border-yellow-500 shadow-xl bg-slate-200 overflow-hidden mb-4">
               <div class="absolute -top-4 left-1/2 -translate-x-1/2 z-20 text-yellow-500 drop-shadow-[0_2px_4px_rgba(234,179,8,0.9)]">
-                <i data-lucide="crown" class="w-8 h-8 fill-yellow-400"></i>
+                <i data-lucide="crown" class="w-12 h-12 fill-yellow-400"></i>
               </div>
               <img src="${imageUrl}" alt="${nama}" class="w-full h-full object-cover pt-2" onerror="this.onerror=null; this.src='${fallbackAvatar}';">
             </div>
 
-            <div class="text-xs font-mono uppercase tracking-widest text-amber-600 font-extrabold mb-1">CHAMPION OF THE MONTH</div>
-            <h3 class="text-2xl font-extrabold text-slate-900 mb-1">${nama}</h3>
-            <div class="text-xs font-semibold text-slate-600 mb-4">NIP: <span class="font-mono text-blue-600 font-bold">${nip}</span> | DEPT: <span class="text-slate-800 font-bold">${dept}</span></div>
+            <div class="text-sm font-mono uppercase tracking-widest text-amber-600 font-extrabold mb-1">CHAMPION OF THE MONTH</div>
+            <!-- Nama & NIP (DEPT Dihilangkan) -->
+            <h3 class="text-3xl font-extrabold text-slate-900 mb-1">${nama}</h3>
+            <div class="text-sm font-semibold text-slate-600 mb-4">NIP: <span class="font-mono text-blue-600 font-bold">${nip}</span></div>
             
-            <div class="w-full bg-amber-50 border border-amber-200 rounded-xl p-4 shadow-inner">
+            <!-- Box Total MTD Sales Diperbesar (p-6 & text-3xl) -->
+            <div class="w-full bg-amber-50 border border-amber-200 rounded-xl p-6 shadow-inner">
               <div class="text-xs font-bold text-amber-800 uppercase tracking-wider">Total MTD Sales</div>
-              <div class="text-2xl font-extrabold font-mono text-emerald-600 mt-1">Rp ${total.toLocaleString('id-ID')}</div>
+              <div class="text-3xl font-extrabold font-mono text-emerald-600 mt-1">Rp ${total.toLocaleString('id-ID')}</div>
             </div>
           </div>
         `;
