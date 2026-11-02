@@ -22,9 +22,9 @@
 
     /* AREA TABEL */
     .custom-table-container {
-      width: 30%;               
+      width: 40%;               
       max-width: 1200px;
-      height: 500px;            
+      height: 600px;            
       margin-left: auto;        
       margin-right: auto;
       margin-top: 10px;         
@@ -43,6 +43,17 @@
     
     .scroll-container:hover .animate-scroll-infinite {
       animation-play-state: paused;
+    }
+
+    /* OUTLINE PUTIH PADA TEKS NOMOR 1, 2, DAN 3 */
+    .number-outline-white {
+      color: #1e293b;
+      text-shadow: 
+        -1.5px -1.5px 0 #fff,  
+         1.5px -1.5px 0 #fff,
+        -1.5px  1.5px 0 #fff,
+         1.5px  1.5px 0 #fff,
+         0px    2px   4px rgba(0, 0, 0, 0.15);
     }
 
     /* ANIMASI BORDER API (FIRE OUTLINE EFFECT) */
@@ -248,10 +259,12 @@
         let rowClass = "bg-slate-50 border border-slate-200 hover:bg-slate-100 rounded-xl";
         let crownMarkup = "";
         let borderPhotoStyle = "border-blue-500";
+        let numberStyle = "text-slate-700";
 
         if (rank === 1) {
           rowClass = "fire-box-1";
           borderPhotoStyle = "border-yellow-500 shadow-yellow-300";
+          numberStyle = "number-outline-white font-black text-xl";
           crownMarkup = `
             <div class="absolute -top-3.5 left-1/2 -translate-x-1/2 z-20 text-yellow-500 drop-shadow-[0_2px_4px_rgba(234,179,8,0.8)]">
               <i data-lucide="crown" class="w-6 h-6 fill-yellow-400"></i>
@@ -259,6 +272,7 @@
         } else if (rank === 2) {
           rowClass = "fire-box-2";
           borderPhotoStyle = "border-slate-400 shadow-slate-300";
+          numberStyle = "number-outline-white font-black text-xl";
           crownMarkup = `
             <div class="absolute -top-3.5 left-1/2 -translate-x-1/2 z-20 text-slate-400 drop-shadow-[0_2px_4px_rgba(148,163,184,0.8)]">
               <i data-lucide="crown" class="w-6 h-6 fill-slate-300"></i>
@@ -266,6 +280,7 @@
         } else if (rank === 3) {
           rowClass = "fire-box-3";
           borderPhotoStyle = "border-amber-600 shadow-amber-300";
+          numberStyle = "number-outline-white font-black text-xl";
           crownMarkup = `
             <div class="absolute -top-3.5 left-1/2 -translate-x-1/2 z-20 text-amber-600 drop-shadow-[0_2px_4px_rgba(217,119,6,0.8)]">
               <i data-lucide="crown" class="w-6 h-6 fill-amber-500"></i>
@@ -275,8 +290,8 @@
         htmlRows += `
           <div class="grid grid-cols-12 items-center px-4 py-3 transition shadow-sm ${rowClass}">
             <div class="col-span-4 flex items-center justify-center gap-3">
-              <!-- Nomor Urut -->
-              <span class="font-extrabold text-lg text-slate-700 w-6 text-right">${rank}.</span>
+              <!-- Nomor Urut dengan Outline Putih khusus Top 3 -->
+              <span class="font-extrabold text-lg w-6 text-right ${numberStyle}">${rank}.</span>
               <!-- Foto dengan Mahkota -->
               <div class="relative w-16 h-16 rounded-lg border-2 ${borderPhotoStyle} bg-slate-200 shrink-0 shadow-md">
                 ${crownMarkup}
