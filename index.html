@@ -183,14 +183,6 @@
     </div>
   </header>
 
-  <!-- ================= SUB-HEADER STATISTIK ================= -->
-  <div class="bg-slate-900/90 border-b border-slate-800 px-12 py-3 flex justify-between items-center text-xs text-slate-300 z-20 shrink-0">
-    <div class="flex items-center gap-10">
-      <span>Total Sales: <strong id="totalDataCount" class="text-white font-mono text-sm">0</strong> Orang</span>
-      <span>Akumulasi Penjualan Sales: <strong id="totalSumSales" class="text-green-400 font-mono text-base">Rp 0</strong></span>
-    </div>
-  </div>
-
   <!-- ================= MAIN VIEW (KONTEN UTAMA) ================= -->
   <main class="flex-1 relative overflow-hidden bg-blue-50 p-6 flex items-center justify-center">
     
@@ -292,7 +284,7 @@
               </div>
             </div>
 
-            <!-- VIEW 2: BEST FURNIPRO (Mirip Best Sales, Tanpa Mahkota, Card Bawah TOTAL MTD FP FURNIPRO + PCS) -->
+            <!-- VIEW 2: BEST FURNIPRO (Mirip Best Sales, Tanpa Mahkota, Card Bawah TOTAL MTD FURNIPRO + PCS) -->
             <div class="w-1/2 h-full flex flex-col items-center justify-center p-6 bg-gradient-to-b from-blue-50/50 to-white shrink-0">
               <div id="furniproTop1Content" class="w-full flex flex-col items-center justify-center">
                 <div class="flex flex-col items-center justify-center text-slate-400 py-12">
@@ -368,10 +360,10 @@
       const totalSumSales = document.getElementById('totalSumSales');
       const emptyStatus = document.getElementById('emptyStatus');
 
-      totalDataCount.innerText = salesList.length;
+      if (totalDataCount) totalDataCount.innerText = salesList.length;
 
       let sumTotal = salesList.reduce((acc, curr) => acc + (Number(curr.total) || 0), 0);
-      totalSumSales.innerText = 'Rp ' + sumTotal.toLocaleString('id-ID');
+      if (totalSumSales) totalSumSales.innerText = 'Rp ' + sumTotal.toLocaleString('id-ID');
 
       if (salesList.length === 0) {
         emptyStatus.classList.remove('hidden');
