@@ -545,7 +545,7 @@
         const imageUrl = `${SUPABASE_URL}/storage/v1/object/public/${encodeURIComponent(bucketName)}/${nip}.jpg`;
         const fallbackAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(nama)}&background=2563eb&color=fff&size=128`;
 
-        // Tampilan layout persis Best Sales, tanpa mahkota, dengan kotak bawah TOTAL MTD FP FURNIPRO + PCS
+        // Tampilan layout persis Best Sales, tanpa mahkota, dengan kotak bawah TOTAL MTD FURNIPRO + PCS
         container.innerHTML = `
           <div class="flex flex-col items-center justify-center text-center w-full relative">
             <div class="relative w-48 h-48 rounded-2xl border-4 border-blue-500 shadow-xl bg-slate-200 overflow-hidden mb-4">
@@ -557,7 +557,7 @@
             <div class="text-sm font-semibold text-slate-600 mb-4">NIP: <span class="font-mono text-blue-600 font-bold">${nip}</span></div>
             
             <div class="w-full bg-blue-50 border border-blue-200 rounded-xl p-6 shadow-inner">
-              <div class="text-xs font-bold text-blue-800 uppercase tracking-wider">TOTAL MTD FP FURNIPRO</div>
+              <div class="text-xs font-bold text-blue-800 uppercase tracking-wider">TOTAL MTD FURNIPRO</div>
               <div class="text-3xl font-extrabold font-mono text-blue-600 mt-1">${qty.toLocaleString('id-ID')} PCS</div>
             </div>
           </div>
