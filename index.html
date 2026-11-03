@@ -57,20 +57,40 @@
       z-index: 10;
     }
 
-    /* AREA TOP 1 MTD SALES & FURNIPRO (DI SEBELAH KANAN) */
+    /* AREA KANAN (BEST SALES & BEST FURNIPRO CAROUSEL) */
     .mtd-top1-container {
       width: 460px;
       height: 520px;
       background: #ffffff;
       border-radius: 1rem;
       box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
-      border: 2px solid #eab308;
       display: flex;
       flex-direction: column;
       overflow: hidden;
       position: relative;
       z-index: 10;
+      transition: all 0.5s ease-in-out;
+    }
+
+    /* Animasi Glow Berbeda untuk Best Sales & Best Furnipro */
+    @keyframes goldGlow {
+      0%, 100% { box-shadow: 0 0 10px rgba(234, 179, 8, 0.5), 0 0 20px rgba(245, 158, 11, 0.3); }
+      50% { box-shadow: 0 0 22px rgba(234, 179, 8, 0.9), 0 0 32px rgba(239, 68, 68, 0.6); }
+    }
+
+    @keyframes cyanGlow {
+      0%, 100% { box-shadow: 0 0 10px rgba(59, 130, 246, 0.6), 0 0 20px rgba(14, 165, 233, 0.4); }
+      50% { box-shadow: 0 0 22px rgba(59, 130, 246, 1), 0 0 35px rgba(6, 182, 212, 0.8); }
+    }
+
+    .gold-glow-container {
+      border: 2px solid #eab308;
       animation: goldGlow 2s infinite ease-in-out;
+    }
+
+    .cyan-glow-container {
+      border: 2px solid #3b82f6;
+      animation: cyanGlow 2s infinite ease-in-out;
     }
 
     /* Animasi Scrolling Vertikal Tabel Tengah */
@@ -95,12 +115,6 @@
         -0.75px  0.75px 0 #fff,
          0.75px  0.75px 0 #fff,
          0px     1px    2px rgba(0, 0, 0, 0.12);
-    }
-
-    /* EFEK GLOW / API UNTUK RANKING & TOP 1 MTD */
-    @keyframes goldGlow {
-      0%, 100% { box-shadow: 0 0 10px rgba(234, 179, 8, 0.5), 0 0 20px rgba(245, 158, 11, 0.3); }
-      50% { box-shadow: 0 0 20px rgba(234, 179, 8, 0.9), 0 0 30px rgba(239, 68, 68, 0.6); }
     }
 
     @keyframes silverGlow {
@@ -256,11 +270,11 @@
 
 
       <!-- ================= 3. BEST SALES & BEST FURNIPRO CAROUSEL (KANAN) ================= -->
-      <div class="mtd-top1-container flex flex-col relative z-10 overflow-hidden">
+      <div id="rightCardContainer" class="mtd-top1-container gold-glow-container flex flex-col relative z-10 overflow-hidden">
         
-        <!-- HEADER DENGAN TRANSISI NAMA JUDUL -->
-        <div class="bg-slate-900 text-white font-extrabold text-center text-2xl py-3.5 border-b border-slate-800 shadow-md z-20 shrink-0 tracking-wider flex items-center justify-center gap-2">
-          <i data-lucide="award" class="w-6 h-6 text-yellow-400"></i>
+        <!-- HEADER DENGAN TRANSISI WARNA & JUDUL -->
+        <div id="sliderHeader" class="bg-slate-900 text-white font-extrabold text-center text-2xl py-3.5 border-b border-slate-800 shadow-md z-20 shrink-0 tracking-wider flex items-center justify-center gap-2 transition-colors duration-500">
+          <i data-lucide="award" id="sliderHeaderIcon" class="w-6 h-6 text-yellow-400"></i>
           <span id="sliderHeaderTitle">BEST SALES</span>
         </div>
 
@@ -278,7 +292,7 @@
               </div>
             </div>
 
-            <!-- VIEW 2: BEST FURNIPRO -->
+            <!-- VIEW 2: BEST FURNIPRO (Mirip Best Sales, Tanpa Mahkota, Card Bawah TOTAL MTD FP FURNIPRO + PCS) -->
             <div class="w-1/2 h-full flex flex-col items-center justify-center p-6 bg-gradient-to-b from-blue-50/50 to-white shrink-0">
               <div id="furniproTop1Content" class="w-full flex flex-col items-center justify-center">
                 <div class="flex flex-col items-center justify-center text-slate-400 py-12">
@@ -490,7 +504,7 @@
             <div class="text-sm font-semibold text-slate-600 mb-4">NIP: <span class="font-mono text-blue-600 font-bold">${nip}</span></div>
             
             <div class="w-full bg-amber-50 border border-amber-200 rounded-xl p-6 shadow-inner">
-              <div class="text-xs font-bold text-amber-800 uppercase tracking-wider">Total MTD Sales</div>
+              <div class="text-xs font-bold text-amber-800 uppercase tracking-wider">TOTAL MTD SALES</div>
               <div class="text-3xl font-extrabold font-mono text-emerald-600 mt-1">Rp ${total.toLocaleString('id-ID')}</div>
             </div>
           </div>
@@ -503,7 +517,7 @@
     }
 
 
-    // 2B. Fetch & Render Best Furnipro (Tabel: mtd_fp | Sort: qty_mtdfp DESC | Tanpa total_mtdfp)
+    // 2B. Fetch & Render Best Furnipro (Tabel: mtd_fp | Sort: qty_mtdfp DESC | Tanpa Mahkota | Dengan Box Total Qty PCS)
     async function fetchTop1MtdFurnipro() {
       try {
         const { data, error } = await supabaseClient
@@ -533,24 +547,27 @@
         const topFp = data[0];
         const nip = topFp.nip_mtdfp || '-';
         const nama = topFp.nama_mtdfp || topFp.nama || 'NONAME';
+        const qty = Number(topFp.qty_mtdfp || 0);
 
         const bucketName = 'FOTO SALES';
         const imageUrl = `${SUPABASE_URL}/storage/v1/object/public/${encodeURIComponent(bucketName)}/${nip}.jpg`;
         const fallbackAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(nama)}&background=2563eb&color=fff&size=128`;
 
-        // Tampilan khusus Best Furnipro (Hanya foto & informasi tanpa total_mtdfp)
+        // Tampilan layout persis Best Sales, tanpa mahkota, dengan kotak bawah TOTAL MTD FP FURNIPRO + PCS
         container.innerHTML = `
           <div class="flex flex-col items-center justify-center text-center w-full relative">
-            <div class="relative w-56 h-56 rounded-2xl border-4 border-blue-600 shadow-2xl bg-slate-200 overflow-hidden mb-5">
-              <div class="absolute -top-4 left-1/2 -translate-x-1/2 z-20 text-yellow-400 drop-shadow-[0_2px_4px_rgba(59,130,246,0.9)]">
-                <i data-lucide="award" class="w-14 h-14 fill-yellow-400"></i>
-              </div>
+            <div class="relative w-48 h-48 rounded-2xl border-4 border-blue-500 shadow-xl bg-slate-200 overflow-hidden mb-4">
               <img src="${imageUrl}" alt="${nama}" class="w-full h-full object-cover pt-2" onerror="this.onerror=null; this.src='${fallbackAvatar}';">
             </div>
 
-            <div class="text-sm font-mono uppercase tracking-widest text-blue-600 font-extrabold mb-1">BEST FURNIPRO</div>
-            <h3 class="text-3xl font-extrabold text-slate-900 mb-2">${nama}</h3>
-            <div class="text-base font-semibold text-slate-600">NIP: <span class="font-mono text-blue-600 font-bold">${nip}</span></div>
+            <div class="text-sm font-mono uppercase tracking-widest text-blue-600 font-extrabold mb-1">CHAMPION FURNIPRO</div>
+            <h3 class="text-3xl font-extrabold text-slate-900 mb-1">${nama}</h3>
+            <div class="text-sm font-semibold text-slate-600 mb-4">NIP: <span class="font-mono text-blue-600 font-bold">${nip}</span></div>
+            
+            <div class="w-full bg-blue-50 border border-blue-200 rounded-xl p-6 shadow-inner">
+              <div class="text-xs font-bold text-blue-800 uppercase tracking-wider">TOTAL MTD FP FURNIPRO</div>
+              <div class="text-3xl font-extrabold font-mono text-blue-600 mt-1">${qty.toLocaleString('id-ID')} PCS</div>
+            </div>
           </div>
         `;
         lucide.createIcons();
@@ -561,22 +578,35 @@
     }
 
 
-    // 3. Carousel Switcher (3 Detik Bergeser Ke Kiri)
+    // 3. Carousel Switcher (3 Detik Bergeser ke Samping Kiri + Ganti Warna Animasi Glow & Header)
     function startCarouselTimer() {
       setInterval(() => {
         const track = document.getElementById('mtdSliderTrack');
         const headerTitle = document.getElementById('sliderHeaderTitle');
+        const headerIcon = document.getElementById('sliderHeaderIcon');
+        const rightContainer = document.getElementById('rightCardContainer');
+        const sliderHeader = document.getElementById('sliderHeader');
         
         if (currentSlide === 0) {
           currentSlide = 1;
           track.style.transform = 'translateX(-50%)';
           headerTitle.innerText = 'BEST FURNIPRO';
+          headerIcon.classList.remove('text-yellow-400');
+          headerIcon.classList.add('text-blue-400');
+          rightContainer.classList.remove('gold-glow-container');
+          rightContainer.classList.add('cyan-glow-container');
+          sliderHeader.style.backgroundColor = '#1e3a8a'; // Biru gelap untuk Furnipro
         } else {
           currentSlide = 0;
           track.style.transform = 'translateX(0%)';
           headerTitle.innerText = 'BEST SALES';
+          headerIcon.classList.remove('text-blue-400');
+          headerIcon.classList.add('text-yellow-400');
+          rightContainer.classList.remove('cyan-glow-container');
+          rightContainer.classList.add('gold-glow-container');
+          sliderHeader.style.backgroundColor = '#0f172a'; // Slate-900 untuk Sales
         }
-      }, 3000); // 3000ms = 3 Detik
+      }, 3000); // 3 Detik
     }
 
 
@@ -669,7 +699,7 @@
 
     // 5. Saluran Supabase Realtime Sync Terintegrasi Lengkap
     function setupRealtime() {
-      // Channel 1: Laporan Sales Realtime Sync
+      // Channel 1: Laporan Sales
       supabaseClient
         .channel('realtime_laporan_sales')
         .on('postgres_changes', { event: '*', schema: 'public', table: 'laporan_sales' }, () => {
@@ -677,7 +707,7 @@
         })
         .subscribe();
 
-      // Channel 2: MTD Sales Realtime Sync
+      // Channel 2: MTD Sales
       supabaseClient
         .channel('realtime_mtd_sales')
         .on('postgres_changes', { event: '*', schema: 'public', table: 'mtd_sales' }, () => {
@@ -685,7 +715,7 @@
         })
         .subscribe();
 
-      // Channel 3: MTD Furnipro Realtime Sync
+      // Channel 3: MTD Furnipro (mtd_fp)
       supabaseClient
         .channel('realtime_mtd_fp')
         .on('postgres_changes', { event: '*', schema: 'public', table: 'mtd_fp' }, () => {
@@ -693,7 +723,7 @@
         })
         .subscribe();
 
-      // Channel 4: Gauge & Target Realtime Sync
+      // Channel 4: Gauge & Target
       supabaseClient
         .channel('realtime_gauge')
         .on('postgres_changes', { event: '*', schema: 'public', table: 'laporan_departemen' }, () => {
