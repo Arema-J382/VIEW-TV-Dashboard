@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=1920, height=1080, initial-scale=1.0">
-  <title>TV Dashboard - Laporan Sales, Gauge & Top 1 MTD Sales, Furnipro & Comser</title>
+  <title>TV Dashboard - Laporan Sales, Gauge, Departemen & Top 1 MTD Sales</title>
   
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -13,14 +13,14 @@
   <script src="https://unpkg.com/lucide@latest"></script>
 
   <style>
-    /* Mengunci ukuran layout pas Full HD 1920x1080 piksel */
+    /* Mengunci ukuran layout pas Full HD 1920x1080 piksel[cite: 1] */
     body {
       width: 1920px;
       height: 1080px;
       overflow: hidden;
     }
 
-    /* CONTAINER UTAMA 3 KOLOM SIDE-BY-SIDE */
+    /* CONTAINER UTAMA 3 KOLOM SIDE-BY-SIDE[cite: 1] */
     .dashboard-grid {
       display: flex;
       flex-direction: row;
@@ -31,22 +31,46 @@
       height: 100%;
     }
 
-    /* AREA GAUGE CHART (DI SEBELAH KIRI) */
-    .gauge-section-container {
+    /* AREA KIRI (WRAPPER GAUGE & SALES DEPARTEMEN) */
+    .left-column-wrapper {
       width: 500px;
       height: 520px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+      z-index: 10;
+    }
+
+    /* AREA GAUGE CHART (DI ATAS KIRI)[cite: 1] */
+    .gauge-section-container {
+      width: 500px;
+      height: 255px;
       background: #ffffff;
-      border-radius: 1rem;
-      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+      border-radius: 0.85rem;
+      box-shadow: 0 8px 20px -4px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
       border: 1px solid #bfdbfe;
       display: flex;
       flex-direction: column;
       overflow: hidden;
       position: relative;
-      z-index: 10;
     }
 
-    /* AREA TABEL LIVE TOP SALES TODAY (DI TENGAH) */
+    /* AREA SALES DEPARTEMEN TODAY (DI BAWAH GAUGE) */
+    .dept-table-container {
+      width: 500px;
+      height: 255px;
+      background: #ffffff;
+      border-radius: 0.85rem;
+      box-shadow: 0 8px 20px -4px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+      border: 1px solid #bfdbfe;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* AREA TABEL LIVE TOP SALES TODAY (DI TENGAH)[cite: 1] */
     .custom-table-container {
       width: 600px;               
       height: 520px;            
@@ -57,7 +81,7 @@
       z-index: 10;
     }
 
-    /* AREA KANAN (BEST SALES, BEST FURNIPRO & BEST COMSER CAROUSEL) */
+    /* AREA KANAN (BEST SALES, BEST FURNIPRO & BEST COMSER CAROUSEL)[cite: 1] */
     .mtd-top1-container {
       width: 460px;
       height: 520px;
@@ -72,7 +96,7 @@
       transition: all 0.5s ease-in-out;
     }
 
-    /* Animasi Glow untuk Masing-masing View Card Kanan */
+    /* Animasi Glow untuk Masing-masing View Card Kanan[cite: 1] */
     @keyframes goldGlow {
       0%, 100% { box-shadow: 0 0 10px rgba(234, 179, 8, 0.5), 0 0 20px rgba(245, 158, 11, 0.3); }
       50% { box-shadow: 0 0 22px rgba(234, 179, 8, 0.9), 0 0 32px rgba(239, 68, 68, 0.6); }
@@ -103,7 +127,7 @@
       animation: emeraldGlow 2s infinite ease-in-out;
     }
 
-    /* Animasi Scrolling Vertikal Tabel Tengah */
+    /* Animasi Scrolling Vertikal Tabel[cite: 1] */
     @keyframes scrollUp {
       0% { transform: translateY(0); }
       100% { transform: translateY(-50%); }
@@ -117,7 +141,7 @@
       animation-play-state: paused;
     }
 
-    /* OUTLINE PUTIH TIPIS PADA TEKS KHUSUS RANKING */
+    /* OUTLINE PUTIH TIPIS PADA TEKS KHUSUS RANKING[cite: 1] */
     .text-outline-white {
       text-shadow: 
         -0.75px -0.75px 0 #fff,  
@@ -158,7 +182,7 @@
       animation: bronzeGlow 2s infinite ease-in-out;
     }
 
-    /* SLIDER TRACK UNTUK 3 VIEW (300% WIDTH) */
+    /* SLIDER TRACK UNTUK 3 VIEW (300% WIDTH)[cite: 1] */
     .slider-track {
       display: flex;
       width: 300%;
@@ -199,55 +223,79 @@
     <!-- CONTAINER UTAMA 3 KOLOM -->
     <div class="dashboard-grid">
 
-      <!-- ================= 1. GAUGE CHART SECTION (KIRI) ================= -->
-      <div id="gaugeContainer" class="gauge-section-container">
+      <!-- ================= KOLOM KIRI (GAUGE & SALES DEPARTEMEN) ================= -->
+      <div class="left-column-wrapper">
         
-        <div class="bg-slate-900 text-white font-extrabold text-center text-2xl py-3.5 border-b border-slate-800 shadow-md tracking-wider">
-          TARGET TODAY
-        </div>
-
-        <div class="flex-1 flex flex-col items-center justify-center p-6 relative bg-gradient-to-b from-slate-50 to-white">
-          
-          <div class="relative w-80 h-40 flex items-center justify-center mt-2">
-            <svg class="w-full h-full overflow-visible" viewBox="0 0 200 100">
-              <defs>
-                <path id="textArcAchieved" d="M 20 90 A 80 80 0 0 1 180 90" />
-              </defs>
-
-              <path id="gaugeBackgroundArc" d="M 20 90 A 80 80 0 0 1 180 90" fill="none" stroke="#cbd5e1" stroke-width="26" stroke-linecap="round"/>
-              <path id="gaugeProgressArc" d="M 20 90 A 80 80 0 0 1 180 90" fill="none" stroke="#3b82f6" stroke-width="26" stroke-linecap="round" stroke-dasharray="251.2" stroke-dashoffset="251.2" style="transition: stroke-dashoffset 1s ease-in-out, stroke 0.5s ease;"/>
-              
-              <text dy="4.5" fill="#ffffff" font-size="9.5" font-weight="900" font-family="monospace">
-                <textPath id="gaugeTextAchieved" href="#textArcAchieved" startOffset="0%" text-anchor="start" style="transition: startOffset 1s ease-in-out;">
-                  0.0%
-                </textPath>
-              </text>
-
-              <g id="gaugeNeedle" style="transform-origin: 100px 90px; transition: transform 1s cubic-bezier(0.4, 0, 0.2, 1); transform: rotate(-90deg);">
-                <line x1="100" y1="90" x2="100" y2="24" stroke="#0f172a" stroke-width="4.5" stroke-linecap="round"/>
-                <circle cx="100" cy="90" r="7.5" fill="#0f172a"/>
-                <circle cx="100" cy="90" r="3" fill="#ffffff"/>
-              </g>
-            </svg>
+        <!-- 1. GAUGE CHART SECTION (TARGET TODAY)[cite: 1] -->
+        <div id="gaugeContainer" class="gauge-section-container">
+          <div class="bg-slate-900 text-white font-extrabold text-center text-lg py-2 border-b border-slate-800 shadow-md tracking-wider">
+            TARGET TODAY
           </div>
 
-          <div class="w-full grid grid-cols-2 gap-4 mt-8 bg-slate-100 p-4 rounded-xl border border-slate-200 shadow-inner">
-            <div class="text-center border-r border-slate-200 pr-2">
-              <div class="text-xl text-slate-500 font-bold uppercase">Realisasi</div>
-              <div id="gaugeRealtimeValue" class="text-2xl font-extrabold font-mono text-emerald-600 mt-1">Rp 0</div>
+          <div class="flex-1 flex flex-col items-center justify-center p-3 relative bg-gradient-to-b from-slate-50 to-white">
+            <div class="relative w-64 h-28 flex items-center justify-center">
+              <svg class="w-full h-full overflow-visible" viewBox="0 0 200 100">
+                <defs>
+                  <path id="textArcAchieved" d="M 20 90 A 80 80 0 0 1 180 90" />
+                </defs>
+
+                <path id="gaugeBackgroundArc" d="M 20 90 A 80 80 0 0 1 180 90" fill="none" stroke="#cbd5e1" stroke-width="22" stroke-linecap="round"/>
+                <path id="gaugeProgressArc" d="M 20 90 A 80 80 0 0 1 180 90" fill="none" stroke="#3b82f6" stroke-width="22" stroke-linecap="round" stroke-dasharray="251.2" stroke-dashoffset="251.2" style="transition: stroke-dashoffset 1s ease-in-out, stroke 0.5s ease;"/>
+                
+                <text dy="4.5" fill="#ffffff" font-size="9.5" font-weight="900" font-family="monospace">
+                  <textPath id="gaugeTextAchieved" href="#textArcAchieved" startOffset="0%" text-anchor="start" style="transition: startOffset 1s ease-in-out;">
+                    0.0%
+                  </textPath>
+                </text>
+
+                <g id="gaugeNeedle" style="transform-origin: 100px 90px; transition: transform 1s cubic-bezier(0.4, 0, 0.2, 1); transform: rotate(-90deg);">
+                  <line x1="100" y1="90" x2="100" y2="30" stroke="#0f172a" stroke-width="4" stroke-linecap="round"/>
+                  <circle cx="100" cy="90" r="6.5" fill="#0f172a"/>
+                  <circle cx="100" cy="90" r="2.5" fill="#ffffff"/>
+                </g>
+              </svg>
             </div>
-            <div class="text-center pl-2">
-              <div class="text-xl text-slate-500 font-bold uppercase">Target Today</div>
-              <div id="gaugeTargetValue" class="text-2xl font-extrabold font-mono text-red-600 mt-1">Rp 0</div>
+
+            <div class="w-full grid grid-cols-2 gap-2 mt-1 bg-slate-100 p-2 rounded-lg border border-slate-200 shadow-inner">
+              <div class="text-center border-r border-slate-200 pr-1">
+                <div class="text-[11px] text-slate-500 font-bold uppercase">Realisasi</div>
+                <div id="gaugeRealtimeValue" class="text-sm font-extrabold font-mono text-emerald-600 mt-0.5">Rp 0</div>
+              </div>
+              <div class="text-center pl-1">
+                <div class="text-[11px] text-slate-500 font-bold uppercase">Target Today</div>
+                <div id="gaugeTargetValue" class="text-sm font-extrabold font-mono text-red-600 mt-0.5">Rp 0</div>
+              </div>
             </div>
           </div>
-
         </div>
+        <!-- ================= AKHIR GAUGE CHART SECTION ================= -->
+
+
+        <!-- 2. SALES DEPARTEMEN TODAY SECTION (BARU) -->
+        <div class="dept-table-container">
+          <div class="bg-slate-900 text-white font-extrabold text-center text-lg py-2 border-b border-slate-800 shadow-md z-10 shrink-0 tracking-wider">
+            SALES DEPARTEMEN TODAY
+          </div>
+
+          <div id="emptyStatusDept" class="hidden absolute inset-0 pt-12 flex flex-col items-center justify-center z-20 bg-white/90 backdrop-blur-sm rounded-b-xl">
+            <i data-lucide="database-backup" class="w-10 h-10 text-slate-400 mb-2"></i>
+            <div id="statusMessageDept" class="text-slate-600 text-xs font-medium">Belum ada data laporan departemen.</div>
+          </div>
+
+          <div class="flex-1 overflow-hidden relative bg-white scroll-container">
+            <div id="scrollWrapperDept" class="absolute w-full animate-scroll-infinite">
+              <div id="tableContentOriginalDept" class="space-y-2 p-2"></div>
+              <div id="tableContentCloneDept" class="space-y-2 p-2" aria-hidden="true"></div>
+            </div>
+          </div>
+        </div>
+        <!-- ================= AKHIR SALES DEPARTEMEN TODAY ================= -->
+
       </div>
-      <!-- ================= AKHIR GAUGE CHART SECTION ================= -->
+      <!-- ================= AKHIR KOLOM KIRI ================= -->
 
 
-      <!-- ================= 2. LIVE TOP SALES TODAY (TENGAH) ================= -->
+      <!-- ================= 2. LIVE TOP SALES TODAY (TENGAH)[cite: 1] ================= -->
       <div class="custom-table-container flex flex-col relative z-10">
         
         <div class="bg-slate-900 text-white font-extrabold text-center text-2xl py-3.5 rounded-t-xl border-b border-slate-800 shadow-md z-10 shrink-0 tracking-wider">
@@ -271,20 +319,20 @@
       <!-- ================= AKHIR LIVE TOP SALES TODAY ================= -->
 
 
-      <!-- ================= 3. BEST SALES, FURNIPRO & COMSER CAROUSEL (KANAN) ================= -->
+      <!-- ================= 3. BEST SALES, FURNIPRO & COMSER CAROUSEL (KANAN)[cite: 1] ================= -->
       <div id="rightCardContainer" class="mtd-top1-container gold-glow-container flex flex-col relative z-10 overflow-hidden">
         
-        <!-- HEADER DENGAN TRANSISI WARNA & JUDUL -->
+        <!-- HEADER DENGAN TRANSISI WARNA & JUDUL[cite: 1] -->
         <div id="sliderHeader" class="bg-slate-900 text-white font-extrabold text-center text-2xl py-3.5 border-b border-slate-800 shadow-md z-20 shrink-0 tracking-wider flex items-center justify-center gap-2 transition-colors duration-500">
           <i data-lucide="award" id="sliderHeaderIcon" class="w-6 h-6 text-yellow-400"></i>
           <span id="sliderHeaderTitle">BEST SALES</span>
         </div>
 
-        <!-- TRACK SLIDER UNTUK TIGA VIEW (300% WIDTH) -->
+        <!-- TRACK SLIDER UNTUK TIGA VIEW (300% WIDTH)[cite: 1] -->
         <div class="flex-1 relative overflow-hidden">
           <div id="mtdSliderTrack" class="slider-track">
             
-            <!-- VIEW 1: BEST SALES -->
+            <!-- VIEW 1: BEST SALES[cite: 1] -->
             <div class="w-1/3 h-full flex flex-col items-center justify-center p-6 bg-gradient-to-b from-amber-50/50 to-white shrink-0">
               <div id="mtdTop1Content" class="w-full flex flex-col items-center justify-center">
                 <div class="flex flex-col items-center justify-center text-slate-400 py-12">
@@ -294,7 +342,7 @@
               </div>
             </div>
 
-            <!-- VIEW 2: BEST FURNIPRO -->
+            <!-- VIEW 2: BEST FURNIPRO[cite: 1] -->
             <div class="w-1/3 h-full flex flex-col items-center justify-center p-6 bg-gradient-to-b from-blue-50/50 to-white shrink-0">
               <div id="furniproTop1Content" class="w-full flex flex-col items-center justify-center">
                 <div class="flex flex-col items-center justify-center text-slate-400 py-12">
@@ -304,7 +352,7 @@
               </div>
             </div>
 
-            <!-- VIEW 3: BEST COMSER -->
+            <!-- VIEW 3: BEST COMSER[cite: 1] -->
             <div class="w-1/3 h-full flex flex-col items-center justify-center p-6 bg-gradient-to-b from-emerald-50/50 to-white shrink-0">
               <div id="comserTop1Content" class="w-full flex flex-col items-center justify-center">
                 <div class="flex flex-col items-center justify-center text-slate-400 py-12">
@@ -330,9 +378,10 @@
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     let salesList = [];
-    let currentSlide = 0; // 0: BEST SALES, 1: BEST FURNIPRO, 2: BEST COMSER
+    let deptList = [];
+    let currentSlide = 0; // 0: BEST SALES, 1: BEST FURNIPRO, 2: BEST COMSER[cite: 1]
 
-    // Jam Digital Dashboard
+    // Jam Digital Dashboard[cite: 1]
     function updateClock() {
       const now = new Date();
       document.getElementById('currentTime').innerText = now.toLocaleTimeString('id-ID');
@@ -344,7 +393,12 @@
     const scrollWrapper = document.getElementById('scrollWrapper');
     scrollWrapper.style.animationDuration = '100s';
 
-    // 1. Fetch & Render Top Sales Data (Daily Sales)
+    const scrollWrapperDept = document.getElementById('scrollWrapperDept');
+    if (scrollWrapperDept) {
+      scrollWrapperDept.style.animationDuration = '40s';
+    }
+
+    // 1. Fetch & Render Top Sales Data (Daily Sales)[cite: 1]
     async function fetchSalesData() {
       const emptyStatus = document.getElementById('emptyStatus');
       const statusMessage = document.getElementById('statusMessage');
@@ -376,14 +430,7 @@
     function renderDashboard() {
       const origContainer = document.getElementById('tableContentOriginal');
       const cloneContainer = document.getElementById('tableContentClone');
-      const totalDataCount = document.getElementById('totalDataCount');
-      const totalSumSales = document.getElementById('totalSumSales');
       const emptyStatus = document.getElementById('emptyStatus');
-
-      if (totalDataCount) totalDataCount.innerText = salesList.length;
-
-      let sumTotal = salesList.reduce((acc, curr) => acc + (Number(curr.total) || 0), 0);
-      if (totalSumSales) totalSumSales.innerText = 'Rp ' + sumTotal.toLocaleString('id-ID');
 
       if (salesList.length === 0) {
         emptyStatus.classList.remove('hidden');
@@ -466,7 +513,134 @@
     }
 
 
-    // 2A. Fetch & Render Top 1 MTD Sales
+    // 1.5. Fetch & Render Sales Departemen Today (Tabel: laporan_departemen)
+    async function fetchDeptData() {
+      const emptyStatusDept = document.getElementById('emptyStatusDept');
+      const statusMessageDept = document.getElementById('statusMessageDept');
+
+      try {
+        const { data, error } = await supabaseClient
+          .from('laporan_departemen')
+          .select('nama_dept, exclude_ppn, kode_dept')
+          .order('exclude_ppn', { ascending: false });
+
+        if (error) {
+          console.error('Gagal mengambil data laporan departemen:', error);
+          if (emptyStatusDept) {
+            emptyStatusDept.classList.remove('hidden');
+            statusMessageDept.innerText = 'Gagal memuat data: ' + error.message;
+          }
+          return;
+        }
+
+        if (data) {
+          deptList = data;
+          renderDeptDashboard();
+        }
+      } catch (err) {
+        console.error('Terjadi kesalahan:', err);
+        if (emptyStatusDept) {
+          emptyStatusDept.classList.remove('hidden');
+          statusMessageDept.innerText = 'Terjadi kesalahan sistem.';
+        }
+      }
+    }
+
+    function renderDeptDashboard() {
+      const origContainer = document.getElementById('tableContentOriginalDept');
+      const cloneContainer = document.getElementById('tableContentCloneDept');
+      const emptyStatusDept = document.getElementById('emptyStatusDept');
+
+      if (!origContainer || !cloneContainer) return;
+
+      if (deptList.length === 0) {
+        if (emptyStatusDept) emptyStatusDept.classList.remove('hidden');
+        origContainer.innerHTML = '';
+        cloneContainer.innerHTML = '';
+        return;
+      }
+
+      if (emptyStatusDept) emptyStatusDept.classList.add('hidden');
+
+      let htmlRows = '';
+      deptList.forEach((item, index) => {
+        const rank = index + 1;
+        const bucketName = 'PS';
+        const kodeDept = item.kode_dept || '';
+        const namaDept = item.nama_dept || 'DEPT';
+        const excludePpn = Number(item.exclude_ppn || 0);
+
+        const imageUrl = `${SUPABASE_URL}/storage/v1/object/public/${encodeURIComponent(bucketName)}/${encodeURIComponent(kodeDept)}.jpg`;
+        const fallbackAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(namaDept)}&background=3b82f6&color=fff&size=128`;
+
+        let rowClass = "bg-slate-50 border border-slate-200 hover:bg-slate-100 rounded-lg";
+        let crownMarkup = "";
+        let borderPhotoStyle = "border-blue-500";
+        let textEffectClass = "";
+        let numberStyle = "text-slate-700";
+
+        if (rank === 1) {
+          rowClass = "fire-box-1";
+          borderPhotoStyle = "border-yellow-500 shadow-yellow-300";
+          textEffectClass = "text-outline-white font-bold";
+          numberStyle = "text-outline-white font-extrabold text-sm";
+          crownMarkup = `
+            <div class="absolute -top-2.5 left-1/2 -translate-x-1/2 z-20 text-yellow-500 drop-shadow-[0_2px_3px_rgba(234,179,8,0.8)]">
+              <i data-lucide="crown" class="w-4 h-4 fill-yellow-400"></i>
+            </div>`;
+        } else if (rank === 2) {
+          rowClass = "fire-box-2";
+          borderPhotoStyle = "border-slate-400 shadow-slate-300";
+          textEffectClass = "text-outline-white font-bold";
+          numberStyle = "text-outline-white font-extrabold text-sm";
+          crownMarkup = `
+            <div class="absolute -top-2.5 left-1/2 -translate-x-1/2 z-20 text-slate-400 drop-shadow-[0_2px_3px_rgba(148,163,184,0.8)]">
+              <i data-lucide="crown" class="w-4 h-4 fill-slate-300"></i>
+            </div>`;
+        } else if (rank === 3) {
+          rowClass = "fire-box-3";
+          borderPhotoStyle = "border-amber-600 shadow-amber-300";
+          textEffectClass = "text-outline-white font-bold";
+          numberStyle = "text-outline-white font-extrabold text-sm";
+          crownMarkup = `
+            <div class="absolute -top-2.5 left-1/2 -translate-x-1/2 z-20 text-amber-600 drop-shadow-[0_2px_3px_rgba(217,119,6,0.8)]">
+              <i data-lucide="crown" class="w-4 h-4 fill-amber-500"></i>
+            </div>`;
+        }
+
+        htmlRows += `
+          <div class="grid grid-cols-12 items-center px-3 py-2 transition shadow-sm ${rowClass}">
+            <div class="col-span-4 flex items-center justify-center gap-2">
+              <span class="font-bold text-sm w-5 text-right ${numberStyle}">${rank}.</span>
+              <div class="relative w-10 h-10 rounded-md border-2 ${borderPhotoStyle} bg-slate-200 shrink-0 shadow-sm">
+                ${crownMarkup}
+                <div class="w-full h-full rounded-[4px] overflow-hidden relative z-10">
+                  <img src="${imageUrl}" alt="${namaDept}" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='${fallbackAvatar}';">
+                </div>
+              </div>
+            </div>
+            <div class="col-span-4 pl-1">
+              <div class="text-slate-900 text-xs font-semibold tracking-wide truncate ${textEffectClass}">${namaDept}</div>
+              <div class="text-[10px] font-mono text-blue-600 font-bold mt-0.5 ${textEffectClass}">CODE: ${kodeDept}</div>
+            </div>
+            <div class="col-span-4 text-right font-mono font-bold text-emerald-600 text-xs ${textEffectClass}">
+              Rp ${excludePpn.toLocaleString('id-ID')}
+            </div>
+          </div>
+        `;
+      });
+
+      origContainer.innerHTML = htmlRows;
+      cloneContainer.innerHTML = htmlRows;
+
+      lucide.createIcons();
+      if (scrollWrapperDept) {
+        scrollWrapperDept.style.animationDuration = '40s';
+      }
+    }
+
+
+    // 2A. Fetch & Render Top 1 MTD Sales[cite: 1]
     async function fetchTop1MtdSales() {
       try {
         const { data, error } = await supabaseClient
@@ -529,7 +703,7 @@
     }
 
 
-    // 2B. Fetch & Render Best Furnipro
+    // 2B. Fetch & Render Best Furnipro[cite: 1]
     async function fetchTop1MtdFurnipro() {
       try {
         const { data, error } = await supabaseClient
@@ -589,7 +763,7 @@
     }
 
 
-    // 2C. Fetch & Render Best Comser (Tabel: mtd_comser | Sort: total_mtdcnc DESC)
+    // 2C. Fetch & Render Best Comser[cite: 1]
     async function fetchTop1MtdComser() {
       try {
         const { data, error } = await supabaseClient
@@ -620,7 +794,6 @@
         const nip = topComser.nip_mtdcnc || '-';
         const nama = topComser.nama_mtdcnc || 'NONAME';
         const total = Number(topComser.total_mtdcnc || 0);
-        const qty = Number(topComser.qty_mtdcnc || 0);
 
         const bucketName = 'FOTO SALES';
         const imageUrl = `${SUPABASE_URL}/storage/v1/object/public/${encodeURIComponent(bucketName)}/${nip}.jpg`;
@@ -650,7 +823,7 @@
     }
 
 
-    // 3. Carousel Switcher (5 Detik per Card View secara Bergantian: Sales -> Furnipro -> Comser)
+    // 3. Carousel Switcher (5 Detik per Card View)[cite: 1]
     function startCarouselTimer() {
       setInterval(() => {
         const track = document.getElementById('mtdSliderTrack');
@@ -662,32 +835,29 @@
         currentSlide = (currentSlide + 1) % 3;
 
         if (currentSlide === 0) {
-          // BEST SALES
           track.style.transform = 'translateX(0%)';
           headerTitle.innerText = 'BEST SALES';
           headerIcon.className = 'w-6 h-6 text-yellow-400';
           rightContainer.className = 'mtd-top1-container gold-glow-container flex flex-col relative z-10 overflow-hidden';
           sliderHeader.style.backgroundColor = '#0f172a';
         } else if (currentSlide === 1) {
-          // BEST FURNIPRO
           track.style.transform = 'translateX(-33.333%)';
           headerTitle.innerText = 'BEST FURNIPRO';
           headerIcon.className = 'w-6 h-6 text-blue-400';
           rightContainer.className = 'mtd-top1-container cyan-glow-container flex flex-col relative z-10 overflow-hidden';
           sliderHeader.style.backgroundColor = '#1e3a8a';
         } else if (currentSlide === 2) {
-          // BEST COMSER
           track.style.transform = 'translateX(-66.666%)';
           headerTitle.innerText = 'BEST COMSER';
           headerIcon.className = 'w-6 h-6 text-emerald-400';
           rightContainer.className = 'mtd-top1-container emerald-glow-container flex flex-col relative z-10 overflow-hidden';
           sliderHeader.style.backgroundColor = '#065f46';
         }
-      }, 5000); // 5 Detik per card view
+      }, 5000);
     }
 
 
-    // 4. Fetch & Compute Realtime Gauge Chart Data
+    // 4. Fetch & Compute Realtime Gauge Chart Data[cite: 1]
     async function updateGaugeData() {
       try {
         const { data: targetData, error: targetError } = await supabaseClient
@@ -774,9 +944,8 @@
     }
 
 
-    // 5. Saluran Supabase Realtime Sync Terintegrasi Lengkap
+    // 5. Saluran Supabase Realtime Sync Terintegrasi[cite: 1]
     function setupRealtime() {
-      // Channel 1: Laporan Sales
       supabaseClient
         .channel('realtime_laporan_sales')
         .on('postgres_changes', { event: '*', schema: 'public', table: 'laporan_sales' }, () => {
@@ -784,7 +953,14 @@
         })
         .subscribe();
 
-      // Channel 2: MTD Sales
+      supabaseClient
+        .channel('realtime_laporan_departemen')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'laporan_departemen' }, () => {
+          fetchDeptData();
+          updateGaugeData();
+        })
+        .subscribe();
+
       supabaseClient
         .channel('realtime_mtd_sales')
         .on('postgres_changes', { event: '*', schema: 'public', table: 'mtd_sales' }, () => {
@@ -792,7 +968,6 @@
         })
         .subscribe();
 
-      // Channel 3: MTD Furnipro (mtd_fp)
       supabaseClient
         .channel('realtime_mtd_fp')
         .on('postgres_changes', { event: '*', schema: 'public', table: 'mtd_fp' }, () => {
@@ -800,7 +975,6 @@
         })
         .subscribe();
 
-      // Channel 4: MTD Comser (mtd_comser)
       supabaseClient
         .channel('realtime_mtd_comser')
         .on('postgres_changes', { event: '*', schema: 'public', table: 'mtd_comser' }, () => {
@@ -808,22 +982,19 @@
         })
         .subscribe();
 
-      // Channel 5: Gauge & Target
       supabaseClient
-        .channel('realtime_gauge')
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'laporan_departemen' }, () => {
-          updateGaugeData();
-        })
+        .channel('realtime_target')
         .on('postgres_changes', { event: '*', schema: 'public', table: 'target_today' }, () => {
           updateGaugeData();
         })
         .subscribe();
     }
 
-    // Polling Cadangan (Backup Sync setiap 10 detik)
+    // Polling Cadangan (Backup Sync setiap 10 detik)[cite: 1]
     function startBackupPolling() {
       setInterval(() => {
         fetchSalesData();
+        fetchDeptData();
         fetchTop1MtdSales();
         fetchTop1MtdFurnipro();
         fetchTop1MtdComser();
@@ -834,6 +1005,7 @@
     document.addEventListener("DOMContentLoaded", () => {
       lucide.createIcons();
       fetchSalesData();
+      fetchDeptData();
       fetchTop1MtdSales();
       fetchTop1MtdFurnipro();
       fetchTop1MtdComser();
