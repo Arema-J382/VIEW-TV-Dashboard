@@ -25,7 +25,7 @@
       display: flex;
       flex-direction: row;
       justify-content: center;
-      align-items: center;
+      align-items: flex-start; /* Mengatur posisi card sejajar ke bagian atas */
       gap: 2.5rem;
       width: 100%;
       height: 100%;
@@ -218,7 +218,8 @@
   </header>
 
   <!-- ================= MAIN VIEW (KONTEN UTAMA) ================= -->
-  <main class="flex-1 relative overflow-hidden bg-blue-50 p-6 flex items-center justify-center">
+  <!-- CATATAN: Ubah pt-3 di bawah ini jika ingin menaikkan/menurunkan posisi card view secara manual -->
+  <main class="flex-1 relative overflow-hidden bg-blue-50 px-6 pt-3 pb-6 flex items-start justify-center">
     
     <!-- CONTAINER UTAMA 3 KOLOM -->
     <div class="dashboard-grid">
@@ -271,7 +272,7 @@
         <!-- ================= AKHIR GAUGE CHART SECTION ================= -->
 
 
-        <!-- 2. SALES DEPARTEMEN TODAY SECTION (BARU) -->
+        <!-- 2. SALES DEPARTEMEN TODAY SECTION -->
         <div class="dept-table-container">
           <div class="bg-slate-900 text-white font-extrabold text-center text-lg py-2 border-b border-slate-800 shadow-md z-10 shrink-0 tracking-wider">
             SALES DEPARTEMEN TODAY
