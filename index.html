@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=1920, height=1080, initial-scale=1.0">
-  <title>TV Dashboard - Laporan Sales, Gauge, Departemen & Top 1 MTD Sales</title>
+  <title>TV Dashboard - Laporan Sales, Gauge, Departemen & MTD Tables</title>
   
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -20,25 +20,38 @@
       overflow: hidden;
     }
 
-    /* CONTAINER UTAMA 3 KOLOM SIDE-BY-SIDE */
-    .dashboard-grid {
+    /* CONTAINER UTAMA DASHBOARD */
+    .dashboard-layout {
       display: flex;
-      flex-direction: row;
-      justify-content: center;
-      align-items: flex-start; /* Mengatur posisi card sejajar ke bagian atas */
-      gap: 2.5rem;
+      flex-direction: column;
+      justify-content: flex-start;
+      align-items: center;
+      gap: 1.25rem;
       width: 100%;
       height: 100%;
     }
 
-    /* WRAPPER KOLOM KIRI */
-    .left-column-wrapper {
+    /* BARIS ATAS (GAUGE, LIVE TOP SALES, CAROUSEL) */
+    .top-row {
       display: flex;
-      flex-direction: column;
-      gap: 1.5rem;
+      flex-direction: row;
+      justify-content: center;
+      align-items: flex-start;
+      gap: 2rem;
+      width: 100%;
     }
 
-    /* AREA GAUGE CHART (DI ATAS KIRI) */
+    /* BARIS BAWAH (4 TABEL CARD VIEW BERJEJER RAPI) */
+    .bottom-row {
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+      align-items: flex-start;
+      gap: 1.5rem;
+      width: 100%;
+    }
+
+    /* AREA GAUGE CHART (TARGET TODAY) */
     .gauge-section-container {
       width: 500px;
       height: 400px;
@@ -52,21 +65,7 @@
       position: relative;
     }
 
-    /* AREA SALES DEPARTEMEN TODAY (DI BAWAH GAUGE) */
-    .dept-table-container {
-      width: 500px;
-      height: 350px;
-      background: #ffffff;
-      border-radius: 0.85rem;
-      box-shadow: 0 8px 20px -4px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-      border: 1px solid #bfdbfe;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-      position: relative;
-    }
-
-    /* AREA TABEL LIVE TOP SALES TODAY (DI TENGAH) */
+    /* AREA TABEL LIVE TOP SALES TODAY */
     .custom-table-container {
       width: 600px;               
       height: 400px;            
@@ -77,7 +76,7 @@
       z-index: 10;
     }
 
-    /* AREA KANAN (BEST SALES, BEST FURNIPRO & BEST COMSER CAROUSEL) */
+    /* AREA KANAN (BEST SALES, FURNIPRO & COMSER CAROUSEL) */
     .mtd-top1-container {
       width: 500px;
       height: 400px;
@@ -90,6 +89,20 @@
       position: relative;
       z-index: 10;
       transition: all 0.5s ease-in-out;
+    }
+
+    /* STYLING UNTUK 4 CARD VIEW DI BARIS BAWAH (DISESUAIKAN AGAR RAPI DI TV) */
+    .bottom-card-container {
+      width: 440px;
+      height: 355px;
+      background: #ffffff;
+      border-radius: 0.85rem;
+      box-shadow: 0 8px 20px -4px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+      border: 1px solid #bfdbfe;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      position: relative;
     }
 
     /* Animasi Glow untuk Masing-masing View Card Kanan */
@@ -190,7 +203,7 @@
 <body class="bg-blue-50 text-slate-800 flex flex-col font-sans select-none">
 
   <!-- ================= HEADER DASHBOARD ================= -->
-  <header class="bg-slate-900 border-b border-slate-800 px-12 py-5 flex justify-between items-center shadow-md z-20 shrink-0 text-white">
+  <header class="bg-slate-900 border-b border-slate-800 px-12 py-4 flex justify-between items-center shadow-md z-20 shrink-0 text-white">
     <div class="flex items-center gap-4">
       <div class="bg-blue-600 p-3 rounded-2xl text-white shadow-lg shadow-blue-600/30">
         <i data-lucide="tv" class="w-7 h-7"></i>
@@ -214,22 +227,21 @@
   </header>
 
   <!-- ================= MAIN VIEW (KONTEN UTAMA) ================= -->
-  <main class="flex-1 relative overflow-hidden bg-blue-50 px-6 pt-3 pb-6 flex items-start justify-center">
+  <main class="flex-1 relative overflow-hidden bg-blue-50 px-6 pt-3 pb-4 flex items-start justify-center">
     
-    <!-- CONTAINER UTAMA 3 KOLOM -->
-    <div class="dashboard-grid">
+    <!-- CONTAINER UTAMA 2 BARIS -->
+    <div class="dashboard-layout">
 
-      <!-- ================= KOLOM KIRI (GAUGE & SALES DEPARTEMEN) ================= -->
-      <div class="left-column-wrapper">
+      <!-- ================= BARIS ATAS ================= -->
+      <div class="top-row">
         
-        <!-- 1. GAUGE CHART SECTION (TARGET TODAY) - DIPERBESAR & ATAS BAWAH -->
+        <!-- 1. GAUGE CHART SECTION (TARGET TODAY) -->
         <div id="gaugeContainer" class="gauge-section-container">
           <div class="bg-slate-900 text-white font-extrabold text-center text-lg py-2 border-b border-slate-800 shadow-md tracking-wider">
             TARGET TODAY
           </div>
 
           <div class="flex-1 flex flex-col items-center justify-center px-3 py-2 relative bg-gradient-to-b from-slate-50 to-white">
-            <!-- Ukuran SVG/Container Gauge diperbesar -->
             <div class="relative w-80 h-36 flex items-center justify-center">
               <svg class="w-full h-full overflow-visible" viewBox="0 0 200 100">
                 <defs>
@@ -253,7 +265,6 @@
               </svg>
             </div>
 
-            <!-- Keterangan Realisasi & Target Today dibuat Atas-Bawah (Vertikal) -->
             <div class="w-full flex flex-col gap-1.5 mt-1">
               <div class="text-center bg-slate-100 py-1.5 px-3 rounded-lg border border-slate-200 shadow-inner flex justify-between items-center">
                 <span class="text-xl text-slate-500 font-bold uppercase tracking-wider">Realisasi</span>
@@ -269,102 +280,159 @@
         <!-- ================= AKHIR GAUGE CHART SECTION ================= -->
 
 
-        <!-- 2. SALES DEPARTEMEN TODAY SECTION -->
-        <div class="dept-table-container">
-          <div class="bg-slate-900 text-white font-extrabold text-center text-lg py-2 border-b border-slate-800 shadow-md z-10 shrink-0 tracking-wider">
+        <!-- 2. LIVE TOP SALES TODAY (TENGAH) -->
+        <div class="custom-table-container flex flex-col relative z-10">
+          <div class="bg-slate-900 text-white font-extrabold text-center text-2xl py-3.5 rounded-t-xl border-b border-slate-800 shadow-md z-10 shrink-0 tracking-wider">
+            LIVE TOP SALES TODAY
+          </div>
+
+          <div id="emptyStatus" class="hidden absolute inset-0 pt-16 flex flex-col items-center justify-center z-20 bg-white/90 backdrop-blur-sm rounded-b-xl">
+            <i data-lucide="database-backup" class="w-16 h-16 text-slate-400 mb-3"></i>
+            <div id="statusMessage" class="text-slate-600 text-base font-medium">Belum ada data laporan sales di database.</div>
+            <p class="text-slate-400 text-xs mt-1">Silakan input data melalui Admin Panel.</p>
+          </div>
+
+          <div class="flex-1 overflow-hidden relative border-x border-b border-blue-200 rounded-b-xl bg-white scroll-container shadow-lg">
+            <div id="scrollWrapper" class="absolute w-full animate-scroll-infinite">
+              <div id="tableContentOriginal" class="space-y-3 p-3"></div>
+              <div id="tableContentClone" class="space-y-3 p-3" aria-hidden="true"></div>
+            </div>
+          </div>
+        </div>
+        <!-- ================= AKHIR LIVE TOP SALES TODAY ================= -->
+
+
+        <!-- 3. BEST SALES, FURNIPRO & COMSER CAROUSEL (KANAN) -->
+        <div id="rightCardContainer" class="mtd-top1-container gold-glow-container flex flex-col relative z-10 overflow-hidden">
+          <div id="sliderHeader" class="bg-slate-900 text-white font-extrabold text-center text-2xl py-3.5 border-b border-slate-800 shadow-md z-20 shrink-0 tracking-wider flex items-center justify-center gap-2 transition-colors duration-500">
+            <i data-lucide="award" id="sliderHeaderIcon" class="w-6 h-6 text-yellow-400"></i>
+            <span id="sliderHeaderTitle">BEST SALES</span>
+          </div>
+
+          <div class="flex-1 relative overflow-hidden">
+            <div id="mtdSliderTrack" class="slider-track">
+              <!-- VIEW 1: BEST SALES -->
+              <div class="w-1/3 h-full flex flex-col items-center justify-center p-4 bg-gradient-to-b from-amber-50/50 to-white shrink-0">
+                <div id="mtdTop1Content" class="w-full flex flex-col items-center justify-center">
+                  <div class="flex flex-col items-center justify-center text-slate-400 py-12">
+                    <i data-lucide="loader-2" class="w-10 h-10 animate-spin mb-2"></i>
+                    <p class="text-sm font-medium">Memuat Best Sales...</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- VIEW 2: BEST FURNIPRO -->
+              <div class="w-1/3 h-full flex flex-col items-center justify-center p-4 bg-gradient-to-b from-blue-50/50 to-white shrink-0">
+                <div id="furniproTop1Content" class="w-full flex flex-col items-center justify-center">
+                  <div class="flex flex-col items-center justify-center text-slate-400 py-12">
+                    <i data-lucide="loader-2" class="w-10 h-10 animate-spin mb-2"></i>
+                    <p class="text-sm font-medium">Memuat Best Furnipro...</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- VIEW 3: BEST COMSER -->
+              <div class="w-1/3 h-full flex flex-col items-center justify-center p-4 bg-gradient-to-b from-emerald-50/50 to-white shrink-0">
+                <div id="comserTop1Content" class="w-full flex flex-col items-center justify-center">
+                  <div class="flex flex-col items-center justify-center text-slate-400 py-12">
+                    <i data-lucide="loader-2" class="w-10 h-10 animate-spin mb-2"></i>
+                    <p class="text-sm font-medium">Memuat Best Comser...</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- ================= AKHIR CAROUSEL KANAN ================= -->
+
+      </div>
+      <!-- ================= AKHIR BARIS ATAS ================= -->
+
+
+      <!-- ================= BARIS BAWAH: 4 TABEL CARD VIEW BERJEJER RAPI ================= -->
+      <div class="bottom-row">
+
+        <!-- 1. SALES DEPARTEMEN TODAY -->
+        <div class="bottom-card-container">
+          <div class="bg-slate-900 text-white font-extrabold text-center text-base py-2 border-b border-slate-800 shadow-md z-10 shrink-0 tracking-wider">
             SALES DEPARTEMEN TODAY
           </div>
 
           <div id="emptyStatusDept" class="hidden absolute inset-0 pt-12 flex flex-col items-center justify-center z-20 bg-white/90 backdrop-blur-sm rounded-b-xl">
-            <i data-lucide="database-backup" class="w-10 h-10 text-slate-400 mb-2"></i>
+            <i data-lucide="database-backup" class="w-8 h-8 text-slate-400 mb-1"></i>
             <div id="statusMessageDept" class="text-slate-600 text-xs font-medium">Belum ada data laporan departemen.</div>
           </div>
 
           <div class="flex-1 overflow-hidden relative bg-white scroll-container">
             <div id="scrollWrapperDept" class="absolute w-full animate-scroll-infinite">
-              <div id="tableContentOriginalDept" class="space-y-2 p-2"></div>
-              <div id="tableContentCloneDept" class="space-y-2 p-2" aria-hidden="true"></div>
+              <div id="tableContentOriginalDept" class="space-y-1.5 p-2"></div>
+              <div id="tableContentCloneDept" class="space-y-1.5 p-2" aria-hidden="true"></div>
             </div>
           </div>
         </div>
-        <!-- ================= AKHIR SALES DEPARTEMEN TODAY ================= -->
-
-      </div>
-      <!-- ================= AKHIR KOLOM KIRI ================= -->
 
 
-      <!-- ================= 2. LIVE TOP SALES TODAY (TENGAH) ================= -->
-      <div class="custom-table-container flex flex-col relative z-10">
-        
-        <div class="bg-slate-900 text-white font-extrabold text-center text-2xl py-3.5 rounded-t-xl border-b border-slate-800 shadow-md z-10 shrink-0 tracking-wider">
-          LIVE TOP SALES TODAY
-        </div>
+        <!-- 2. MTD BY SALES (BARU) -->
+        <div class="bottom-card-container">
+          <div class="bg-slate-900 text-white font-extrabold text-center text-base py-2 border-b border-slate-800 shadow-md z-10 shrink-0 tracking-wider">
+            MTD BY SALES
+          </div>
 
-        <div id="emptyStatus" class="hidden absolute inset-0 pt-16 flex flex-col items-center justify-center z-20 bg-white/90 backdrop-blur-sm rounded-b-xl">
-          <i data-lucide="database-backup" class="w-16 h-16 text-slate-400 mb-3"></i>
-          <div id="statusMessage" class="text-slate-600 text-base font-medium">Belum ada data laporan sales di database.</div>
-          <p class="text-slate-400 text-xs mt-1">Silakan input data melalui Admin Panel.</p>
-        </div>
+          <div id="emptyStatusMtdSales" class="hidden absolute inset-0 pt-12 flex flex-col items-center justify-center z-20 bg-white/90 backdrop-blur-sm rounded-b-xl">
+            <i data-lucide="database-backup" class="w-8 h-8 text-slate-400 mb-1"></i>
+            <div id="statusMessageMtdSales" class="text-slate-600 text-xs font-medium">Belum ada data MTD Sales.</div>
+          </div>
 
-        <div class="flex-1 overflow-hidden relative border-x border-b border-blue-200 rounded-b-xl bg-white scroll-container shadow-lg">
-          <div id="scrollWrapper" class="absolute w-full animate-scroll-infinite">
-            <div id="tableContentOriginal" class="space-y-3 p-3"></div>
-            <div id="tableContentClone" class="space-y-3 p-3" aria-hidden="true"></div>
+          <div class="flex-1 overflow-hidden relative bg-white scroll-container">
+            <div id="scrollWrapperMtdSales" class="absolute w-full animate-scroll-infinite">
+              <div id="tableContentOriginalMtdSales" class="space-y-1.5 p-2"></div>
+              <div id="tableContentCloneMtdSales" class="space-y-1.5 p-2" aria-hidden="true"></div>
+            </div>
           </div>
         </div>
 
-      </div>
-      <!-- ================= AKHIR LIVE TOP SALES TODAY ================= -->
 
+        <!-- 3. MTD BY FURNIPRO (BARU) -->
+        <div class="bottom-card-container">
+          <div class="bg-slate-900 text-white font-extrabold text-center text-base py-2 border-b border-slate-800 shadow-md z-10 shrink-0 tracking-wider">
+            MTD BY FURNIPRO
+          </div>
 
-      <!-- ================= 3. BEST SALES, FURNIPRO & COMSER CAROUSEL (KANAN) ================= -->
-      <div id="rightCardContainer" class="mtd-top1-container gold-glow-container flex flex-col relative z-10 overflow-hidden">
-        
-        <!-- HEADER DENGAN TRANSISI WARNA & JUDUL -->
-        <div id="sliderHeader" class="bg-slate-900 text-white font-extrabold text-center text-2xl py-3.5 border-b border-slate-800 shadow-md z-20 shrink-0 tracking-wider flex items-center justify-center gap-2 transition-colors duration-500">
-          <i data-lucide="award" id="sliderHeaderIcon" class="w-6 h-6 text-yellow-400"></i>
-          <span id="sliderHeaderTitle">BEST SALES</span>
+          <div id="emptyStatusMtdFurnipro" class="hidden absolute inset-0 pt-12 flex flex-col items-center justify-center z-20 bg-white/90 backdrop-blur-sm rounded-b-xl">
+            <i data-lucide="database-backup" class="w-8 h-8 text-slate-400 mb-1"></i>
+            <div id="statusMessageMtdFurnipro" class="text-slate-600 text-xs font-medium">Belum ada data MTD Furnipro.</div>
+          </div>
+
+          <div class="flex-1 overflow-hidden relative bg-white scroll-container">
+            <div id="scrollWrapperMtdFurnipro" class="absolute w-full animate-scroll-infinite">
+              <div id="tableContentOriginalMtdFurnipro" class="space-y-1.5 p-2"></div>
+              <div id="tableContentCloneMtdFurnipro" class="space-y-1.5 p-2" aria-hidden="true"></div>
+            </div>
+          </div>
         </div>
 
-        <!-- TRACK SLIDER UNTUK TIGA VIEW (300% WIDTH) -->
-        <div class="flex-1 relative overflow-hidden">
-          <div id="mtdSliderTrack" class="slider-track">
-            
-            <!-- VIEW 1: BEST SALES -->
-            <div class="w-1/3 h-full flex flex-col items-center justify-center p-4 bg-gradient-to-b from-amber-50/50 to-white shrink-0">
-              <div id="mtdTop1Content" class="w-full flex flex-col items-center justify-center">
-                <div class="flex flex-col items-center justify-center text-slate-400 py-12">
-                  <i data-lucide="loader-2" class="w-10 h-10 animate-spin mb-2"></i>
-                  <p class="text-sm font-medium">Memuat Best Sales...</p>
-                </div>
-              </div>
-            </div>
 
-            <!-- VIEW 2: BEST FURNIPRO -->
-            <div class="w-1/3 h-full flex flex-col items-center justify-center p-4 bg-gradient-to-b from-blue-50/50 to-white shrink-0">
-              <div id="furniproTop1Content" class="w-full flex flex-col items-center justify-center">
-                <div class="flex flex-col items-center justify-center text-slate-400 py-12">
-                  <i data-lucide="loader-2" class="w-10 h-10 animate-spin mb-2"></i>
-                  <p class="text-sm font-medium">Memuat Best Furnipro...</p>
-                </div>
-              </div>
-            </div>
+        <!-- 4. MTD BY COMSER (BARU) -->
+        <div class="bottom-card-container">
+          <div class="bg-slate-900 text-white font-extrabold text-center text-base py-2 border-b border-slate-800 shadow-md z-10 shrink-0 tracking-wider">
+            MTD BY COMSER
+          </div>
 
-            <!-- VIEW 3: BEST COMSER -->
-            <div class="w-1/3 h-full flex flex-col items-center justify-center p-4 bg-gradient-to-b from-emerald-50/50 to-white shrink-0">
-              <div id="comserTop1Content" class="w-full flex flex-col items-center justify-center">
-                <div class="flex flex-col items-center justify-center text-slate-400 py-12">
-                  <i data-lucide="loader-2" class="w-10 h-10 animate-spin mb-2"></i>
-                  <p class="text-sm font-medium">Memuat Best Comser...</p>
-                </div>
-              </div>
-            </div>
+          <div id="emptyStatusMtdComser" class="hidden absolute inset-0 pt-12 flex flex-col items-center justify-center z-20 bg-white/90 backdrop-blur-sm rounded-b-xl">
+            <i data-lucide="database-backup" class="w-8 h-8 text-slate-400 mb-1"></i>
+            <div id="statusMessageMtdComser" class="text-slate-600 text-xs font-medium">Belum ada data MTD Comser.</div>
+          </div>
 
+          <div class="flex-1 overflow-hidden relative bg-white scroll-container">
+            <div id="scrollWrapperMtdComser" class="absolute w-full animate-scroll-infinite">
+              <div id="tableContentOriginalMtdComser" class="space-y-1.5 p-2"></div>
+              <div id="tableContentCloneMtdComser" class="space-y-1.5 p-2" aria-hidden="true"></div>
+            </div>
           </div>
         </div>
 
       </div>
-      <!-- ================= AKHIR CAROUSEL KANAN ================= -->
+      <!-- ================= AKHIR BARIS BAWAH ================= -->
 
     </div>
   </main>
@@ -377,6 +445,9 @@
 
     let salesList = [];
     let deptList = [];
+    let mtdSalesList = [];
+    let mtdFurniproList = [];
+    let mtdComserList = [];
     let currentSlide = 0; 
 
     // Jam Digital Dashboard
@@ -389,12 +460,19 @@
     updateClock();
 
     const scrollWrapper = document.getElementById('scrollWrapper');
-    scrollWrapper.style.animationDuration = '100s';
+    if (scrollWrapper) scrollWrapper.style.animationDuration = '100s';
 
     const scrollWrapperDept = document.getElementById('scrollWrapperDept');
-    if (scrollWrapperDept) {
-      scrollWrapperDept.style.animationDuration = '40s';
-    }
+    if (scrollWrapperDept) scrollWrapperDept.style.animationDuration = '40s';
+
+    const scrollWrapperMtdSales = document.getElementById('scrollWrapperMtdSales');
+    if (scrollWrapperMtdSales) scrollWrapperMtdSales.style.animationDuration = '40s';
+
+    const scrollWrapperMtdFurnipro = document.getElementById('scrollWrapperMtdFurnipro');
+    if (scrollWrapperMtdFurnipro) scrollWrapperMtdFurnipro.style.animationDuration = '40s';
+
+    const scrollWrapperMtdComser = document.getElementById('scrollWrapperMtdComser');
+    if (scrollWrapperMtdComser) scrollWrapperMtdComser.style.animationDuration = '40s';
 
     // 1. Fetch & Render Top Sales Data (Daily Sales)
     async function fetchSalesData() {
@@ -505,13 +583,11 @@
 
       origContainer.innerHTML = htmlRows;
       cloneContainer.innerHTML = htmlRows;
-
       lucide.createIcons();
-      scrollWrapper.style.animationDuration = '100s';
     }
 
 
-    // 1.5. Fetch & Render Sales Departemen Today
+    // 1.2. Fetch & Render Sales Departemen Today
     async function fetchDeptData() {
       const emptyStatusDept = document.getElementById('emptyStatusDept');
       const statusMessageDept = document.getElementById('statusMessageDept');
@@ -523,7 +599,6 @@
           .order('exclude_ppn', { ascending: false });
 
         if (error) {
-          console.error('Gagal mengambil data laporan departemen:', error);
           if (emptyStatusDept) {
             emptyStatusDept.classList.remove('hidden');
             statusMessageDept.innerText = 'Gagal memuat data: ' + error.message;
@@ -536,7 +611,6 @@
           renderDeptDashboard();
         }
       } catch (err) {
-        console.error('Terjadi kesalahan:', err);
         if (emptyStatusDept) {
           emptyStatusDept.classList.remove('hidden');
           statusMessageDept.innerText = 'Terjadi kesalahan sistem.';
@@ -582,28 +656,19 @@
           borderPhotoStyle = "border-yellow-500 shadow-yellow-300";
           textEffectClass = "text-outline-white font-bold";
           numberStyle = "text-outline-white font-extrabold text-sm";
-          crownMarkup = `
-            <div class="absolute -top-2.5 left-1/2 -translate-x-1/2 z-20 text-yellow-500 drop-shadow-[0_2px_3px_rgba(234,179,8,0.8)]">
-              <i data-lucide="crown" class="w-4 h-4 fill-yellow-400"></i>
-            </div>`;
+          crownMarkup = `<div class="absolute -top-2.5 left-1/2 -translate-x-1/2 z-20 text-yellow-500 drop-shadow-[0_2px_3px_rgba(234,179,8,0.8)]"><i data-lucide="crown" class="w-4 h-4 fill-yellow-400"></i></div>`;
         } else if (rank === 2) {
           rowClass = "fire-box-2";
           borderPhotoStyle = "border-slate-400 shadow-slate-300";
           textEffectClass = "text-outline-white font-bold";
           numberStyle = "text-outline-white font-extrabold text-sm";
-          crownMarkup = `
-            <div class="absolute -top-2.5 left-1/2 -translate-x-1/2 z-20 text-slate-400 drop-shadow-[0_2px_3px_rgba(148,163,184,0.8)]">
-              <i data-lucide="crown" class="w-4 h-4 fill-slate-300"></i>
-            </div>`;
+          crownMarkup = `<div class="absolute -top-2.5 left-1/2 -translate-x-1/2 z-20 text-slate-400 drop-shadow-[0_2px_3px_rgba(148,163,184,0.8)]"><i data-lucide="crown" class="w-4 h-4 fill-slate-300"></i></div>`;
         } else if (rank === 3) {
           rowClass = "fire-box-3";
           borderPhotoStyle = "border-amber-600 shadow-amber-300";
           textEffectClass = "text-outline-white font-bold";
           numberStyle = "text-outline-white font-extrabold text-sm";
-          crownMarkup = `
-            <div class="absolute -top-2.5 left-1/2 -translate-x-1/2 z-20 text-amber-600 drop-shadow-[0_2px_3px_rgba(217,119,6,0.8)]">
-              <i data-lucide="crown" class="w-4 h-4 fill-amber-500"></i>
-            </div>`;
+          crownMarkup = `<div class="absolute -top-2.5 left-1/2 -translate-x-1/2 z-20 text-amber-600 drop-shadow-[0_2px_3px_rgba(217,119,6,0.8)]"><i data-lucide="crown" class="w-4 h-4 fill-amber-500"></i></div>`;
         }
 
         htmlRows += `
@@ -630,15 +695,347 @@
 
       origContainer.innerHTML = htmlRows;
       cloneContainer.innerHTML = htmlRows;
-
       lucide.createIcons();
-      if (scrollWrapperDept) {
-        scrollWrapperDept.style.animationDuration = '40s';
-      }
     }
 
 
-    // 2A. Fetch & Render Top 1 MTD Sales
+    // 1.3. Fetch & Render MTD By Sales
+    async function fetchMtdSalesData() {
+      const emptyStatus = document.getElementById('emptyStatusMtdSales');
+      const statusMessage = document.getElementById('statusMessageMtdSales');
+
+      try {
+        const { data, error } = await supabaseClient
+          .from('mtd_sales')
+          .select('*')
+          .order('mtd_total', { ascending: false });
+
+        if (error) {
+          if (emptyStatus) {
+            emptyStatus.classList.remove('hidden');
+            statusMessage.innerText = 'Gagal memuat data: ' + error.message;
+          }
+          return;
+        }
+
+        if (data) {
+          mtdSalesList = data;
+          renderMtdSalesDashboard();
+        }
+      } catch (err) {
+        if (emptyStatus) {
+          emptyStatus.classList.remove('hidden');
+          statusMessage.innerText = 'Terjadi kesalahan sistem.';
+        }
+      }
+    }
+
+    function renderMtdSalesDashboard() {
+      const origContainer = document.getElementById('tableContentOriginalMtdSales');
+      const cloneContainer = document.getElementById('tableContentCloneMtdSales');
+      const emptyStatus = document.getElementById('emptyStatusMtdSales');
+
+      if (!origContainer || !cloneContainer) return;
+
+      if (mtdSalesList.length === 0) {
+        if (emptyStatus) emptyStatus.classList.remove('hidden');
+        origContainer.innerHTML = '';
+        cloneContainer.innerHTML = '';
+        return;
+      }
+
+      if (emptyStatus) emptyStatus.classList.add('hidden');
+
+      let htmlRows = '';
+      mtdSalesList.forEach((item, index) => {
+        const rank = index + 1;
+        const bucketName = 'FOTO SALES';
+        const nip = item.mtd_nip || '';
+        const nama = item.mtd_nama || 'SALES';
+        const total = Number(item.mtd_total || 0);
+
+        const imageUrl = `${SUPABASE_URL}/storage/v1/object/public/${encodeURIComponent(bucketName)}/${encodeURIComponent(nip)}.jpg`;
+        const fallbackAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(nama)}&background=3b82f6&color=fff&size=128`;
+
+        let rowClass = "bg-slate-50 border border-slate-200 hover:bg-slate-100 rounded-lg";
+        let crownMarkup = "";
+        let borderPhotoStyle = "border-blue-500";
+        let textEffectClass = "";
+        let numberStyle = "text-slate-700";
+
+        if (rank === 1) {
+          rowClass = "fire-box-1";
+          borderPhotoStyle = "border-yellow-500 shadow-yellow-300";
+          textEffectClass = "text-outline-white font-bold";
+          numberStyle = "text-outline-white font-extrabold text-sm";
+          crownMarkup = `<div class="absolute -top-2.5 left-1/2 -translate-x-1/2 z-20 text-yellow-500 drop-shadow-[0_2px_3px_rgba(234,179,8,0.8)]"><i data-lucide="crown" class="w-4 h-4 fill-yellow-400"></i></div>`;
+        } else if (rank === 2) {
+          rowClass = "fire-box-2";
+          borderPhotoStyle = "border-slate-400 shadow-slate-300";
+          textEffectClass = "text-outline-white font-bold";
+          numberStyle = "text-outline-white font-extrabold text-sm";
+          crownMarkup = `<div class="absolute -top-2.5 left-1/2 -translate-x-1/2 z-20 text-slate-400 drop-shadow-[0_2px_3px_rgba(148,163,184,0.8)]"><i data-lucide="crown" class="w-4 h-4 fill-slate-300"></i></div>`;
+        } else if (rank === 3) {
+          rowClass = "fire-box-3";
+          borderPhotoStyle = "border-amber-600 shadow-amber-300";
+          textEffectClass = "text-outline-white font-bold";
+          numberStyle = "text-outline-white font-extrabold text-sm";
+          crownMarkup = `<div class="absolute -top-2.5 left-1/2 -translate-x-1/2 z-20 text-amber-600 drop-shadow-[0_2px_3px_rgba(217,119,6,0.8)]"><i data-lucide="crown" class="w-4 h-4 fill-amber-500"></i></div>`;
+        }
+
+        htmlRows += `
+          <div class="grid grid-cols-12 items-center px-3 py-2 transition shadow-sm ${rowClass}">
+            <div class="col-span-4 flex items-center justify-center gap-2">
+              <span class="font-bold text-sm w-5 text-right ${numberStyle}">${rank}.</span>
+              <div class="relative w-10 h-10 rounded-md border-2 ${borderPhotoStyle} bg-slate-200 shrink-0 shadow-sm">
+                ${crownMarkup}
+                <div class="w-full h-full rounded-[4px] overflow-hidden relative z-10">
+                  <img src="${imageUrl}" alt="${nama}" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='${fallbackAvatar}';">
+                </div>
+              </div>
+            </div>
+            <div class="col-span-4 pl-1">
+              <div class="text-slate-900 text-xs font-semibold tracking-wide truncate ${textEffectClass}">${nama}</div>
+              <div class="text-[10px] font-mono text-blue-600 font-bold mt-0.5 ${textEffectClass}">NIP: ${nip}</div>
+            </div>
+            <div class="col-span-4 text-right font-mono font-bold text-emerald-600 text-xs ${textEffectClass}">
+              Rp ${total.toLocaleString('id-ID')}
+            </div>
+          </div>
+        `;
+      });
+
+      origContainer.innerHTML = htmlRows;
+      cloneContainer.innerHTML = htmlRows;
+      lucide.createIcons();
+    }
+
+
+    // 1.4. Fetch & Render MTD By Furnipro
+    async function fetchMtdFurniproData() {
+      const emptyStatus = document.getElementById('emptyStatusMtdFurnipro');
+      const statusMessage = document.getElementById('statusMessageMtdFurnipro');
+
+      try {
+        const { data, error } = await supabaseClient
+          .from('mtd_fp')
+          .select('*')
+          .order('qty_mtdfp', { ascending: false });
+
+        if (error) {
+          if (emptyStatus) {
+            emptyStatus.classList.remove('hidden');
+            statusMessage.innerText = 'Gagal memuat data: ' + error.message;
+          }
+          return;
+        }
+
+        if (data) {
+          mtdFurniproList = data;
+          renderMtdFurniproDashboard();
+        }
+      } catch (err) {
+        if (emptyStatus) {
+          emptyStatus.classList.remove('hidden');
+          statusMessage.innerText = 'Terjadi kesalahan sistem.';
+        }
+      }
+    }
+
+    function renderMtdFurniproDashboard() {
+      const origContainer = document.getElementById('tableContentOriginalMtdFurnipro');
+      const cloneContainer = document.getElementById('tableContentCloneMtdFurnipro');
+      const emptyStatus = document.getElementById('emptyStatusMtdFurnipro');
+
+      if (!origContainer || !cloneContainer) return;
+
+      if (mtdFurniproList.length === 0) {
+        if (emptyStatus) emptyStatus.classList.remove('hidden');
+        origContainer.innerHTML = '';
+        cloneContainer.innerHTML = '';
+        return;
+      }
+
+      if (emptyStatus) emptyStatus.classList.add('hidden');
+
+      let htmlRows = '';
+      mtdFurniproList.forEach((item, index) => {
+        const rank = index + 1;
+        const bucketName = 'FOTO SALES';
+        const nip = item.nip_mtdfp || '';
+        const nama = item.nama_mtdfp || item.nama || 'FURNIPRO';
+        const qty = Number(item.qty_mtdfp || 0);
+
+        const imageUrl = `${SUPABASE_URL}/storage/v1/object/public/${encodeURIComponent(bucketName)}/${encodeURIComponent(nip)}.jpg`;
+        const fallbackAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(nama)}&background=2563eb&color=fff&size=128`;
+
+        let rowClass = "bg-slate-50 border border-slate-200 hover:bg-slate-100 rounded-lg";
+        let crownMarkup = "";
+        let borderPhotoStyle = "border-blue-500";
+        let textEffectClass = "";
+        let numberStyle = "text-slate-700";
+
+        if (rank === 1) {
+          rowClass = "fire-box-1";
+          borderPhotoStyle = "border-yellow-500 shadow-yellow-300";
+          textEffectClass = "text-outline-white font-bold";
+          numberStyle = "text-outline-white font-extrabold text-sm";
+          crownMarkup = `<div class="absolute -top-2.5 left-1/2 -translate-x-1/2 z-20 text-yellow-500 drop-shadow-[0_2px_3px_rgba(234,179,8,0.8)]"><i data-lucide="crown" class="w-4 h-4 fill-yellow-400"></i></div>`;
+        } else if (rank === 2) {
+          rowClass = "fire-box-2";
+          borderPhotoStyle = "border-slate-400 shadow-slate-300";
+          textEffectClass = "text-outline-white font-bold";
+          numberStyle = "text-outline-white font-extrabold text-sm";
+          crownMarkup = `<div class="absolute -top-2.5 left-1/2 -translate-x-1/2 z-20 text-slate-400 drop-shadow-[0_2px_3px_rgba(148,163,184,0.8)]"><i data-lucide="crown" class="w-4 h-4 fill-slate-300"></i></div>`;
+        } else if (rank === 3) {
+          rowClass = "fire-box-3";
+          borderPhotoStyle = "border-amber-600 shadow-amber-300";
+          textEffectClass = "text-outline-white font-bold";
+          numberStyle = "text-outline-white font-extrabold text-sm";
+          crownMarkup = `<div class="absolute -top-2.5 left-1/2 -translate-x-1/2 z-20 text-amber-600 drop-shadow-[0_2px_3px_rgba(217,119,6,0.8)]"><i data-lucide="crown" class="w-4 h-4 fill-amber-500"></i></div>`;
+        }
+
+        htmlRows += `
+          <div class="grid grid-cols-12 items-center px-3 py-2 transition shadow-sm ${rowClass}">
+            <div class="col-span-4 flex items-center justify-center gap-2">
+              <span class="font-bold text-sm w-5 text-right ${numberStyle}">${rank}.</span>
+              <div class="relative w-10 h-10 rounded-md border-2 ${borderPhotoStyle} bg-slate-200 shrink-0 shadow-sm">
+                ${crownMarkup}
+                <div class="w-full h-full rounded-[4px] overflow-hidden relative z-10">
+                  <img src="${imageUrl}" alt="${nama}" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='${fallbackAvatar}';">
+                </div>
+              </div>
+            </div>
+            <div class="col-span-4 pl-1">
+              <div class="text-slate-900 text-xs font-semibold tracking-wide truncate ${textEffectClass}">${nama}</div>
+              <div class="text-[10px] font-mono text-blue-600 font-bold mt-0.5 ${textEffectClass}">NIP: ${nip}</div>
+            </div>
+            <div class="col-span-4 text-right font-mono font-bold text-blue-600 text-xs ${textEffectClass}">
+              ${qty.toLocaleString('id-ID')} PCS
+            </div>
+          </div>
+        `;
+      });
+
+      origContainer.innerHTML = htmlRows;
+      cloneContainer.innerHTML = htmlRows;
+      lucide.createIcons();
+    }
+
+
+    // 1.5. Fetch & Render MTD By Comser
+    async function fetchMtdComserData() {
+      const emptyStatus = document.getElementById('emptyStatusMtdComser');
+      const statusMessage = document.getElementById('statusMessageMtdComser');
+
+      try {
+        const { data, error } = await supabaseClient
+          .from('mtd_comser')
+          .select('*')
+          .order('total_mtdcnc', { ascending: false });
+
+        if (error) {
+          if (emptyStatus) {
+            emptyStatus.classList.remove('hidden');
+            statusMessage.innerText = 'Gagal memuat data: ' + error.message;
+          }
+          return;
+        }
+
+        if (data) {
+          mtdComserList = data;
+          renderMtdComserDashboard();
+        }
+      } catch (err) {
+        if (emptyStatus) {
+          emptyStatus.classList.remove('hidden');
+          statusMessage.innerText = 'Terjadi kesalahan sistem.';
+        }
+      }
+    }
+
+    function renderMtdComserDashboard() {
+      const origContainer = document.getElementById('tableContentOriginalMtdComser');
+      const cloneContainer = document.getElementById('tableContentCloneMtdComser');
+      const emptyStatus = document.getElementById('emptyStatusMtdComser');
+
+      if (!origContainer || !cloneContainer) return;
+
+      if (mtdComserList.length === 0) {
+        if (emptyStatus) emptyStatus.classList.remove('hidden');
+        origContainer.innerHTML = '';
+        cloneContainer.innerHTML = '';
+        return;
+      }
+
+      if (emptyStatus) emptyStatus.classList.add('hidden');
+
+      let htmlRows = '';
+      mtdComserList.forEach((item, index) => {
+        const rank = index + 1;
+        const bucketName = 'FOTO SALES';
+        const nip = item.nip_mtdcnc || '';
+        const nama = item.nama_mtdcnc || 'COMSER';
+        const total = Number(item.total_mtdcnc || 0);
+
+        const imageUrl = `${SUPABASE_URL}/storage/v1/object/public/${encodeURIComponent(bucketName)}/${encodeURIComponent(nip)}.jpg`;
+        const fallbackAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(nama)}&background=10b981&color=fff&size=128`;
+
+        let rowClass = "bg-slate-50 border border-slate-200 hover:bg-slate-100 rounded-lg";
+        let crownMarkup = "";
+        let borderPhotoStyle = "border-blue-500";
+        let textEffectClass = "";
+        let numberStyle = "text-slate-700";
+
+        if (rank === 1) {
+          rowClass = "fire-box-1";
+          borderPhotoStyle = "border-yellow-500 shadow-yellow-300";
+          textEffectClass = "text-outline-white font-bold";
+          numberStyle = "text-outline-white font-extrabold text-sm";
+          crownMarkup = `<div class="absolute -top-2.5 left-1/2 -translate-x-1/2 z-20 text-yellow-500 drop-shadow-[0_2px_3px_rgba(234,179,8,0.8)]"><i data-lucide="crown" class="w-4 h-4 fill-yellow-400"></i></div>`;
+        } else if (rank === 2) {
+          rowClass = "fire-box-2";
+          borderPhotoStyle = "border-slate-400 shadow-slate-300";
+          textEffectClass = "text-outline-white font-bold";
+          numberStyle = "text-outline-white font-extrabold text-sm";
+          crownMarkup = `<div class="absolute -top-2.5 left-1/2 -translate-x-1/2 z-20 text-slate-400 drop-shadow-[0_2px_3px_rgba(148,163,184,0.8)]"><i data-lucide="crown" class="w-4 h-4 fill-slate-300"></i></div>`;
+        } else if (rank === 3) {
+          rowClass = "fire-box-3";
+          borderPhotoStyle = "border-amber-600 shadow-amber-300";
+          textEffectClass = "text-outline-white font-bold";
+          numberStyle = "text-outline-white font-extrabold text-sm";
+          crownMarkup = `<div class="absolute -top-2.5 left-1/2 -translate-x-1/2 z-20 text-amber-600 drop-shadow-[0_2px_3px_rgba(217,119,6,0.8)]"><i data-lucide="crown" class="w-4 h-4 fill-amber-500"></i></div>`;
+        }
+
+        htmlRows += `
+          <div class="grid grid-cols-12 items-center px-3 py-2 transition shadow-sm ${rowClass}">
+            <div class="col-span-4 flex items-center justify-center gap-2">
+              <span class="font-bold text-sm w-5 text-right ${numberStyle}">${rank}.</span>
+              <div class="relative w-10 h-10 rounded-md border-2 ${borderPhotoStyle} bg-slate-200 shrink-0 shadow-sm">
+                ${crownMarkup}
+                <div class="w-full h-full rounded-[4px] overflow-hidden relative z-10">
+                  <img src="${imageUrl}" alt="${nama}" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='${fallbackAvatar}';">
+                </div>
+              </div>
+            </div>
+            <div class="col-span-4 pl-1">
+              <div class="text-slate-900 text-xs font-semibold tracking-wide truncate ${textEffectClass}">${nama}</div>
+              <div class="text-[10px] font-mono text-emerald-600 font-bold mt-0.5 ${textEffectClass}">NIP: ${nip}</div>
+            </div>
+            <div class="col-span-4 text-right font-mono font-bold text-emerald-600 text-xs ${textEffectClass}">
+              Rp ${total.toLocaleString('id-ID')}
+            </div>
+          </div>
+        `;
+      });
+
+      origContainer.innerHTML = htmlRows;
+      cloneContainer.innerHTML = htmlRows;
+      lucide.createIcons();
+    }
+
+
+    // 2A. Fetch & Render Top 1 MTD Sales (Carousel Kanan)
     async function fetchTop1MtdSales() {
       try {
         const { data, error } = await supabaseClient
@@ -648,22 +1045,7 @@
           .limit(1);
 
         const container = document.getElementById('mtdTop1Content');
-
-        if (error) {
-          console.error("Gagal mengambil MTD Sales:", error.message);
-          return;
-        }
-
-        if (!data || data.length === 0) {
-          container.innerHTML = `
-            <div class="flex flex-col items-center justify-center h-full text-slate-400 py-12">
-              <i data-lucide="database-backup" class="w-12 h-12 mb-2"></i>
-              <p class="text-sm font-medium">Belum ada data MTD Sales</p>
-            </div>
-          `;
-          lucide.createIcons();
-          return;
-        }
+        if (error || !data || data.length === 0) return;
 
         const topMtd = data[0];
         const nip = topMtd.mtd_nip || '-';
@@ -694,14 +1076,13 @@
           </div>
         `;
         lucide.createIcons();
-
       } catch (err) {
         console.error('Gagal memuat Top 1 MTD Sales:', err);
       }
     }
 
 
-    // 2B. Fetch & Render Best Furnipro
+    // 2B. Fetch & Render Best Furnipro (Carousel Kanan)
     async function fetchTop1MtdFurnipro() {
       try {
         const { data, error } = await supabaseClient
@@ -711,22 +1092,7 @@
           .limit(1);
 
         const container = document.getElementById('furniproTop1Content');
-
-        if (error) {
-          console.error("Gagal mengambil MTD Furnipro:", error.message);
-          return;
-        }
-
-        if (!data || data.length === 0) {
-          container.innerHTML = `
-            <div class="flex flex-col items-center justify-center h-full text-slate-400 py-12">
-              <i data-lucide="database-backup" class="w-12 h-12 mb-2"></i>
-              <p class="text-sm font-medium">Belum ada data MTD Furnipro</p>
-            </div>
-          `;
-          lucide.createIcons();
-          return;
-        }
+        if (error || !data || data.length === 0) return;
 
         const topFp = data[0];
         const nip = topFp.nip_mtdfp || '-';
@@ -754,14 +1120,13 @@
           </div>
         `;
         lucide.createIcons();
-
       } catch (err) {
         console.error('Gagal memuat Best Furnipro:', err);
       }
     }
 
 
-    // 2C. Fetch & Render Best Comser
+    // 2C. Fetch & Render Best Comser (Carousel Kanan)
     async function fetchTop1MtdComser() {
       try {
         const { data, error } = await supabaseClient
@@ -771,22 +1136,7 @@
           .limit(1);
 
         const container = document.getElementById('comserTop1Content');
-
-        if (error) {
-          console.error("Gagal mengambil MTD Comser:", error.message);
-          return;
-        }
-
-        if (!data || data.length === 0) {
-          container.innerHTML = `
-            <div class="flex flex-col items-center justify-center h-full text-slate-400 py-12">
-              <i data-lucide="database-backup" class="w-12 h-12 mb-2"></i>
-              <p class="text-sm font-medium">Belum ada data MTD Comser</p>
-            </div>
-          `;
-          lucide.createIcons();
-          return;
-        }
+        if (error || !data || data.length === 0) return;
 
         const topComser = data[0];
         const nip = topComser.nip_mtdcnc || '-';
@@ -814,7 +1164,6 @@
           </div>
         `;
         lucide.createIcons();
-
       } catch (err) {
         console.error('Gagal memuat Best Comser:', err);
       }
@@ -963,6 +1312,7 @@
         .channel('realtime_mtd_sales')
         .on('postgres_changes', { event: '*', schema: 'public', table: 'mtd_sales' }, () => {
           fetchTop1MtdSales();
+          fetchMtdSalesData();
         })
         .subscribe();
 
@@ -970,6 +1320,7 @@
         .channel('realtime_mtd_fp')
         .on('postgres_changes', { event: '*', schema: 'public', table: 'mtd_fp' }, () => {
           fetchTop1MtdFurnipro();
+          fetchMtdFurniproData();
         })
         .subscribe();
 
@@ -977,6 +1328,7 @@
         .channel('realtime_mtd_comser')
         .on('postgres_changes', { event: '*', schema: 'public', table: 'mtd_comser' }, () => {
           fetchTop1MtdComser();
+          fetchMtdComserData();
         })
         .subscribe();
 
@@ -993,6 +1345,9 @@
       setInterval(() => {
         fetchSalesData();
         fetchDeptData();
+        fetchMtdSalesData();
+        fetchMtdFurniproData();
+        fetchMtdComserData();
         fetchTop1MtdSales();
         fetchTop1MtdFurnipro();
         fetchTop1MtdComser();
@@ -1004,6 +1359,9 @@
       lucide.createIcons();
       fetchSalesData();
       fetchDeptData();
+      fetchMtdSalesData();
+      fetchMtdFurniproData();
+      fetchMtdComserData();
       fetchTop1MtdSales();
       fetchTop1MtdFurnipro();
       fetchTop1MtdComser();
