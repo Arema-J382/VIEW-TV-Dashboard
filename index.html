@@ -13,14 +13,14 @@
   <script src="https://unpkg.com/lucide@latest"></script>
 
   <style>
-    /* Mengunci ukuran layout pas Full HD 1920x1080 piksel[cite: 1] */
+    /* Mengunci ukuran layout pas Full HD 1920x1080 piksel */
     body {
       width: 1920px;
       height: 1080px;
       overflow: hidden;
     }
 
-    /* CONTAINER UTAMA 3 KOLOM SIDE-BY-SIDE[cite: 1] */
+    /* CONTAINER UTAMA 3 KOLOM SIDE-BY-SIDE */
     .dashboard-grid {
       display: flex;
       flex-direction: row;
@@ -31,8 +31,14 @@
       height: 100%;
     }
 
+    /* WRAPPER KOLOM KIRI (Memberikan jarak antara Target Today & Sales Departemen Today) */
+    .left-column-wrapper {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
 
-    /* AREA GAUGE CHART (DI ATAS KIRI)[cite: 1] */
+    /* AREA GAUGE CHART (DI ATAS KIRI) */
     .gauge-section-container {
       width: 500px;
       height: 400px;
@@ -60,7 +66,7 @@
       position: relative;
     }
 
-    /* AREA TABEL LIVE TOP SALES TODAY (DI TENGAH)[cite: 1] */
+    /* AREA TABEL LIVE TOP SALES TODAY (DI TENGAH) */
     .custom-table-container {
       width: 600px;               
       height: 400px;            
@@ -71,7 +77,7 @@
       z-index: 10;
     }
 
-    /* AREA KANAN (BEST SALES, BEST FURNIPRO & BEST COMSER CAROUSEL)[cite: 1] */
+    /* AREA KANAN (BEST SALES, BEST FURNIPRO & BEST COMSER CAROUSEL) */
     .mtd-top1-container {
       width: 500px;
       height: 400px;
@@ -86,7 +92,7 @@
       transition: all 0.5s ease-in-out;
     }
 
-    /* Animasi Glow untuk Masing-masing View Card Kanan[cite: 1] */
+    /* Animasi Glow untuk Masing-masing View Card Kanan */
     @keyframes goldGlow {
       0%, 100% { box-shadow: 0 0 10px rgba(234, 179, 8, 0.5), 0 0 20px rgba(245, 158, 11, 0.3); }
       50% { box-shadow: 0 0 22px rgba(234, 179, 8, 0.9), 0 0 32px rgba(239, 68, 68, 0.6); }
@@ -117,7 +123,7 @@
       animation: emeraldGlow 2s infinite ease-in-out;
     }
 
-    /* Animasi Scrolling Vertikal Tabel[cite: 1] */
+    /* Animasi Scrolling Vertikal Tabel */
     @keyframes scrollUp {
       0% { transform: translateY(0); }
       100% { transform: translateY(-50%); }
@@ -131,7 +137,7 @@
       animation-play-state: paused;
     }
 
-    /* OUTLINE PUTIH TIPIS PADA TEKS KHUSUS RANKING[cite: 1] */
+    /* OUTLINE PUTIH TIPIS PADA TEKS KHUSUS RANKING */
     .text-outline-white {
       text-shadow: 
         -0.75px -0.75px 0 #fff,  
@@ -172,7 +178,7 @@
       animation: bronzeGlow 2s infinite ease-in-out;
     }
 
-    /* SLIDER TRACK UNTUK 3 VIEW (300% WIDTH)[cite: 1] */
+    /* SLIDER TRACK UNTUK 3 VIEW (300% WIDTH) */
     .slider-track {
       display: flex;
       width: 300%;
@@ -208,7 +214,6 @@
   </header>
 
   <!-- ================= MAIN VIEW (KONTEN UTAMA) ================= -->
-  <!-- CATATAN: Ubah pt-3 di bawah ini jika ingin menaikkan/menurunkan posisi card view secara manual -->
   <main class="flex-1 relative overflow-hidden bg-blue-50 px-6 pt-3 pb-6 flex items-start justify-center">
     
     <!-- CONTAINER UTAMA 3 KOLOM -->
@@ -217,7 +222,7 @@
       <!-- ================= KOLOM KIRI (GAUGE & SALES DEPARTEMEN) ================= -->
       <div class="left-column-wrapper">
         
-        <!-- 1. GAUGE CHART SECTION (TARGET TODAY)[cite: 1] -->
+        <!-- 1. GAUGE CHART SECTION (TARGET TODAY) -->
         <div id="gaugeContainer" class="gauge-section-container">
           <div class="bg-slate-900 text-white font-extrabold text-center text-lg py-2 border-b border-slate-800 shadow-md tracking-wider">
             TARGET TODAY
@@ -286,7 +291,7 @@
       <!-- ================= AKHIR KOLOM KIRI ================= -->
 
 
-      <!-- ================= 2. LIVE TOP SALES TODAY (TENGAH)[cite: 1] ================= -->
+      <!-- ================= 2. LIVE TOP SALES TODAY (TENGAH) ================= -->
       <div class="custom-table-container flex flex-col relative z-10">
         
         <div class="bg-slate-900 text-white font-extrabold text-center text-2xl py-3.5 rounded-t-xl border-b border-slate-800 shadow-md z-10 shrink-0 tracking-wider">
@@ -310,21 +315,21 @@
       <!-- ================= AKHIR LIVE TOP SALES TODAY ================= -->
 
 
-      <!-- ================= 3. BEST SALES, FURNIPRO & COMSER CAROUSEL (KANAN)[cite: 1] ================= -->
+      <!-- ================= 3. BEST SALES, FURNIPRO & COMSER CAROUSEL (KANAN) ================= -->
       <div id="rightCardContainer" class="mtd-top1-container gold-glow-container flex flex-col relative z-10 overflow-hidden">
         
-        <!-- HEADER DENGAN TRANSISI WARNA & JUDUL[cite: 1] -->
+        <!-- HEADER DENGAN TRANSISI WARNA & JUDUL -->
         <div id="sliderHeader" class="bg-slate-900 text-white font-extrabold text-center text-2xl py-3.5 border-b border-slate-800 shadow-md z-20 shrink-0 tracking-wider flex items-center justify-center gap-2 transition-colors duration-500">
           <i data-lucide="award" id="sliderHeaderIcon" class="w-6 h-6 text-yellow-400"></i>
           <span id="sliderHeaderTitle">BEST SALES</span>
         </div>
 
-        <!-- TRACK SLIDER UNTUK TIGA VIEW (300% WIDTH)[cite: 1] -->
+        <!-- TRACK SLIDER UNTUK TIGA VIEW (300% WIDTH) -->
         <div class="flex-1 relative overflow-hidden">
           <div id="mtdSliderTrack" class="slider-track">
             
-            <!-- VIEW 1: BEST SALES[cite: 1] -->
-            <div class="w-1/3 h-full flex flex-col items-center justify-center p-6 bg-gradient-to-b from-amber-50/50 to-white shrink-0">
+            <!-- VIEW 1: BEST SALES -->
+            <div class="w-1/3 h-full flex flex-col items-center justify-center p-4 bg-gradient-to-b from-amber-50/50 to-white shrink-0">
               <div id="mtdTop1Content" class="w-full flex flex-col items-center justify-center">
                 <div class="flex flex-col items-center justify-center text-slate-400 py-12">
                   <i data-lucide="loader-2" class="w-10 h-10 animate-spin mb-2"></i>
@@ -333,8 +338,8 @@
               </div>
             </div>
 
-            <!-- VIEW 2: BEST FURNIPRO[cite: 1] -->
-            <div class="w-1/3 h-full flex flex-col items-center justify-center p-6 bg-gradient-to-b from-blue-50/50 to-white shrink-0">
+            <!-- VIEW 2: BEST FURNIPRO -->
+            <div class="w-1/3 h-full flex flex-col items-center justify-center p-4 bg-gradient-to-b from-blue-50/50 to-white shrink-0">
               <div id="furniproTop1Content" class="w-full flex flex-col items-center justify-center">
                 <div class="flex flex-col items-center justify-center text-slate-400 py-12">
                   <i data-lucide="loader-2" class="w-10 h-10 animate-spin mb-2"></i>
@@ -343,8 +348,8 @@
               </div>
             </div>
 
-            <!-- VIEW 3: BEST COMSER[cite: 1] -->
-            <div class="w-1/3 h-full flex flex-col items-center justify-center p-6 bg-gradient-to-b from-emerald-50/50 to-white shrink-0">
+            <!-- VIEW 3: BEST COMSER -->
+            <div class="w-1/3 h-full flex flex-col items-center justify-center p-4 bg-gradient-to-b from-emerald-50/50 to-white shrink-0">
               <div id="comserTop1Content" class="w-full flex flex-col items-center justify-center">
                 <div class="flex flex-col items-center justify-center text-slate-400 py-12">
                   <i data-lucide="loader-2" class="w-10 h-10 animate-spin mb-2"></i>
@@ -370,9 +375,9 @@
 
     let salesList = [];
     let deptList = [];
-    let currentSlide = 0; // 0: BEST SALES, 1: BEST FURNIPRO, 2: BEST COMSER[cite: 1]
+    let currentSlide = 0; 
 
-    // Jam Digital Dashboard[cite: 1]
+    // Jam Digital Dashboard
     function updateClock() {
       const now = new Date();
       document.getElementById('currentTime').innerText = now.toLocaleTimeString('id-ID');
@@ -389,7 +394,7 @@
       scrollWrapperDept.style.animationDuration = '40s';
     }
 
-    // 1. Fetch & Render Top Sales Data (Daily Sales)[cite: 1]
+    // 1. Fetch & Render Top Sales Data (Daily Sales)
     async function fetchSalesData() {
       const emptyStatus = document.getElementById('emptyStatus');
       const statusMessage = document.getElementById('statusMessage');
@@ -504,7 +509,7 @@
     }
 
 
-    // 1.5. Fetch & Render Sales Departemen Today (Tabel: laporan_departemen)
+    // 1.5. Fetch & Render Sales Departemen Today
     async function fetchDeptData() {
       const emptyStatusDept = document.getElementById('emptyStatusDept');
       const statusMessageDept = document.getElementById('statusMessageDept');
@@ -631,7 +636,7 @@
     }
 
 
-    // 2A. Fetch & Render Top 1 MTD Sales[cite: 1]
+    // 2A. Fetch & Render Top 1 MTD Sales (Optimized for perfect fit)
     async function fetchTop1MtdSales() {
       try {
         const { data, error } = await supabaseClient
@@ -668,21 +673,21 @@
         const fallbackAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(nama)}&background=eab308&color=fff&size=128`;
 
         container.innerHTML = `
-          <div class="flex flex-col items-center justify-center text-center w-full relative">
-            <div class="relative w-48 h-48 rounded-2xl border-4 border-yellow-500 shadow-xl bg-slate-200 overflow-hidden mb-4">
-              <div class="absolute -top-4 left-1/2 -translate-x-1/2 z-20 text-yellow-500 drop-shadow-[0_2px_4px_rgba(234,179,8,0.9)]">
-                <i data-lucide="crown" class="w-12 h-12 fill-yellow-400"></i>
+          <div class="flex flex-col items-center justify-center text-center w-full relative px-2">
+            <div class="relative w-36 h-36 rounded-2xl border-4 border-yellow-500 shadow-lg bg-slate-200 overflow-hidden mb-2.5">
+              <div class="absolute -top-3 left-1/2 -translate-x-1/2 z-20 text-yellow-500 drop-shadow-[0_2px_4px_rgba(234,179,8,0.9)]">
+                <i data-lucide="crown" class="w-9 h-9 fill-yellow-400"></i>
               </div>
-              <img src="${imageUrl}" alt="${nama}" class="w-full h-full object-cover pt-2" onerror="this.onerror=null; this.src='${fallbackAvatar}';">
+              <img src="${imageUrl}" alt="${nama}" class="w-full h-full object-cover pt-1" onerror="this.onerror=null; this.src='${fallbackAvatar}';">
             </div>
 
-            <div class="text-sm font-mono uppercase tracking-widest text-amber-600 font-extrabold mb-1">CHAMPION OF THE MONTH</div>
-            <h3 class="text-3xl font-extrabold text-slate-900 mb-1">${nama}</h3>
-            <div class="text-sm font-semibold text-slate-600 mb-4">NIP: <span class="font-mono text-blue-600 font-bold">${nip}</span></div>
+            <div class="text-[11px] font-mono uppercase tracking-widest text-amber-600 font-extrabold mb-0.5">CHAMPION OF THE MONTH</div>
+            <h3 class="text-2xl font-extrabold text-slate-900 mb-0.5 tracking-tight line-clamp-1">${nama}</h3>
+            <div class="text-xs font-semibold text-slate-600 mb-3">NIP: <span class="font-mono text-blue-600 font-bold">${nip}</span></div>
             
-            <div class="w-full bg-amber-50 border border-amber-200 rounded-xl p-6 shadow-inner">
-              <div class="text-xs font-bold text-amber-800 uppercase tracking-wider">TOTAL MTD SALES</div>
-              <div class="text-3xl font-extrabold font-mono text-emerald-600 mt-1">Rp ${total.toLocaleString('id-ID')}</div>
+            <div class="w-full bg-amber-50 border border-amber-200 rounded-xl p-3 shadow-inner">
+              <div class="text-[10px] font-bold text-amber-800 uppercase tracking-wider">TOTAL MTD SALES</div>
+              <div class="text-2xl font-extrabold font-mono text-emerald-600 mt-0.5">Rp ${total.toLocaleString('id-ID')}</div>
             </div>
           </div>
         `;
@@ -694,7 +699,7 @@
     }
 
 
-    // 2B. Fetch & Render Best Furnipro[cite: 1]
+    // 2B. Fetch & Render Best Furnipro (Optimized for perfect fit)
     async function fetchTop1MtdFurnipro() {
       try {
         const { data, error } = await supabaseClient
@@ -731,18 +736,18 @@
         const fallbackAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(nama)}&background=2563eb&color=fff&size=128`;
 
         container.innerHTML = `
-          <div class="flex flex-col items-center justify-center text-center w-full relative">
-            <div class="relative w-48 h-48 rounded-2xl border-4 border-blue-500 shadow-xl bg-slate-200 overflow-hidden mb-4">
-              <img src="${imageUrl}" alt="${nama}" class="w-full h-full object-cover pt-2" onerror="this.onerror=null; this.src='${fallbackAvatar}';">
+          <div class="flex flex-col items-center justify-center text-center w-full relative px-2">
+            <div class="relative w-36 h-36 rounded-2xl border-4 border-blue-500 shadow-lg bg-slate-200 overflow-hidden mb-2.5">
+              <img src="${imageUrl}" alt="${nama}" class="w-full h-full object-cover pt-1" onerror="this.onerror=null; this.src='${fallbackAvatar}';">
             </div>
 
-            <div class="text-sm font-mono uppercase tracking-widest text-blue-600 font-extrabold mb-1">CHAMPION FURNIPRO</div>
-            <h3 class="text-3xl font-extrabold text-slate-900 mb-1">${nama}</h3>
-            <div class="text-sm font-semibold text-slate-600 mb-4">NIP: <span class="font-mono text-blue-600 font-bold">${nip}</span></div>
+            <div class="text-[11px] font-mono uppercase tracking-widest text-blue-600 font-extrabold mb-0.5">CHAMPION FURNIPRO</div>
+            <h3 class="text-2xl font-extrabold text-slate-900 mb-0.5 tracking-tight line-clamp-1">${nama}</h3>
+            <div class="text-xs font-semibold text-slate-600 mb-3">NIP: <span class="font-mono text-blue-600 font-bold">${nip}</span></div>
             
-            <div class="w-full bg-blue-50 border border-blue-200 rounded-xl p-6 shadow-inner">
-              <div class="text-xs font-bold text-blue-800 uppercase tracking-wider">TOTAL MTD FURNIPRO</div>
-              <div class="text-3xl font-extrabold font-mono text-blue-600 mt-1">${qty.toLocaleString('id-ID')} PCS</div>
+            <div class="w-full bg-blue-50 border border-blue-200 rounded-xl p-3 shadow-inner">
+              <div class="text-[10px] font-bold text-blue-800 uppercase tracking-wider">TOTAL MTD FURNIPRO</div>
+              <div class="text-2xl font-extrabold font-mono text-blue-600 mt-0.5">${qty.toLocaleString('id-ID')} PCS</div>
             </div>
           </div>
         `;
@@ -754,7 +759,7 @@
     }
 
 
-    // 2C. Fetch & Render Best Comser[cite: 1]
+    // 2C. Fetch & Render Best Comser (Optimized for perfect fit)
     async function fetchTop1MtdComser() {
       try {
         const { data, error } = await supabaseClient
@@ -791,18 +796,18 @@
         const fallbackAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(nama)}&background=10b981&color=fff&size=128`;
 
         container.innerHTML = `
-          <div class="flex flex-col items-center justify-center text-center w-full relative">
-            <div class="relative w-48 h-48 rounded-2xl border-4 border-emerald-500 shadow-xl bg-slate-200 overflow-hidden mb-4">
-              <img src="${imageUrl}" alt="${nama}" class="w-full h-full object-cover pt-2" onerror="this.onerror=null; this.src='${fallbackAvatar}';">
+          <div class="flex flex-col items-center justify-center text-center w-full relative px-2">
+            <div class="relative w-36 h-36 rounded-2xl border-4 border-emerald-500 shadow-lg bg-slate-200 overflow-hidden mb-2.5">
+              <img src="${imageUrl}" alt="${nama}" class="w-full h-full object-cover pt-1" onerror="this.onerror=null; this.src='${fallbackAvatar}';">
             </div>
 
-            <div class="text-sm font-mono uppercase tracking-widest text-emerald-600 font-extrabold mb-1">CHAMPION COMSER</div>
-            <h3 class="text-3xl font-extrabold text-slate-900 mb-1">${nama}</h3>
-            <div class="text-sm font-semibold text-slate-600 mb-4">NIP: <span class="font-mono text-emerald-600 font-bold">${nip}</span></div>
+            <div class="text-[11px] font-mono uppercase tracking-widest text-emerald-600 font-extrabold mb-0.5">CHAMPION COMSER</div>
+            <h3 class="text-2xl font-extrabold text-slate-900 mb-0.5 tracking-tight line-clamp-1">${nama}</h3>
+            <div class="text-xs font-semibold text-slate-600 mb-3">NIP: <span class="font-mono text-emerald-600 font-bold">${nip}</span></div>
             
-            <div class="w-full bg-emerald-50 border border-emerald-200 rounded-xl p-6 shadow-inner">
-              <div class="text-xs font-bold text-emerald-800 uppercase tracking-wider">TOTAL MTD COMSER</div>
-              <div class="text-3xl font-extrabold font-mono text-emerald-600 mt-1">Rp ${total.toLocaleString('id-ID')}</div>
+            <div class="w-full bg-emerald-50 border border-emerald-200 rounded-xl p-3 shadow-inner">
+              <div class="text-[10px] font-bold text-emerald-800 uppercase tracking-wider">TOTAL MTD COMSER</div>
+              <div class="text-2xl font-extrabold font-mono text-emerald-600 mt-0.5">Rp ${total.toLocaleString('id-ID')}</div>
             </div>
           </div>
         `;
@@ -814,7 +819,7 @@
     }
 
 
-    // 3. Carousel Switcher (5 Detik per Card View)[cite: 1]
+    // 3. Carousel Switcher (5 Detik per Card View)
     function startCarouselTimer() {
       setInterval(() => {
         const track = document.getElementById('mtdSliderTrack');
@@ -848,7 +853,7 @@
     }
 
 
-    // 4. Fetch & Compute Realtime Gauge Chart Data[cite: 1]
+    // 4. Fetch & Compute Realtime Gauge Chart Data
     async function updateGaugeData() {
       try {
         const { data: targetData, error: targetError } = await supabaseClient
@@ -935,7 +940,7 @@
     }
 
 
-    // 5. Saluran Supabase Realtime Sync Terintegrasi[cite: 1]
+    // 5. Saluran Supabase Realtime Sync Terintegrasi
     function setupRealtime() {
       supabaseClient
         .channel('realtime_laporan_sales')
@@ -981,7 +986,7 @@
         .subscribe();
     }
 
-    // Polling Cadangan (Backup Sync setiap 10 detik)[cite: 1]
+    // Polling Cadangan (Backup Sync setiap 10 detik)
     function startBackupPolling() {
       setInterval(() => {
         fetchSalesData();
