@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=1920, height=1080, initial-scale=1.0">
-  <title>TV Dashboard - Laporan Sales, Gauge & Top 1 MTD Sales & Furnipro</title>
+  <title>TV Dashboard - Laporan Sales, Gauge & Top 1 MTD Sales, Furnipro & Comser</title>
   
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -57,7 +57,7 @@
       z-index: 10;
     }
 
-    /* AREA KANAN (BEST SALES & BEST FURNIPRO CAROUSEL) */
+    /* AREA KANAN (BEST SALES, BEST FURNIPRO & BEST COMSER CAROUSEL) */
     .mtd-top1-container {
       width: 460px;
       height: 520px;
@@ -72,7 +72,7 @@
       transition: all 0.5s ease-in-out;
     }
 
-    /* Animasi Glow Berbeda untuk Best Sales & Best Furnipro */
+    /* Animasi Glow untuk Masing-masing View Card Kanan */
     @keyframes goldGlow {
       0%, 100% { box-shadow: 0 0 10px rgba(234, 179, 8, 0.5), 0 0 20px rgba(245, 158, 11, 0.3); }
       50% { box-shadow: 0 0 22px rgba(234, 179, 8, 0.9), 0 0 32px rgba(239, 68, 68, 0.6); }
@@ -83,6 +83,11 @@
       50% { box-shadow: 0 0 22px rgba(59, 130, 246, 1), 0 0 35px rgba(6, 182, 212, 0.8); }
     }
 
+    @keyframes emeraldGlow {
+      0%, 100% { box-shadow: 0 0 10px rgba(16, 185, 129, 0.6), 0 0 20px rgba(5, 150, 105, 0.4); }
+      50% { box-shadow: 0 0 22px rgba(16, 185, 129, 1), 0 0 35px rgba(4, 120, 87, 0.8); }
+    }
+
     .gold-glow-container {
       border: 2px solid #eab308;
       animation: goldGlow 2s infinite ease-in-out;
@@ -91,6 +96,11 @@
     .cyan-glow-container {
       border: 2px solid #3b82f6;
       animation: cyanGlow 2s infinite ease-in-out;
+    }
+
+    .emerald-glow-container {
+      border: 2px solid #10b981;
+      animation: emeraldGlow 2s infinite ease-in-out;
     }
 
     /* Animasi Scrolling Vertikal Tabel Tengah */
@@ -148,10 +158,10 @@
       animation: bronzeGlow 2s infinite ease-in-out;
     }
 
-    /* SLIDER TRANSFORM CSS */
+    /* SLIDER TRACK UNTUK 3 VIEW (300% WIDTH) */
     .slider-track {
       display: flex;
-      width: 200%;
+      width: 300%;
       height: 100%;
       transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
     }
@@ -261,7 +271,7 @@
       <!-- ================= AKHIR LIVE TOP SALES TODAY ================= -->
 
 
-      <!-- ================= 3. BEST SALES & BEST FURNIPRO CAROUSEL (KANAN) ================= -->
+      <!-- ================= 3. BEST SALES, FURNIPRO & COMSER CAROUSEL (KANAN) ================= -->
       <div id="rightCardContainer" class="mtd-top1-container gold-glow-container flex flex-col relative z-10 overflow-hidden">
         
         <!-- HEADER DENGAN TRANSISI WARNA & JUDUL -->
@@ -270,12 +280,12 @@
           <span id="sliderHeaderTitle">BEST SALES</span>
         </div>
 
-        <!-- TRACK SLIDER UNTUK DUA VIEW (SLIDE LEFT EFFECT) -->
+        <!-- TRACK SLIDER UNTUK TIGA VIEW (300% WIDTH) -->
         <div class="flex-1 relative overflow-hidden">
           <div id="mtdSliderTrack" class="slider-track">
             
             <!-- VIEW 1: BEST SALES -->
-            <div class="w-1/2 h-full flex flex-col items-center justify-center p-6 bg-gradient-to-b from-amber-50/50 to-white shrink-0">
+            <div class="w-1/3 h-full flex flex-col items-center justify-center p-6 bg-gradient-to-b from-amber-50/50 to-white shrink-0">
               <div id="mtdTop1Content" class="w-full flex flex-col items-center justify-center">
                 <div class="flex flex-col items-center justify-center text-slate-400 py-12">
                   <i data-lucide="loader-2" class="w-10 h-10 animate-spin mb-2"></i>
@@ -284,8 +294,8 @@
               </div>
             </div>
 
-            <!-- VIEW 2: BEST FURNIPRO (Mirip Best Sales, Tanpa Mahkota, Card Bawah TOTAL MTD FURNIPRO + PCS) -->
-            <div class="w-1/2 h-full flex flex-col items-center justify-center p-6 bg-gradient-to-b from-blue-50/50 to-white shrink-0">
+            <!-- VIEW 2: BEST FURNIPRO -->
+            <div class="w-1/3 h-full flex flex-col items-center justify-center p-6 bg-gradient-to-b from-blue-50/50 to-white shrink-0">
               <div id="furniproTop1Content" class="w-full flex flex-col items-center justify-center">
                 <div class="flex flex-col items-center justify-center text-slate-400 py-12">
                   <i data-lucide="loader-2" class="w-10 h-10 animate-spin mb-2"></i>
@@ -294,11 +304,21 @@
               </div>
             </div>
 
+            <!-- VIEW 3: BEST COMSER -->
+            <div class="w-1/3 h-full flex flex-col items-center justify-center p-6 bg-gradient-to-b from-emerald-50/50 to-white shrink-0">
+              <div id="comserTop1Content" class="w-full flex flex-col items-center justify-center">
+                <div class="flex flex-col items-center justify-center text-slate-400 py-12">
+                  <i data-lucide="loader-2" class="w-10 h-10 animate-spin mb-2"></i>
+                  <p class="text-sm font-medium">Memuat Best Comser...</p>
+                </div>
+              </div>
+            </div>
+
           </div>
         </div>
 
       </div>
-      <!-- ================= AKHIR BEST SALES & FURNIPRO ================= -->
+      <!-- ================= AKHIR CAROUSEL KANAN ================= -->
 
     </div>
   </main>
@@ -310,7 +330,7 @@
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     let salesList = [];
-    let currentSlide = 0; // 0: BEST SALES, 1: BEST FURNIPRO
+    let currentSlide = 0; // 0: BEST SALES, 1: BEST FURNIPRO, 2: BEST COMSER
 
     // Jam Digital Dashboard
     function updateClock() {
@@ -509,7 +529,7 @@
     }
 
 
-    // 2B. Fetch & Render Best Furnipro (Tabel: mtd_fp | Sort: qty_mtdfp DESC | Tanpa Mahkota | Dengan Box Total Qty PCS)
+    // 2B. Fetch & Render Best Furnipro
     async function fetchTop1MtdFurnipro() {
       try {
         const { data, error } = await supabaseClient
@@ -545,7 +565,6 @@
         const imageUrl = `${SUPABASE_URL}/storage/v1/object/public/${encodeURIComponent(bucketName)}/${nip}.jpg`;
         const fallbackAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(nama)}&background=2563eb&color=fff&size=128`;
 
-        // Tampilan layout persis Best Sales, tanpa mahkota, dengan kotak bawah TOTAL MTD FURNIPRO + PCS
         container.innerHTML = `
           <div class="flex flex-col items-center justify-center text-center w-full relative">
             <div class="relative w-48 h-48 rounded-2xl border-4 border-blue-500 shadow-xl bg-slate-200 overflow-hidden mb-4">
@@ -570,7 +589,68 @@
     }
 
 
-    // 3. Carousel Switcher (3 Detik Bergeser ke Samping Kiri + Ganti Warna Animasi Glow & Header)
+    // 2C. Fetch & Render Best Comser (Tabel: mtd_comser | Sort: total_mtdcnc DESC)
+    async function fetchTop1MtdComser() {
+      try {
+        const { data, error } = await supabaseClient
+          .from('mtd_comser')
+          .select('*')
+          .order('total_mtdcnc', { ascending: false })
+          .limit(1);
+
+        const container = document.getElementById('comserTop1Content');
+
+        if (error) {
+          console.error("Gagal mengambil MTD Comser:", error.message);
+          return;
+        }
+
+        if (!data || data.length === 0) {
+          container.innerHTML = `
+            <div class="flex flex-col items-center justify-center h-full text-slate-400 py-12">
+              <i data-lucide="database-backup" class="w-12 h-12 mb-2"></i>
+              <p class="text-sm font-medium">Belum ada data MTD Comser</p>
+            </div>
+          `;
+          lucide.createIcons();
+          return;
+        }
+
+        const topComser = data[0];
+        const nip = topComser.nip_mtdcnc || '-';
+        const nama = topComser.nama_mtdcnc || 'NONAME';
+        const total = Number(topComser.total_mtdcnc || 0);
+        const qty = Number(topComser.qty_mtdcnc || 0);
+
+        const bucketName = 'FOTO SALES';
+        const imageUrl = `${SUPABASE_URL}/storage/v1/object/public/${encodeURIComponent(bucketName)}/${nip}.jpg`;
+        const fallbackAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(nama)}&background=10b981&color=fff&size=128`;
+
+        container.innerHTML = `
+          <div class="flex flex-col items-center justify-center text-center w-full relative">
+            <div class="relative w-48 h-48 rounded-2xl border-4 border-emerald-500 shadow-xl bg-slate-200 overflow-hidden mb-4">
+              <img src="${imageUrl}" alt="${nama}" class="w-full h-full object-cover pt-2" onerror="this.onerror=null; this.src='${fallbackAvatar}';">
+            </div>
+
+            <div class="text-sm font-mono uppercase tracking-widest text-emerald-600 font-extrabold mb-1">CHAMPION COMSER</div>
+            <h3 class="text-3xl font-extrabold text-slate-900 mb-1">${nama}</h3>
+            <div class="text-sm font-semibold text-slate-600 mb-4">NIP: <span class="font-mono text-emerald-600 font-bold">${nip}</span></div>
+            
+            <div class="w-full bg-emerald-50 border border-emerald-200 rounded-xl p-6 shadow-inner">
+              <div class="text-xs font-bold text-emerald-800 uppercase tracking-wider">TOTAL MTD COMSER (${qty} PCS)</div>
+              <div class="text-3xl font-extrabold font-mono text-emerald-600 mt-1">Rp ${total.toLocaleString('id-ID')}</div>
+            </div>
+          </div>
+        `;
+        lucide.createIcons();
+
+      } catch (err) {
+        console.error('Gagal memuat Best Comser:', err);
+      }
+    }
+
+
+    // 3. Carousel Switcher (5 Detik per Card View secara Bergantian: Sales -> Furnipro -> Comser)
     function startCarouselTimer() {
       setInterval(() => {
         const track = document.getElementById('mtdSliderTrack');
@@ -579,26 +659,31 @@
         const rightContainer = document.getElementById('rightCardContainer');
         const sliderHeader = document.getElementById('sliderHeader');
         
+        currentSlide = (currentSlide + 1) % 3;
+
         if (currentSlide === 0) {
-          currentSlide = 1;
-          track.style.transform = 'translateX(-50%)';
-          headerTitle.innerText = 'BEST FURNIPRO';
-          headerIcon.classList.remove('text-yellow-400');
-          headerIcon.classList.add('text-blue-400');
-          rightContainer.classList.remove('gold-glow-container');
-          rightContainer.classList.add('cyan-glow-container');
-          sliderHeader.style.backgroundColor = '#1e3a8a'; // Biru gelap untuk Furnipro
-        } else {
-          currentSlide = 0;
+          // BEST SALES
           track.style.transform = 'translateX(0%)';
           headerTitle.innerText = 'BEST SALES';
-          headerIcon.classList.remove('text-blue-400');
-          headerIcon.classList.add('text-yellow-400');
-          rightContainer.classList.remove('cyan-glow-container');
-          rightContainer.classList.add('gold-glow-container');
-          sliderHeader.style.backgroundColor = '#0f172a'; // Slate-900 untuk Sales
+          headerIcon.className = 'w-6 h-6 text-yellow-400';
+          rightContainer.className = 'mtd-top1-container gold-glow-container flex flex-col relative z-10 overflow-hidden';
+          sliderHeader.style.backgroundColor = '#0f172a';
+        } else if (currentSlide === 1) {
+          // BEST FURNIPRO
+          track.style.transform = 'translateX(-33.333%)';
+          headerTitle.innerText = 'BEST FURNIPRO';
+          headerIcon.className = 'w-6 h-6 text-blue-400';
+          rightContainer.className = 'mtd-top1-container cyan-glow-container flex flex-col relative z-10 overflow-hidden';
+          sliderHeader.style.backgroundColor = '#1e3a8a';
+        } else if (currentSlide === 2) {
+          // BEST COMSER
+          track.style.transform = 'translateX(-66.666%)';
+          headerTitle.innerText = 'BEST COMSER';
+          headerIcon.className = 'w-6 h-6 text-emerald-400';
+          rightContainer.className = 'mtd-top1-container emerald-glow-container flex flex-col relative z-10 overflow-hidden';
+          sliderHeader.style.backgroundColor = '#065f46';
         }
-      }, 3000); // 3 Detik
+      }, 5000); // 5 Detik per card view
     }
 
 
@@ -715,7 +800,15 @@
         })
         .subscribe();
 
-      // Channel 4: Gauge & Target
+      // Channel 4: MTD Comser (mtd_comser)
+      supabaseClient
+        .channel('realtime_mtd_comser')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'mtd_comser' }, () => {
+          fetchTop1MtdComser();
+        })
+        .subscribe();
+
+      // Channel 5: Gauge & Target
       supabaseClient
         .channel('realtime_gauge')
         .on('postgres_changes', { event: '*', schema: 'public', table: 'laporan_departemen' }, () => {
@@ -733,6 +826,7 @@
         fetchSalesData();
         fetchTop1MtdSales();
         fetchTop1MtdFurnipro();
+        fetchTop1MtdComser();
         updateGaugeData();
       }, 10000);
     }
@@ -742,6 +836,7 @@
       fetchSalesData();
       fetchTop1MtdSales();
       fetchTop1MtdFurnipro();
+      fetchTop1MtdComser();
       updateGaugeData();
       setupRealtime();
       startCarouselTimer();
