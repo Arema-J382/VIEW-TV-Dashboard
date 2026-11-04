@@ -91,7 +91,7 @@
       transition: all 0.5s ease-in-out;
     }
 
-    /* STYLING UNTUK 4 CARD VIEW DI BARIS BAWAH (DISESUAIKAN AGAR RAPI DI TV) */
+    /* STYLING UNTUK 4 CARD VIEW DI BARIS BAWAH */
     .bottom-card-container {
       width: 440px;
       height: 355px;
@@ -304,8 +304,9 @@
 
         <!-- 3. BEST SALES, FURNIPRO & COMSER CAROUSEL (KANAN) -->
         <div id="rightCardContainer" class="mtd-top1-container gold-glow-container flex flex-col relative z-10 overflow-hidden">
-          <div id="sliderHeader" class="bg-slate-900 text-white font-extrabold text-center text-2xl py-3.5 border-b border-slate-800 shadow-md z-20 shrink-0 tracking-wider flex items-center justify-center gap-2 transition-colors duration-500">
-            <i data-lucide="award" id="sliderHeaderIcon" class="w-6 h-6 text-yellow-400"></i>
+          <!-- Header disesuaikan warna emas (#92400e / amber-85ak atau gradient amber elegan) saat BEST SALES -->
+          <div id="sliderHeader" class="bg-amber-600 text-white font-extrabold text-center text-2xl py-3.5 border-b border-amber-700 shadow-md z-20 shrink-0 tracking-wider flex items-center justify-center gap-2 transition-colors duration-500">
+            <i data-lucide="award" id="sliderHeaderIcon" class="w-6 h-6 text-yellow-200"></i>
             <span id="sliderHeaderTitle">BEST SALES</span>
           </div>
 
@@ -372,7 +373,7 @@
         </div>
 
 
-        <!-- 2. MTD BY SALES (BARU) -->
+        <!-- 2. MTD BY SALES -->
         <div class="bottom-card-container">
           <div class="bg-slate-900 text-white font-extrabold text-center text-base py-2 border-b border-slate-800 shadow-md z-10 shrink-0 tracking-wider">
             MTD BY SALES
@@ -392,7 +393,7 @@
         </div>
 
 
-        <!-- 3. MTD BY FURNIPRO (BARU) -->
+        <!-- 3. MTD BY FURNIPRO -->
         <div class="bottom-card-container">
           <div class="bg-slate-900 text-white font-extrabold text-center text-base py-2 border-b border-slate-800 shadow-md z-10 shrink-0 tracking-wider">
             MTD BY FURNIPRO
@@ -412,7 +413,7 @@
         </div>
 
 
-        <!-- 4. MTD BY COMSER (BARU) -->
+        <!-- 4. MTD BY COMSER -->
         <div class="bottom-card-container">
           <div class="bg-slate-900 text-white font-extrabold text-center text-base py-2 border-b border-slate-800 shadow-md z-10 shrink-0 tracking-wider">
             MTD BY COMSER
@@ -1170,7 +1171,7 @@
     }
 
 
-    // 3. Carousel Switcher (5 Detik per Card View)
+    // 3. Carousel Switcher (5 Detik per Card View - Sinkron Warna Header)
     function startCarouselTimer() {
       setInterval(() => {
         const track = document.getElementById('mtdSliderTrack');
@@ -1184,21 +1185,24 @@
         if (currentSlide === 0) {
           track.style.transform = 'translateX(0%)';
           headerTitle.innerText = 'BEST SALES';
-          headerIcon.className = 'w-6 h-6 text-yellow-400';
+          headerIcon.className = 'w-6 h-6 text-yellow-200';
           rightContainer.className = 'mtd-top1-container gold-glow-container flex flex-col relative z-10 overflow-hidden';
-          sliderHeader.style.backgroundColor = '#0f172a';
+          sliderHeader.style.backgroundColor = '#d97706'; // Warna amber/emas senada dengan api
+          sliderHeader.style.borderColor = '#b45309';
         } else if (currentSlide === 1) {
           track.style.transform = 'translateX(-33.333%)';
           headerTitle.innerText = 'BEST FURNIPRO';
-          headerIcon.className = 'w-6 h-6 text-blue-400';
+          headerIcon.className = 'w-6 h-6 text-blue-200';
           rightContainer.className = 'mtd-top1-container cyan-glow-container flex flex-col relative z-10 overflow-hidden';
-          sliderHeader.style.backgroundColor = '#1e3a8a';
+          sliderHeader.style.backgroundColor = '#1e3a8a'; // Biru Furnipro
+          sliderHeader.style.borderColor = '#1e40af';
         } else if (currentSlide === 2) {
           track.style.transform = 'translateX(-66.666%)';
           headerTitle.innerText = 'BEST COMSER';
-          headerIcon.className = 'w-6 h-6 text-emerald-400';
+          headerIcon.className = 'w-6 h-6 text-emerald-200';
           rightContainer.className = 'mtd-top1-container emerald-glow-container flex flex-col relative z-10 overflow-hidden';
-          sliderHeader.style.backgroundColor = '#065f46';
+          sliderHeader.style.backgroundColor = '#065f46'; // Hijau Comser
+          sliderHeader.style.borderColor = '#047857';
         }
       }, 5000);
     }
