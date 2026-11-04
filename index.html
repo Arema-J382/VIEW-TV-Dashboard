@@ -31,7 +31,7 @@
       height: 100%;
     }
 
-    /* WRAPPER KOLOM KIRI (Memberikan jarak antara Target Today & Sales Departemen Today) */
+    /* WRAPPER KOLOM KIRI */
     .left-column-wrapper {
       display: flex;
       flex-direction: column;
@@ -222,14 +222,15 @@
       <!-- ================= KOLOM KIRI (GAUGE & SALES DEPARTEMEN) ================= -->
       <div class="left-column-wrapper">
         
-        <!-- 1. GAUGE CHART SECTION (TARGET TODAY) -->
+        <!-- 1. GAUGE CHART SECTION (TARGET TODAY) - DIPERBESAR & ATAS BAWAH -->
         <div id="gaugeContainer" class="gauge-section-container">
           <div class="bg-slate-900 text-white font-extrabold text-center text-lg py-2 border-b border-slate-800 shadow-md tracking-wider">
             TARGET TODAY
           </div>
 
-          <div class="flex-1 flex flex-col items-center justify-center p-3 relative bg-gradient-to-b from-slate-50 to-white">
-            <div class="relative w-64 h-28 flex items-center justify-center">
+          <div class="flex-1 flex flex-col items-center justify-center px-3 py-2 relative bg-gradient-to-b from-slate-50 to-white">
+            <!-- Ukuran SVG/Container Gauge diperbesar -->
+            <div class="relative w-80 h-36 flex items-center justify-center">
               <svg class="w-full h-full overflow-visible" viewBox="0 0 200 100">
                 <defs>
                   <path id="textArcAchieved" d="M 20 90 A 80 80 0 0 1 180 90" />
@@ -252,14 +253,15 @@
               </svg>
             </div>
 
-            <div class="w-full grid grid-cols-2 gap-2 mt-1 bg-slate-100 p-2 rounded-lg border border-slate-200 shadow-inner">
-              <div class="text-center border-r border-slate-200 pr-1">
-                <div class="text-[11px] text-slate-500 font-bold uppercase">Realisasi</div>
-                <div id="gaugeRealtimeValue" class="text-sm font-extrabold font-mono text-emerald-600 mt-0.5">Rp 0</div>
+            <!-- Keterangan Realisasi & Target Today dibuat Atas-Bawah (Vertikal) -->
+            <div class="w-full flex flex-col gap-1.5 mt-1">
+              <div class="text-center bg-slate-100 py-1.5 px-3 rounded-lg border border-slate-200 shadow-inner flex justify-between items-center">
+                <span class="text-xs text-slate-500 font-bold uppercase tracking-wider">Realisasi</span>
+                <span id="gaugeRealtimeValue" class="text-base font-extrabold font-mono text-emerald-600">Rp 0</span>
               </div>
-              <div class="text-center pl-1">
-                <div class="text-[11px] text-slate-500 font-bold uppercase">Target Today</div>
-                <div id="gaugeTargetValue" class="text-sm font-extrabold font-mono text-red-600 mt-0.5">Rp 0</div>
+              <div class="text-center bg-slate-100 py-1.5 px-3 rounded-lg border border-slate-200 shadow-inner flex justify-between items-center">
+                <span class="text-xs text-slate-500 font-bold uppercase tracking-wider">Target Today</span>
+                <span id="gaugeTargetValue" class="text-base font-extrabold font-mono text-red-600">Rp 0</span>
               </div>
             </div>
           </div>
@@ -636,7 +638,7 @@
     }
 
 
-    // 2A. Fetch & Render Top 1 MTD Sales (Optimized for perfect fit)
+    // 2A. Fetch & Render Top 1 MTD Sales
     async function fetchTop1MtdSales() {
       try {
         const { data, error } = await supabaseClient
@@ -699,7 +701,7 @@
     }
 
 
-    // 2B. Fetch & Render Best Furnipro (Optimized for perfect fit)
+    // 2B. Fetch & Render Best Furnipro
     async function fetchTop1MtdFurnipro() {
       try {
         const { data, error } = await supabaseClient
@@ -759,7 +761,7 @@
     }
 
 
-    // 2C. Fetch & Render Best Comser (Optimized for perfect fit)
+    // 2C. Fetch & Render Best Comser
     async function fetchTop1MtdComser() {
       try {
         const { data, error } = await supabaseClient
