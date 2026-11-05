@@ -26,7 +26,7 @@
       flex-direction: column;
       justify-content: flex-start;
       align-items: center;
-      gap: 1.25rem;
+      gap: 1rem;
       width: 100%;
       height: 100%;
     }
@@ -37,7 +37,7 @@
       flex-direction: row;
       justify-content: center;
       align-items: flex-start;
-      gap: 2rem;
+      gap: 1.5rem;
       width: 100%;
     }
 
@@ -47,14 +47,14 @@
       flex-direction: row;
       justify-content: center;
       align-items: flex-start;
-      gap: 1.5rem;
+      gap: 1.25rem;
       width: 100%;
     }
 
     /* AREA GAUGE CHART (TARGET TODAY) */
     .gauge-section-container {
       width: 500px;
-      height: 400px;
+      height: 380px;
       background: #ffffff;
       border-radius: 0.85rem;
       box-shadow: 0 8px 20px -4px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
@@ -68,7 +68,7 @@
     /* AREA TABEL LIVE TOP SALES TODAY */
     .custom-table-container {
       width: 600px;               
-      height: 400px;            
+      height: 380px;            
       margin: 0;         
       display: flex;
       flex-direction: column;
@@ -79,7 +79,7 @@
     /* AREA KANAN (BEST SALES, FURNIPRO & COMSER CAROUSEL) */
     .mtd-top1-container {
       width: 500px;
-      height: 400px;
+      height: 380px;
       background: #ffffff;
       border-radius: 1rem;
       box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
@@ -91,10 +91,10 @@
       transition: all 0.5s ease-in-out;
     }
 
-    /* STYLING UNTUK 4 CARD VIEW DI BARIS BAWAH (DISESUAIKAN AGAR RAPI DI TV) */
+    /* STYLING UNTUK 4 CARD VIEW DI BARIS BAWAH */
     .bottom-card-container {
       width: 440px;
-      height: 355px;
+      height: 340px;
       background: #ffffff;
       border-radius: 0.85rem;
       box-shadow: 0 8px 20px -4px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
@@ -105,7 +105,7 @@
       position: relative;
     }
 
-    /* Animasi Glow untuk Masing-masing View Card Kanan */
+    /* Animasi Glow */
     @keyframes goldGlow {
       0%, 100% { box-shadow: 0 0 10px rgba(234, 179, 8, 0.5), 0 0 20px rgba(245, 158, 11, 0.3); }
       50% { box-shadow: 0 0 22px rgba(234, 179, 8, 0.9), 0 0 32px rgba(239, 68, 68, 0.6); }
@@ -150,7 +150,6 @@
       animation-play-state: paused;
     }
 
-    /* OUTLINE PUTIH TIPIS PADA TEKS KHUSUS RANKING */
     .text-outline-white {
       text-shadow: 
         -0.75px -0.75px 0 #fff,  
@@ -167,7 +166,7 @@
 
     @keyframes bronzeGlow {
       0%, 100% { box-shadow: 0 0 8px rgba(217, 119, 6, 0.5), 0 0 16px rgba(234, 88, 12, 0.3); }
-      50% { box-shadow: 0 0 16px rgba(217, 119, 6, 0.9), 0 0 24px rgba(220, 38, 38, 0.6); }
+      50% { box-shadow: 0 0 16px rgba(217, 119, 6, 0.9), 0 0 22px rgba(220, 38, 38, 0.6); }
     }
 
     .fire-box-1 {
@@ -191,7 +190,6 @@
       animation: bronzeGlow 2s infinite ease-in-out;
     }
 
-    /* SLIDER TRACK UNTUK 3 VIEW (300% WIDTH) */
     .slider-track {
       display: flex;
       width: 300%;
@@ -199,29 +197,30 @@
       transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
-    /* ANIMASI RUNNING TEXT HORIZONTAL (KANAN KE KIRI) */
-    @keyframes marquee {
+    /* ANIMASI RUNNING TEXT HORIZONTAL MURNI DAN KONTINU (KANAN KE KIRI) */
+    @keyframes marqueeHorizontal {
       0% { transform: translateX(0%); }
       100% { transform: translateX(-50%); }
     }
 
-    .animate-marquee {
+    .marquee-wrapper {
       display: inline-flex;
       white-space: nowrap;
-      animation: marquee 35s linear infinite;
+      will-change: transform;
+      animation: marqueeHorizontal 30s linear infinite;
     }
 
-    .animate-marquee:hover {
+    .marquee-wrapper:hover {
       animation-play-state: paused;
     }
   </style>
 </head>
-<body class="bg-blue-50 text-slate-800 flex flex-col font-sans select-none">
+<body class="bg-blue-50 text-slate-800 flex flex-col font-sans select-none h-screen w-screen overflow-hidden">
 
   <!-- ================= HEADER DASHBOARD ================= -->
-  <header class="bg-slate-900 border-b border-slate-800 px-12 py-4 flex justify-between items-center shadow-md z-20 shrink-0 text-white">
+  <header class="bg-slate-900 border-b border-slate-800 px-10 py-3 flex justify-between items-center shadow-md z-20 shrink-0 text-white h-[80px]">
     <div class="flex items-center gap-4">
-      <div class="bg-blue-600 p-3 rounded-2xl text-white shadow-lg shadow-blue-600/30">
+      <div class="bg-blue-600 p-2.5 rounded-2xl text-white shadow-lg shadow-blue-600/30">
         <i data-lucide="tv" class="w-7 h-7"></i>
       </div>
       <div>
@@ -243,7 +242,7 @@
   </header>
 
   <!-- ================= MAIN VIEW (KONTEN UTAMA) ================= -->
-  <main class="flex-1 relative overflow-hidden bg-blue-50 px-6 pt-3 pb-3 flex items-start justify-center">
+  <main class="flex-1 relative overflow-hidden bg-blue-50 px-6 py-2 flex items-center justify-center">
     
     <!-- CONTAINER UTAMA 2 BARIS -->
     <div class="dashboard-layout">
@@ -253,12 +252,12 @@
         
         <!-- 1. GAUGE CHART SECTION (TARGET TODAY) -->
         <div id="gaugeContainer" class="gauge-section-container">
-          <div class="bg-slate-900 text-white font-extrabold text-center text-lg py-2 border-b border-slate-800 shadow-md tracking-wider">
+          <div class="bg-slate-900 text-white font-extrabold text-center text-lg py-1.5 border-b border-slate-800 shadow-md tracking-wider">
             TARGET TODAY
           </div>
 
-          <div class="flex-1 flex flex-col items-center justify-center px-3 py-2 relative bg-gradient-to-b from-slate-50 to-white">
-            <div class="relative w-80 h-36 flex items-center justify-center">
+          <div class="flex-1 flex flex-col items-center justify-center px-3 py-1 relative bg-gradient-to-b from-slate-50 to-white">
+            <div class="relative w-80 h-32 flex items-center justify-center">
               <svg class="w-full h-full overflow-visible" viewBox="0 0 200 100">
                 <defs>
                   <path id="textArcAchieved" d="M 20 90 A 80 80 0 0 1 180 90" />
@@ -282,23 +281,22 @@
             </div>
 
             <div class="w-full flex flex-col gap-1.5 mt-1">
-              <div class="text-center bg-slate-100 py-1.5 px-3 rounded-lg border border-slate-200 shadow-inner flex justify-between items-center">
-                <span class="text-xl text-slate-500 font-bold uppercase tracking-wider">Realisasi</span>
-                <span id="gaugeRealtimeValue" class="text-xl font-extrabold font-mono text-emerald-600">Rp 0</span>
+              <div class="text-center bg-slate-100 py-1 px-3 rounded-lg border border-slate-200 shadow-inner flex justify-between items-center">
+                <span class="text-lg text-slate-500 font-bold uppercase tracking-wider">Realisasi</span>
+                <span id="gaugeRealtimeValue" class="text-lg font-extrabold font-mono text-emerald-600">Rp 0</span>
               </div>
-              <div class="text-center bg-slate-100 py-1.5 px-3 rounded-lg border border-slate-200 shadow-inner flex justify-between items-center">
-                <span class="text-xl text-slate-500 font-bold uppercase tracking-wider">Target Today</span>
-                <span id="gaugeTargetValue" class="text-xl font-extrabold font-mono text-red-600">Rp 0</span>
+              <div class="text-center bg-slate-100 py-1 px-3 rounded-lg border border-slate-200 shadow-inner flex justify-between items-center">
+                <span class="text-lg text-slate-500 font-bold uppercase tracking-wider">Target Today</span>
+                <span id="gaugeTargetValue" class="text-lg font-extrabold font-mono text-red-600">Rp 0</span>
               </div>
             </div>
           </div>
         </div>
-        <!-- ================= AKHIR GAUGE CHART SECTION ================= -->
 
 
         <!-- 2. LIVE TOP SALES TODAY (TENGAH) -->
         <div class="custom-table-container flex flex-col relative z-10">
-          <div class="bg-slate-900 text-white font-extrabold text-center text-2xl py-3.5 rounded-t-xl border-b border-slate-800 shadow-md z-10 shrink-0 tracking-wider">
+          <div class="bg-slate-900 text-white font-extrabold text-center text-xl py-2.5 rounded-t-xl border-b border-slate-800 shadow-md z-10 shrink-0 tracking-wider">
             LIVE TOP SALES TODAY
           </div>
 
@@ -310,17 +308,16 @@
 
           <div class="flex-1 overflow-hidden relative border-x border-b border-blue-200 rounded-b-xl bg-white scroll-container shadow-lg">
             <div id="scrollWrapper" class="absolute w-full animate-scroll-infinite">
-              <div id="tableContentOriginal" class="space-y-3 p-3"></div>
-              <div id="tableContentClone" class="space-y-3 p-3" aria-hidden="true"></div>
+              <div id="tableContentOriginal" class="space-y-2.5 p-2.5"></div>
+              <div id="tableContentClone" class="space-y-2.5 p-2.5" aria-hidden="true"></div>
             </div>
           </div>
         </div>
-        <!-- ================= AKHIR LIVE TOP SALES TODAY ================= -->
 
 
         <!-- 3. BEST SALES, FURNIPRO & COMSER CAROUSEL (KANAN) -->
         <div id="rightCardContainer" class="mtd-top1-container gold-glow-container flex flex-col relative z-10 overflow-hidden">
-          <div id="sliderHeader" class="bg-slate-900 text-white font-extrabold text-center text-2xl py-3.5 border-b border-slate-800 shadow-md z-20 shrink-0 tracking-wider flex items-center justify-center gap-2 transition-colors duration-500">
+          <div id="sliderHeader" class="bg-slate-900 text-white font-extrabold text-center text-xl py-2.5 border-b border-slate-800 shadow-md z-20 shrink-0 tracking-wider flex items-center justify-center gap-2 transition-colors duration-500">
             <i data-lucide="award" id="sliderHeaderIcon" class="w-6 h-6 text-yellow-400"></i>
             <span id="sliderHeaderTitle">BEST SALES</span>
           </div>
@@ -328,49 +325,47 @@
           <div class="flex-1 relative overflow-hidden">
             <div id="mtdSliderTrack" class="slider-track">
               <!-- VIEW 1: BEST SALES -->
-              <div class="w-1/3 h-full flex flex-col items-center justify-center p-4 bg-gradient-to-b from-amber-50/50 to-white shrink-0">
+              <div class="w-1/3 h-full flex flex-col items-center justify-center p-3 bg-gradient-to-b from-amber-50/50 to-white shrink-0">
                 <div id="mtdTop1Content" class="w-full flex flex-col items-center justify-center">
-                  <div class="flex flex-col items-center justify-center text-slate-400 py-12">
-                    <i data-lucide="loader-2" class="w-10 h-10 animate-spin mb-2"></i>
-                    <p class="text-sm font-medium">Memuat Best Sales...</p>
+                  <div class="flex flex-col items-center justify-center text-slate-400 py-10">
+                    <i data-lucide="loader-2" class="w-9 h-9 animate-spin mb-2"></i>
+                    <p class="text-xs font-medium">Memuat Best Sales...</p>
                   </div>
                 </div>
               </div>
 
               <!-- VIEW 2: BEST FURNIPRO -->
-              <div class="w-1/3 h-full flex flex-col items-center justify-center p-4 bg-gradient-to-b from-blue-50/50 to-white shrink-0">
+              <div class="w-1/3 h-full flex flex-col items-center justify-center p-3 bg-gradient-to-b from-blue-50/50 to-white shrink-0">
                 <div id="furniproTop1Content" class="w-full flex flex-col items-center justify-center">
-                  <div class="flex flex-col items-center justify-center text-slate-400 py-12">
-                    <i data-lucide="loader-2" class="w-10 h-10 animate-spin mb-2"></i>
-                    <p class="text-sm font-medium">Memuat Best Furnipro...</p>
+                  <div class="flex flex-col items-center justify-center text-slate-400 py-10">
+                    <i data-lucide="loader-2" class="w-9 h-9 animate-spin mb-2"></i>
+                    <p class="text-xs font-medium">Memuat Best Furnipro...</p>
                   </div>
                 </div>
               </div>
 
               <!-- VIEW 3: BEST COMSER -->
-              <div class="w-1/3 h-full flex flex-col items-center justify-center p-4 bg-gradient-to-b from-emerald-50/50 to-white shrink-0">
+              <div class="w-1/3 h-full flex flex-col items-center justify-center p-3 bg-gradient-to-b from-emerald-50/50 to-white shrink-0">
                 <div id="comserTop1Content" class="w-full flex flex-col items-center justify-center">
-                  <div class="flex flex-col items-center justify-center text-slate-400 py-12">
-                    <i data-lucide="loader-2" class="w-10 h-10 animate-spin mb-2"></i>
-                    <p class="text-sm font-medium">Memuat Best Comser...</p>
+                  <div class="flex flex-col items-center justify-center text-slate-400 py-10">
+                    <i data-lucide="loader-2" class="w-9 h-9 animate-spin mb-2"></i>
+                    <p class="text-xs font-medium">Memuat Best Comser...</p>
                   </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
-        <!-- ================= AKHIR CAROUSEL KANAN ================= -->
 
       </div>
-      <!-- ================= AKHIR BARIS ATAS ================= -->
 
 
-      <!-- ================= BARIS BAWAH: 4 TABEL CARD VIEW BERJEJER RAPI ================= -->
+      <!-- ================= BARIS BAWAH: 4 TABEL CARD VIEW ================= -->
       <div class="bottom-row">
 
         <!-- 1. SALES DEPARTEMEN TODAY -->
         <div class="bottom-card-container">
-          <div class="bg-slate-900 text-white font-extrabold text-center text-base py-2 border-b border-slate-800 shadow-md z-10 shrink-0 tracking-wider">
+          <div class="bg-slate-900 text-white font-extrabold text-center text-sm py-1.5 border-b border-slate-800 shadow-md z-10 shrink-0 tracking-wider">
             SALES DEPARTEMEN TODAY
           </div>
 
@@ -390,7 +385,7 @@
 
         <!-- 2. MTD BY SALES -->
         <div class="bottom-card-container">
-          <div class="bg-slate-900 text-white font-extrabold text-center text-base py-2 border-b border-slate-800 shadow-md z-10 shrink-0 tracking-wider">
+          <div class="bg-slate-900 text-white font-extrabold text-center text-sm py-1.5 border-b border-slate-800 shadow-md z-10 shrink-0 tracking-wider">
             MTD BY SALES
           </div>
 
@@ -410,7 +405,7 @@
 
         <!-- 3. MTD BY FURNIPRO -->
         <div class="bottom-card-container">
-          <div class="bg-slate-900 text-white font-extrabold text-center text-base py-2 border-b border-slate-800 shadow-md z-10 shrink-0 tracking-wider">
+          <div class="bg-slate-900 text-white font-extrabold text-center text-sm py-1.5 border-b border-slate-800 shadow-md z-10 shrink-0 tracking-wider">
             MTD BY FURNIPRO
           </div>
 
@@ -430,7 +425,7 @@
 
         <!-- 4. MTD BY COMSER -->
         <div class="bottom-card-container">
-          <div class="bg-slate-900 text-white font-extrabold text-center text-base py-2 border-b border-slate-800 shadow-md z-10 shrink-0 tracking-wider">
+          <div class="bg-slate-900 text-white font-extrabold text-center text-sm py-1.5 border-b border-slate-800 shadow-md z-10 shrink-0 tracking-wider">
             MTD BY COMSER
           </div>
 
@@ -448,23 +443,22 @@
         </div>
 
       </div>
-      <!-- ================= AKHIR BARIS BAWAH ================= -->
 
     </div>
   </main>
 
   <!-- ================= RUNNING TEXT FOOTER DI BAGIAN PALING BAWAH ================= -->
-  <footer class="bg-slate-900 border-t-2 border-blue-500/40 text-white h-12 flex items-center px-6 shrink-0 relative overflow-hidden z-30 shadow-xl">
+  <footer class="bg-slate-900 border-t-2 border-blue-500/50 text-white h-[50px] flex items-center px-6 shrink-0 relative overflow-hidden z-50 shadow-2xl">
     <!-- Pojok Kiri: Border Title "INFO BOLO" dengan Ikon Sound -->
-    <div class="flex items-center bg-slate-800 border-2 border-blue-500/60 px-3.5 py-1 rounded-lg shrink-0 mr-4 shadow-md gap-2 z-10">
-      <i data-lucide="volume-2" class="w-4 h-4 text-blue-400 animate-pulse"></i>
-      <span class="text-xs font-extrabold tracking-widest text-white uppercase">INFO BOLO</span>
+    <div class="flex items-center bg-blue-900/80 border-2 border-blue-400 px-4 py-1 rounded-lg shrink-0 mr-4 shadow-lg gap-2.5 z-20">
+      <i data-lucide="volume-2" class="w-5 h-5 text-yellow-400 animate-pulse"></i>
+      <span class="text-sm font-black tracking-widest text-white uppercase drop-shadow">INFO BOLO</span>
     </div>
 
-    <!-- Area Teks Berjalan dari Kanan ke Kiri & Looping Tanpa Henti -->
-    <div class="flex-1 overflow-hidden relative flex items-center">
-      <div id="runningTextContainer" class="whitespace-nowrap flex items-center animate-marquee text-sm font-semibold text-slate-100 tracking-wide">
-        <span class="px-4">Memuat informasi running text dari database...</span>
+    <!-- Area Teks Berjalan Kanan ke Kiri & Looping Tanpa Henti -->
+    <div class="flex-1 overflow-hidden relative flex items-center h-full">
+      <div id="runningTextContainer" class="marquee-wrapper text-base font-bold text-yellow-300 tracking-wider">
+        <span class="px-6">Memuat informasi running text...</span>
       </div>
     </div>
   </footer>
@@ -592,10 +586,10 @@
         }
 
         htmlRows += `
-          <div class="grid grid-cols-12 items-center px-4 py-3 transition shadow-sm ${rowClass}">
+          <div class="grid grid-cols-12 items-center px-4 py-2.5 transition shadow-sm ${rowClass}">
             <div class="col-span-4 flex items-center justify-center gap-3">
               <span class="font-bold text-lg w-6 text-right ${numberStyle}">${rank}.</span>
-              <div class="relative w-16 h-16 rounded-lg border-2 ${borderPhotoStyle} bg-slate-200 shrink-0 shadow-md">
+              <div class="relative w-14 h-14 rounded-lg border-2 ${borderPhotoStyle} bg-slate-200 shrink-0 shadow-md">
                 ${crownMarkup}
                 <div class="w-full h-full rounded-[6px] overflow-hidden relative z-10">
                   <img src="${imageUrl}" alt="${item.nama}" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='${fallbackAvatar}';">
@@ -704,10 +698,10 @@
         }
 
         htmlRows += `
-          <div class="grid grid-cols-12 items-center px-3 py-2 transition shadow-sm ${rowClass}">
+          <div class="grid grid-cols-12 items-center px-3 py-1.5 transition shadow-sm ${rowClass}">
             <div class="col-span-4 flex items-center justify-center gap-2">
               <span class="font-bold text-sm w-5 text-right ${numberStyle}">${rank}.</span>
-              <div class="relative w-10 h-10 rounded-md border-2 ${borderPhotoStyle} bg-slate-200 shrink-0 shadow-sm">
+              <div class="relative w-9 h-9 rounded-md border-2 ${borderPhotoStyle} bg-slate-200 shrink-0 shadow-sm">
                 ${crownMarkup}
                 <div class="w-full h-full rounded-[4px] overflow-hidden relative z-10">
                   <img src="${imageUrl}" alt="${namaDept}" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='${fallbackAvatar}';">
@@ -816,10 +810,10 @@
         }
 
         htmlRows += `
-          <div class="grid grid-cols-12 items-center px-3 py-2 transition shadow-sm ${rowClass}">
+          <div class="grid grid-cols-12 items-center px-3 py-1.5 transition shadow-sm ${rowClass}">
             <div class="col-span-4 flex items-center justify-center gap-2">
               <span class="font-bold text-sm w-5 text-right ${numberStyle}">${rank}.</span>
-              <div class="relative w-10 h-10 rounded-md border-2 ${borderPhotoStyle} bg-slate-200 shrink-0 shadow-sm">
+              <div class="relative w-9 h-9 rounded-md border-2 ${borderPhotoStyle} bg-slate-200 shrink-0 shadow-sm">
                 ${crownMarkup}
                 <div class="w-full h-full rounded-[4px] overflow-hidden relative z-10">
                   <img src="${imageUrl}" alt="${nama}" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='${fallbackAvatar}';">
@@ -928,10 +922,10 @@
         }
 
         htmlRows += `
-          <div class="grid grid-cols-12 items-center px-3 py-2 transition shadow-sm ${rowClass}">
+          <div class="grid grid-cols-12 items-center px-3 py-1.5 transition shadow-sm ${rowClass}">
             <div class="col-span-4 flex items-center justify-center gap-2">
               <span class="font-bold text-sm w-5 text-right ${numberStyle}">${rank}.</span>
-              <div class="relative w-10 h-10 rounded-md border-2 ${borderPhotoStyle} bg-slate-200 shrink-0 shadow-sm">
+              <div class="relative w-9 h-9 rounded-md border-2 ${borderPhotoStyle} bg-slate-200 shrink-0 shadow-sm">
                 ${crownMarkup}
                 <div class="w-full h-full rounded-[4px] overflow-hidden relative z-10">
                   <img src="${imageUrl}" alt="${nama}" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='${fallbackAvatar}';">
@@ -1040,10 +1034,10 @@
         }
 
         htmlRows += `
-          <div class="grid grid-cols-12 items-center px-3 py-2 transition shadow-sm ${rowClass}">
+          <div class="grid grid-cols-12 items-center px-3 py-1.5 transition shadow-sm ${rowClass}">
             <div class="col-span-4 flex items-center justify-center gap-2">
               <span class="font-bold text-sm w-5 text-right ${numberStyle}">${rank}.</span>
-              <div class="relative w-10 h-10 rounded-md border-2 ${borderPhotoStyle} bg-slate-200 shrink-0 shadow-sm">
+              <div class="relative w-9 h-9 rounded-md border-2 ${borderPhotoStyle} bg-slate-200 shrink-0 shadow-sm">
                 ${crownMarkup}
                 <div class="w-full h-full rounded-[4px] overflow-hidden relative z-10">
                   <img src="${imageUrl}" alt="${nama}" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='${fallbackAvatar}';">
@@ -1067,7 +1061,7 @@
     }
 
 
-    // 1.6. Fetch & Render Running Text from Table "running_text", Column "run_text"
+    // 1.6. FETCH & RENDER RUNNING TEXT DENGAN PERBAIKAN DUAL-SPANS LOOP
     async function fetchRunningText() {
       const container = document.getElementById('runningTextContainer');
       if (!container) return;
@@ -1077,31 +1071,32 @@
           .from('running_text')
           .select('run_text');
 
-        if (error) {
-          console.error('Gagal mengambil running text:', error);
-          container.innerHTML = `<span class="px-4 text-amber-400">Gagal memuat running text: ${error.message}</span>`;
-          return;
+        let rawTexts = [];
+
+        if (!error && data && data.length > 0) {
+          rawTexts = data.map(item => item.run_text).filter(Boolean);
         }
 
-        if (data && data.length > 0) {
-          const texts = data.map(item => item.run_text).filter(Boolean);
-          if (texts.length > 0) {
-            // Gabungkan teks dengan ikon/simbol pemisah
-            const separator = '    •    ';
-            const joinedText = texts.join(separator);
-            // Gandakan konten agar looping animasi infinite berjalan mulus tanpa jeda
-            container.innerHTML = `
-              <span class="px-4">${joinedText}${separator}</span>
-              <span class="px-4">${joinedText}${separator}</span>
-            `;
-          } else {
-            container.innerHTML = '<span class="px-4">Belum ada data pada kolom run_text.</span>';
-          }
-        } else {
-          container.innerHTML = '<span class="px-4">Belum ada data pada tabel running_text.</span>';
+        // Teks fallback jika database kosong / terhalang permission RLS
+        if (rawTexts.length === 0) {
+          rawTexts = [
+            "SELAMAT DATANG DI INFORMA MOG MALANG (J382)",
+            "TINGKATKAN PENJUALAN DAN PERTAHANKAN SEMANGAT KINERJA TERBAIK HARI INI!",
+            "UTAMAKAN PELAYANAN TERBAIK KEPADA PELANGGAN SETIA INFORMA"
+          ];
         }
+
+        const separator = '    •    ';
+        const joinedText = rawTexts.join(separator);
+
+        // Render 2 span berdampingan agar animasi 0% -> -50% berjalan mulus tanpa celah
+        container.innerHTML = `
+          <span class="inline-block px-8">${joinedText}${separator}</span>
+          <span class="inline-block px-8">${joinedText}${separator}</span>
+        `;
       } catch (err) {
-        console.error('Error running text:', err);
+        console.error('Error fetching running text:', err);
+        container.innerHTML = `<span class="inline-block px-8">SELAMAT DATANG DI INFORMA MOG MALANG   •   LIVE TV DASHBOARD</span>`;
       }
     }
 
@@ -1129,20 +1124,20 @@
 
         container.innerHTML = `
           <div class="flex flex-col items-center justify-center text-center w-full relative px-2">
-            <div class="relative w-36 h-36 rounded-2xl border-4 border-yellow-500 shadow-lg bg-slate-200 overflow-hidden mb-2.5">
+            <div class="relative w-32 h-32 rounded-2xl border-4 border-yellow-500 shadow-lg bg-slate-200 overflow-hidden mb-2">
               <div class="absolute -top-3 left-1/2 -translate-x-1/2 z-20 text-yellow-500 drop-shadow-[0_2px_4px_rgba(234,179,8,0.9)]">
-                <i data-lucide="crown" class="w-9 h-9 fill-yellow-400"></i>
+                <i data-lucide="crown" class="w-8 h-8 fill-yellow-400"></i>
               </div>
               <img src="${imageUrl}" alt="${nama}" class="w-full h-full object-cover pt-1" onerror="this.onerror=null; this.src='${fallbackAvatar}';">
             </div>
 
-            <div class="text-[11px] font-mono uppercase tracking-widest text-amber-600 font-extrabold mb-0.5">CHAMPION OF THE MONTH</div>
-            <h3 class="text-2xl font-extrabold text-slate-900 mb-0.5 tracking-tight line-clamp-1">${nama}</h3>
-            <div class="text-xs font-semibold text-slate-600 mb-3">NIP: <span class="font-mono text-blue-600 font-bold">${nip}</span></div>
+            <div class="text-[10px] font-mono uppercase tracking-widest text-amber-600 font-extrabold mb-0.5">CHAMPION OF THE MONTH</div>
+            <h3 class="text-xl font-extrabold text-slate-900 mb-0.5 tracking-tight line-clamp-1">${nama}</h3>
+            <div class="text-xs font-semibold text-slate-600 mb-2">NIP: <span class="font-mono text-blue-600 font-bold">${nip}</span></div>
             
-            <div class="w-full bg-amber-50 border border-amber-200 rounded-xl p-3 shadow-inner">
+            <div class="w-full bg-amber-50 border border-amber-200 rounded-xl p-2.5 shadow-inner">
               <div class="text-[10px] font-bold text-amber-800 uppercase tracking-wider">TOTAL MTD SALES</div>
-              <div class="text-2xl font-extrabold font-mono text-emerald-600 mt-0.5">Rp ${total.toLocaleString('id-ID')}</div>
+              <div class="text-xl font-extrabold font-mono text-emerald-600 mt-0.5">Rp ${total.toLocaleString('id-ID')}</div>
             </div>
           </div>
         `;
@@ -1176,17 +1171,17 @@
 
         container.innerHTML = `
           <div class="flex flex-col items-center justify-center text-center w-full relative px-2">
-            <div class="relative w-36 h-36 rounded-2xl border-4 border-blue-500 shadow-lg bg-slate-200 overflow-hidden mb-2.5">
+            <div class="relative w-32 h-32 rounded-2xl border-4 border-blue-500 shadow-lg bg-slate-200 overflow-hidden mb-2">
               <img src="${imageUrl}" alt="${nama}" class="w-full h-full object-cover pt-1" onerror="this.onerror=null; this.src='${fallbackAvatar}';">
             </div>
 
-            <div class="text-[11px] font-mono uppercase tracking-widest text-blue-600 font-extrabold mb-0.5">CHAMPION FURNIPRO</div>
-            <h3 class="text-2xl font-extrabold text-slate-900 mb-0.5 tracking-tight line-clamp-1">${nama}</h3>
-            <div class="text-xs font-semibold text-slate-600 mb-3">NIP: <span class="font-mono text-blue-600 font-bold">${nip}</span></div>
+            <div class="text-[10px] font-mono uppercase tracking-widest text-blue-600 font-extrabold mb-0.5">CHAMPION FURNIPRO</div>
+            <h3 class="text-xl font-extrabold text-slate-900 mb-0.5 tracking-tight line-clamp-1">${nama}</h3>
+            <div class="text-xs font-semibold text-slate-600 mb-2">NIP: <span class="font-mono text-blue-600 font-bold">${nip}</span></div>
             
-            <div class="w-full bg-blue-50 border border-blue-200 rounded-xl p-3 shadow-inner">
+            <div class="w-full bg-blue-50 border border-blue-200 rounded-xl p-2.5 shadow-inner">
               <div class="text-[10px] font-bold text-blue-800 uppercase tracking-wider">TOTAL MTD FURNIPRO</div>
-              <div class="text-2xl font-extrabold font-mono text-blue-600 mt-0.5">${qty.toLocaleString('id-ID')} PCS</div>
+              <div class="text-xl font-extrabold font-mono text-blue-600 mt-0.5">${qty.toLocaleString('id-ID')} PCS</div>
             </div>
           </div>
         `;
@@ -1220,17 +1215,17 @@
 
         container.innerHTML = `
           <div class="flex flex-col items-center justify-center text-center w-full relative px-2">
-            <div class="relative w-36 h-36 rounded-2xl border-4 border-emerald-500 shadow-lg bg-slate-200 overflow-hidden mb-2.5">
+            <div class="relative w-32 h-32 rounded-2xl border-4 border-emerald-500 shadow-lg bg-slate-200 overflow-hidden mb-2">
               <img src="${imageUrl}" alt="${nama}" class="w-full h-full object-cover pt-1" onerror="this.onerror=null; this.src='${fallbackAvatar}';">
             </div>
 
-            <div class="text-[11px] font-mono uppercase tracking-widest text-emerald-600 font-extrabold mb-0.5">CHAMPION COMSER</div>
-            <h3 class="text-2xl font-extrabold text-slate-900 mb-0.5 tracking-tight line-clamp-1">${nama}</h3>
-            <div class="text-xs font-semibold text-slate-600 mb-3">NIP: <span class="font-mono text-emerald-600 font-bold">${nip}</span></div>
+            <div class="text-[10px] font-mono uppercase tracking-widest text-emerald-600 font-extrabold mb-0.5">CHAMPION COMSER</div>
+            <h3 class="text-xl font-extrabold text-slate-900 mb-0.5 tracking-tight line-clamp-1">${nama}</h3>
+            <div class="text-xs font-semibold text-slate-600 mb-2">NIP: <span class="font-mono text-emerald-600 font-bold">${nip}</span></div>
             
-            <div class="w-full bg-emerald-50 border border-emerald-200 rounded-xl p-3 shadow-inner">
+            <div class="w-full bg-emerald-50 border border-emerald-200 rounded-xl p-2.5 shadow-inner">
               <div class="text-[10px] font-bold text-emerald-800 uppercase tracking-wider">TOTAL MTD COMSER</div>
-              <div class="text-2xl font-extrabold font-mono text-emerald-600 mt-0.5">Rp ${total.toLocaleString('id-ID')}</div>
+              <div class="text-xl font-extrabold font-mono text-emerald-600 mt-0.5">Rp ${total.toLocaleString('id-ID')}</div>
             </div>
           </div>
         `;
@@ -1366,9 +1361,7 @@
     function setupRealtime() {
       supabaseClient
         .channel('realtime_laporan_sales')
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'laporan_sales' }, () => {
-          fetchSalesData();
-        })
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'laporan_sales' }, () => fetchSalesData())
         .subscribe();
 
       supabaseClient
@@ -1405,20 +1398,16 @@
 
       supabaseClient
         .channel('realtime_target')
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'target_today' }, () => {
-          updateGaugeData();
-        })
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'target_today' }, () => updateGaugeData())
         .subscribe();
 
       supabaseClient
         .channel('realtime_running_text')
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'running_text' }, () => {
-          fetchRunningText();
-        })
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'running_text' }, () => fetchRunningText())
         .subscribe();
     }
 
-    // Polling Cadangan (Backup Sync setiap 10 detik)
+    // Polling Cadangan (Backup Sync)
     function startBackupPolling() {
       setInterval(() => {
         fetchSalesData();
