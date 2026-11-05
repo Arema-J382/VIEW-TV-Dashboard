@@ -1066,7 +1066,7 @@
     }
 
 
-    // 1.6. FETCH & RENDER RUNNING TEXT DARI TABEL "running_text" & KOLOM "run_text"
+    // 1.6. FETCH & RENDER RUNNING TEXT DARI TABEL "running_text" & KOLOM "run_text" (TANPA PEMISAH BULLET DI AKHIR)
     async function fetchRunningText() {
       const container = document.getElementById('runningTextContainer');
       if (!container) return;
@@ -1094,7 +1094,8 @@
         const separator = '    •    ';
         const joinedText = rawTexts.join(separator);
 
-        container.innerHTML = `<span>${joinedText}${separator}</span>`;
+        // Hanya merender teks murni tanpa tanda titik/bullet berlebih di ujung belakang
+        container.innerHTML = `<span>${joinedText}</span>`;
       } catch (err) {
         console.error('Error fetching running text:', err);
         container.innerHTML = `<span>SELAMAT DATANG DI INFORMA MOG MALANG   •   LIVE TV DASHBOARD</span>`;
