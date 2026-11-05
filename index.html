@@ -197,20 +197,24 @@
       transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
-    /* ANIMASI RUNNING TEXT HORIZONTAL MURNI DAN KONTINU (KANAN KE KIRI) */
-    @keyframes marqueeHorizontal {
-      0% { transform: translateX(0%); }
-      100% { transform: translateX(-50%); }
+    /* ANIMASI RUNNING TEXT TRUE MARQUEE (KELUAR DARI KANAN KE KIRI) */
+    @keyframes trueMarquee {
+      0% {
+        transform: translateX(100%);
+      }
+      100% {
+        transform: translateX(-100%);
+      }
     }
 
-    .marquee-wrapper {
-      display: inline-flex;
+    .true-marquee-anim {
+      display: inline-block;
       white-space: nowrap;
       will-change: transform;
-      animation: marqueeHorizontal 30s linear infinite;
+      animation: trueMarquee 28s linear infinite;
     }
 
-    .marquee-wrapper:hover {
+    .true-marquee-anim:hover {
       animation-play-state: paused;
     }
   </style>
@@ -218,13 +222,13 @@
 <body class="bg-blue-50 text-slate-800 flex flex-col font-sans select-none h-screen w-screen overflow-hidden">
 
   <!-- ================= HEADER DASHBOARD ================= -->
-  <header class="bg-slate-900 border-b border-slate-800 px-10 py-3 flex justify-between items-center shadow-md z-20 shrink-0 text-white h-[80px]">
+  <header class="bg-slate-900 border-b border-slate-800 px-10 py-3 flex justify-between items-center shadow-md z-20 shrink-0 h-[80px]">
     <div class="flex items-center gap-4">
       <div class="bg-blue-600 p-2.5 rounded-2xl text-white shadow-lg shadow-blue-600/30">
         <i data-lucide="tv" class="w-7 h-7"></i>
       </div>
       <div>
-        <h1 class="text-2xl font-bold tracking-wide">INFORMA MOG MALANG (J382)</h1>
+        <h1 class="text-2xl font-bold tracking-wide text-white">INFORMA MOG MALANG (J382)</h1>
         <p class="text-xs text-blue-400 font-medium">LIVE TV DASHBOARD - LAPORAN SALES</p>
       </div>
     </div>
@@ -448,17 +452,18 @@
   </main>
 
   <!-- ================= RUNNING TEXT FOOTER DI BAGIAN PALING BAWAH ================= -->
-  <footer class="bg-slate-900 border-t-2 border-blue-500/50 text-white h-[50px] flex items-center px-6 shrink-0 relative overflow-hidden z-50 shadow-2xl">
-    <!-- Pojok Kiri: Border Title "INFO BOLO" dengan Ikon Sound -->
-    <div class="flex items-center bg-blue-900/80 border-2 border-blue-400 px-4 py-1 rounded-lg shrink-0 mr-4 shadow-lg gap-2.5 z-20">
+  <footer class="bg-slate-900 border-t-2 border-blue-500/50 text-white h-[50px] flex items-center px-4 shrink-0 relative overflow-hidden z-50 shadow-2xl">
+    
+    <!-- POJOK KIRI: BORDER TITLE "INFO BOLO" DENGAN IKON SOUND (Z-INDEX TINGGI AGAR TEKS BERJALAN TENGGELAM DI BALIKNYA) -->
+    <div class="flex items-center bg-slate-900 border-2 border-blue-400 px-4 py-1 rounded-lg shrink-0 mr-2 shadow-lg gap-2.5 z-30 relative">
       <i data-lucide="volume-2" class="w-5 h-5 text-yellow-400 animate-pulse"></i>
       <span class="text-sm font-black tracking-widest text-white uppercase drop-shadow">INFO BOLO</span>
     </div>
 
-    <!-- Area Teks Berjalan Kanan ke Kiri & Looping Tanpa Henti -->
-    <div class="flex-1 overflow-hidden relative flex items-center h-full">
-      <div id="runningTextContainer" class="marquee-wrapper text-base font-bold text-yellow-300 tracking-wider">
-        <span class="px-6">Memuat informasi running text...</span>
+    <!-- AREA RUNNING TEXT YANG KELUAR DARI KANAN & HILANG DI BALIK BORDER TITLE KIRI -->
+    <div class="flex-1 overflow-hidden relative h-full flex items-center">
+      <div id="runningTextContainer" class="true-marquee-anim text-base font-bold text-yellow-300 tracking-wider">
+        <span class="px-4">Memuat informasi running text...</span>
       </div>
     </div>
   </footer>
@@ -1061,7 +1066,7 @@
     }
 
 
-    // 1.6. FETCH & RENDER RUNNING TEXT DENGAN PERBAIKAN DUAL-SPANS LOOP
+    // 1.6. FETCH & RENDER RUNNING TEXT DARI TABEL "running_text" & KOLOM "run_text"
     async function fetchRunningText() {
       const container = document.getElementById('runningTextContainer');
       if (!container) return;
@@ -1077,7 +1082,7 @@
           rawTexts = data.map(item => item.run_text).filter(Boolean);
         }
 
-        // Teks fallback jika database kosong / terhalang permission RLS
+        // Teks fallback jika database kosong / belum terhubung
         if (rawTexts.length === 0) {
           rawTexts = [
             "SELAMAT DATANG DI INFORMA MOG MALANG (J382)",
@@ -1089,14 +1094,11 @@
         const separator = '    •    ';
         const joinedText = rawTexts.join(separator);
 
-        // Render 2 span berdampingan agar animasi 0% -> -50% berjalan mulus tanpa celah
-        container.innerHTML = `
-          <span class="inline-block px-8">${joinedText}${separator}</span>
-          <span class="inline-block px-8">${joinedText}${separator}</span>
-        `;
+        // Menampilkan teks dengan jeda pemisah agar keluar dari kanan layar dan masuk ke kiri secara looping tanpa henti
+        container.innerHTML = `<span>${joinedText}${separator}</span>`;
       } catch (err) {
         console.error('Error fetching running text:', err);
-        container.innerHTML = `<span class="inline-block px-8">SELAMAT DATANG DI INFORMA MOG MALANG   •   LIVE TV DASHBOARD</span>`;
+        container.innerHTML = `<span>SELAMAT DATANG DI INFORMA MOG MALANG   •   LIVE TV DASHBOARD</span>`;
       }
     }
 
