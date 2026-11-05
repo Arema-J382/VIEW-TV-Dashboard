@@ -197,8 +197,8 @@
       transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
-    /* ANIMASI RUNNING TEXT TRUE MARQUEE (KELUAR DARI KANAN KE KIRI) */
-    @keyframes trueMarquee {
+    /* ANIMASI RUNNING TEXT DARI LUAR LAYAR KANAN MENUJU KE KIRI */
+    @keyframes slideFromRight {
       0% {
         transform: translateX(100%);
       }
@@ -207,14 +207,14 @@
       }
     }
 
-    .true-marquee-anim {
+    .running-text-scroll {
       display: inline-block;
       white-space: nowrap;
       will-change: transform;
-      animation: trueMarquee 28s linear infinite;
+      animation: slideFromRight 32s linear infinite;
     }
 
-    .true-marquee-anim:hover {
+    .running-text-scroll:hover {
       animation-play-state: paused;
     }
   </style>
@@ -460,9 +460,9 @@
       <span class="text-sm font-black tracking-widest text-white uppercase drop-shadow">INFO BOLO</span>
     </div>
 
-    <!-- AREA RUNNING TEXT YANG KELUAR DARI KANAN & HILANG DI BALIK BORDER TITLE KIRI -->
+    <!-- AREA RUNNING TEXT YANG BENAR-BENAR KELUAR DARI POJOK KANAN LAYAR DAN HILANG DI BALIK BORDER KIRI -->
     <div class="flex-1 overflow-hidden relative h-full flex items-center">
-      <div id="runningTextContainer" class="true-marquee-anim text-base font-bold text-yellow-300 tracking-wider">
+      <div id="runningTextContainer" class="running-text-scroll text-base font-bold text-yellow-300 tracking-wider">
         <span class="px-4">Memuat informasi running text...</span>
       </div>
     </div>
@@ -1094,7 +1094,7 @@
         const separator = '    •    ';
         const joinedText = rawTexts.join(separator);
 
-        // Menampilkan teks dengan jeda pemisah agar keluar dari kanan layar dan masuk ke kiri secara looping tanpa henti
+        // Menampilkan teks agar bergerak dari luar pojok kanan layar menuju ke kiri
         container.innerHTML = `<span>${joinedText}${separator}</span>`;
       } catch (err) {
         console.error('Error fetching running text:', err);
