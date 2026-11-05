@@ -218,7 +218,7 @@
       animation-play-state: paused;
     }
 
-    /* UJUNG KANAN POTONGAN MIRING BROADCAST STYLE */
+    /* TRACK RUNNING TEXT DENGAN UJUNG MIRING WARNA MERAH */
     .broadcast-slant-edge {
       clip-path: polygon(0 0, calc(100% - 35px) 0, 100% 100%, 0 100%);
     }
@@ -457,18 +457,18 @@
   </main>
 
   <!-- ================= LOWER THIRD BROADCAST FOOTER ================= -->
-  <footer class="w-full h-[52px] flex items-center shrink-0 relative overflow-hidden z-50 bg-slate-900">
+  <footer class="w-full h-[52px] flex items-center shrink-0 relative overflow-hidden z-50 bg-red-600">
     
-    <!-- 1. KOTAK MERAH KIRI (INFO BOLO TANPA SECOND LINE) -->
+    <!-- 1. KOTAK MERAH KIRI (INFO BOLO) -->
     <div class="bg-red-600 text-white px-6 h-full flex items-center gap-3 shrink-0 z-30 shadow-lg relative font-sans">
       <i data-lucide="volume-2" class="w-6 h-6 text-yellow-300 animate-pulse"></i>
       <span class="text-base font-black tracking-widest uppercase text-white drop-shadow">INFO BOLO</span>
     </div>
 
-    <!-- 2. AREA RUNNING TEXT PUTIH DENGAN TEKS HITAM DAN UJUNG MIRING (BROADCAST STYLE) -->
-    <div class="bg-white text-slate-900 flex-1 h-full relative overflow-hidden flex items-center broadcast-slant-edge z-20 shadow-inner">
+    <!-- 2. TRACK RUNNING TEXT BIRU TUA GELAP DENGAN TEKS PUTIH & UJUNG KANAN MIRING RED ACCENT -->
+    <div class="bg-slate-900 text-white flex-1 h-full relative overflow-hidden flex items-center broadcast-slant-edge z-20 shadow-inner border-l border-red-700">
       <div class="absolute inset-0 overflow-hidden pointer-events-none">
-        <div id="runningTextContainer" class="screen-marquee-anim text-lg font-bold text-slate-900 tracking-wider flex items-center h-full">
+        <div id="runningTextContainer" class="screen-marquee-anim text-lg font-bold text-white tracking-wider flex items-center h-full">
           <span>Memuat informasi running text...</span>
         </div>
       </div>
