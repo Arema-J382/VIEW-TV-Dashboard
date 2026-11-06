@@ -13,7 +13,9 @@
   <script src="https://unpkg.com/lucide@latest"></script>
 
   <style>
-    /* Optimasi Rendering Teks Agar Tajam & Tidak Buram di TV */
+    /* ==========================================================================
+       OPTIMASI RENDERING AGAR TEKS TAJAM & ANIMASI TIDAK PATAH-PATAH DI SMART TV
+       ========================================================================== */
     * {
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
@@ -47,7 +49,6 @@
       backface-visibility: hidden;
     }
 
-    /* CONTAINER UTAMA DASHBOARD */
     .dashboard-layout {
       display: flex;
       flex-direction: column;
@@ -58,7 +59,6 @@
       height: 100%;
     }
 
-    /* BARIS ATAS */
     .top-row {
       display: flex;
       flex-direction: row;
@@ -68,7 +68,6 @@
       width: 100%;
     }
 
-    /* BARIS BAWAH */
     .bottom-row {
       display: flex;
       flex-direction: row;
@@ -78,10 +77,16 @@
       width: 100%;
     }
 
-    /* AREA GAUGE CHART */
+    /* ==========================================================================
+       PANDUAN EDIT UKURAN KOTAK / CARD VIEW BARIS ATAS
+       - Cara memperkecil: Kurangi nilai width (lebar) dan height (tinggi)
+       - Cara memperbesar: Tambah nilai width dan height
+       ========================================================================== */
+
+    /* 1. KOTAK GAUGE CHART (TARGET TODAY) */
     .gauge-section-container {
-      width: 500px;
-      height: 380px;
+      width: 500px;  /* EDIT LEBAR KOTAK GAUGE */
+      height: 380px; /* EDIT TINGGI KOTAK GAUGE */
       background: #ffffff;
       border-radius: 0.85rem;
       box-shadow: 0 8px 20px -4px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
@@ -92,10 +97,10 @@
       position: relative;
     }
 
-    /* AREA TABEL LIVE TOP SALES */
+    /* 2. KOTAK TABEL LIVE TOP SALES (TENGAH) */
     .custom-table-container {
-      width: 600px;               
-      height: 380px;            
+      width: 600px;  /* EDIT LEBAR KOTAK TABEL TENGAH */
+      height: 380px; /* EDIT TINGGI KOTAK TABEL TENGAH */
       margin: 0;         
       display: flex;
       flex-direction: column;
@@ -103,10 +108,10 @@
       z-index: 10;
     }
 
-    /* AREA KANAN (CAROUSEL) */
+    /* 3. KOTAK CAROUSEL KANAN (BEST SALES, FURNIPRO, COMSER) */
     .mtd-top1-container {
-      width: 500px;
-      height: 380px;
+      width: 500px;  /* EDIT LEBAR KOTAK CAROUSEL KANAN */
+      height: 380px; /* EDIT TINGGI KOTAK CAROUSEL KANAN */
       background: #ffffff;
       border-radius: 1rem;
       box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
@@ -118,10 +123,12 @@
       transition: all 0.5s ease-in-out;
     }
 
-    /* STYLING UNTUK 4 CARD VIEW DI BARIS BAWAH */
+    /* ==========================================================================
+       PANDUAN EDIT UKURAN KOTAK / CARD VIEW BARIS BAWAH (4 TABEL KECIL)
+       ========================================================================== */
     .bottom-card-container {
-      width: 440px;
-      height: 340px;
+      width: 440px;  /* EDIT LEBAR PER CARD DI BARIS BAWAH */
+      height: 340px; /* EDIT TINGGI PER CARD DI BARIS BAWAH */
       background: #ffffff;
       border-radius: 0.85rem;
       box-shadow: 0 8px 20px -4px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
@@ -132,7 +139,7 @@
       position: relative;
     }
 
-    /* Animasi Glow dengan GPU Acceleration */
+    /* Animasi Glow */
     @keyframes goldGlow {
       0%, 100% { box-shadow: 0 0 10px rgba(234, 179, 8, 0.5), 0 0 20px rgba(245, 158, 11, 0.3); }
       50% { box-shadow: 0 0 22px rgba(234, 179, 8, 0.9), 0 0 32px rgba(239, 68, 68, 0.6); }
@@ -163,7 +170,6 @@
       animation: emeraldGlow 2s infinite ease-in-out;
     }
 
-    /* Animasi Scrolling Vertikal Tabel yang Smooth (Hardware Accelerated) */
     @keyframes scrollUp {
       0% { transform: translate3d(0, 0, 0); }
       100% { transform: translate3d(0, -50%, 0); }
@@ -226,7 +232,6 @@
       will-change: transform;
     }
 
-    /* Animasi Running Text yang Super Smooth (Translate3D GPU) */
     @keyframes screenMarquee {
       0% {
         transform: translate3d(1920px, 0, 0);
@@ -255,13 +260,11 @@
 </head>
 <body class="bg-slate-950 text-slate-800 select-none overflow-hidden m-0 p-0">
 
-  <!-- SAFE-AREA CONTAINER (Pencegah Overscan Layar Smart TV 2.5%) -->
+  <!-- SAFE-AREA CONTAINER -->
   <div class="w-full h-full p-[2.5%] box-border flex items-center justify-center overflow-hidden">
     
-    <!-- CONTAINER ASPECT RATIO DINAMIS DARI SUPABASE -->
     <div id="tvAspectRatioBox" class="w-full max-h-full flex items-center justify-center relative overflow-hidden" style="aspect-ratio: 70 / 39;">
       
-      <!-- KANVAS UTAMA 1920x1080 YANG DISKALAKAN DENGAN AKselerasi GPU -->
       <div id="tvScaleCanvas" class="tv-canvas rounded-2xl shadow-2xl">
 
         <!-- ================= HEADER DASHBOARD ================= -->
@@ -271,6 +274,7 @@
               <i data-lucide="tv" class="w-7 h-7"></i>
             </div>
             <div>
+              <!-- [PANDUAN TEKS]: Ubah text-2xl jika ingin memperkecil/memperbesar judul toko -->
               <h1 class="text-2xl font-bold tracking-wide text-white">INFORMA MOG MALANG (J382)</h1>
               <p class="text-xs text-blue-400 font-medium">LIVE TV DASHBOARD - LAPORAN SALES</p>
             </div>
@@ -278,6 +282,7 @@
           
           <div class="flex items-center gap-8">
             <div class="text-right">
+              <!-- [PANDUAN TEKS]: Ubah text-3xl untuk ukuran jam digital -->
               <div id="currentTime" class="text-3xl font-mono font-bold text-slate-100">00:00:00</div>
               <div id="currentDate" class="text-xs text-slate-400">-</div>
             </div>
@@ -288,16 +293,15 @@
           </div>
         </header>
 
-        <!-- ================= MAIN VIEW (KONTEN UTAMA) ================= -->
+        <!-- ================= MAIN VIEW ================= -->
         <main class="flex-1 relative overflow-hidden bg-blue-50 px-6 py-2 flex items-center justify-center">
           
-          <!-- CONTAINER UTAMA 2 BARIS -->
           <div class="dashboard-layout">
 
             <!-- ================= BARIS ATAS ================= -->
             <div class="top-row">
               
-              <!-- 1. GAUGE CHART SECTION (TARGET TODAY) -->
+              <!-- 1. GAUGE CHART SECTION -->
               <div id="gaugeContainer" class="gauge-section-container">
                 <div class="bg-slate-900 text-white font-extrabold text-center text-lg py-1.5 border-b border-slate-800 shadow-md tracking-wider">
                   TARGET TODAY
@@ -329,12 +333,12 @@
 
                   <div class="w-full flex flex-col gap-1.5 mt-1">
                     <div class="text-center bg-slate-100 py-1 px-3 rounded-lg border border-slate-200 shadow-inner flex justify-between items-center">
-                      <span class="text-lg text-slate-500 font-bold uppercase tracking-wider">Realisasi</span>
-                      <span id="gaugeRealtimeValue" class="text-lg font-extrabold font-mono text-emerald-600">Rp 0</span>
+                      <span class="text-2xl text-slate-500 font-bold uppercase tracking-wider">Realisasi</span>
+                      <span id="gaugeRealtimeValue" class="text-2xl font-extrabold font-mono text-emerald-600">Rp 0</span>
                     </div>
                     <div class="text-center bg-slate-100 py-1 px-3 rounded-lg border border-slate-200 shadow-inner flex justify-between items-center">
-                      <span class="text-lg text-slate-500 font-bold uppercase tracking-wider">Target Today</span>
-                      <span id="gaugeTargetValue" class="text-lg font-extrabold font-mono text-red-600">Rp 0</span>
+                      <span class="text-2xl text-slate-500 font-bold uppercase tracking-wider">Target Today</span>
+                      <span id="gaugeTargetValue" class="text-2xl font-extrabold font-mono text-red-600">Rp 0</span>
                     </div>
                   </div>
                 </div>
@@ -362,7 +366,7 @@
               </div>
 
 
-              <!-- 3. BEST SALES, FURNIPRO & COMSER CAROUSEL (KANAN) -->
+              <!-- 3. BEST SALES CAROUSEL (KANAN) -->
               <div id="rightCardContainer" class="mtd-top1-container gold-glow-container flex flex-col relative z-10 overflow-hidden">
                 <div id="sliderHeader" class="bg-slate-900 text-white font-extrabold text-center text-xl py-2.5 border-b border-slate-800 shadow-md z-20 shrink-0 tracking-wider flex items-center justify-center gap-2 transition-colors duration-500">
                   <i data-lucide="award" id="sliderHeaderIcon" class="w-6 h-6 text-yellow-400"></i>
@@ -371,7 +375,6 @@
 
                 <div class="flex-1 relative overflow-hidden">
                   <div id="mtdSliderTrack" class="slider-track">
-                    <!-- VIEW 1: BEST SALES -->
                     <div class="w-1/3 h-full flex flex-col items-center justify-center p-3 bg-gradient-to-b from-amber-50/50 to-white shrink-0">
                       <div id="mtdTop1Content" class="w-full flex flex-col items-center justify-center">
                         <div class="flex flex-col items-center justify-center text-slate-400 py-10">
@@ -381,7 +384,6 @@
                       </div>
                     </div>
 
-                    <!-- VIEW 2: BEST FURNIPRO -->
                     <div class="w-1/3 h-full flex flex-col items-center justify-center p-3 bg-gradient-to-b from-blue-50/50 to-white shrink-0">
                       <div id="furniproTop1Content" class="w-full flex flex-col items-center justify-center">
                         <div class="flex flex-col items-center justify-center text-slate-400 py-10">
@@ -391,7 +393,6 @@
                       </div>
                     </div>
 
-                    <!-- VIEW 3: BEST COMSER -->
                     <div class="w-1/3 h-full flex flex-col items-center justify-center p-3 bg-gradient-to-b from-emerald-50/50 to-white shrink-0">
                       <div id="comserTop1Content" class="w-full flex flex-col items-center justify-center">
                         <div class="flex flex-col items-center justify-center text-slate-400 py-10">
@@ -415,12 +416,10 @@
                 <div class="bg-slate-900 text-white font-extrabold text-center text-sm py-1.5 border-b border-slate-800 shadow-md z-10 shrink-0 tracking-wider">
                   SALES DEPARTEMEN TODAY
                 </div>
-
                 <div id="emptyStatusDept" class="hidden absolute inset-0 pt-12 flex flex-col items-center justify-center z-20 bg-white/90 backdrop-blur-sm rounded-b-xl">
                   <i data-lucide="database-backup" class="w-8 h-8 text-slate-400 mb-1"></i>
                   <div id="statusMessageDept" class="text-slate-600 text-xs font-medium">Belum ada data laporan departemen.</div>
                 </div>
-
                 <div class="flex-1 overflow-hidden relative bg-white scroll-container">
                   <div id="scrollWrapperDept" class="absolute w-full animate-scroll-infinite">
                     <div id="tableContentOriginalDept" class="space-y-1.5 p-2"></div>
@@ -429,18 +428,15 @@
                 </div>
               </div>
 
-
               <!-- 2. MTD BY SALES -->
               <div class="bottom-card-container">
                 <div class="bg-slate-900 text-white font-extrabold text-center text-sm py-1.5 border-b border-slate-800 shadow-md z-10 shrink-0 tracking-wider">
                   MTD BY SALES
                 </div>
-
                 <div id="emptyStatusMtdSales" class="hidden absolute inset-0 pt-12 flex flex-col items-center justify-center z-20 bg-white/90 backdrop-blur-sm rounded-b-xl">
                   <i data-lucide="database-backup" class="w-8 h-8 text-slate-400 mb-1"></i>
                   <div id="statusMessageMtdSales" class="text-slate-600 text-xs font-medium">Belum ada data MTD Sales.</div>
                 </div>
-
                 <div class="flex-1 overflow-hidden relative bg-white scroll-container">
                   <div id="scrollWrapperMtdSales" class="absolute w-full animate-scroll-infinite">
                     <div id="tableContentOriginalMtdSales" class="space-y-1.5 p-2"></div>
@@ -449,18 +445,15 @@
                 </div>
               </div>
 
-
               <!-- 3. MTD BY FURNIPRO -->
               <div class="bottom-card-container">
                 <div class="bg-slate-900 text-white font-extrabold text-center text-sm py-1.5 border-b border-slate-800 shadow-md z-10 shrink-0 tracking-wider">
                   MTD BY FURNIPRO
                 </div>
-
                 <div id="emptyStatusMtdFurnipro" class="hidden absolute inset-0 pt-12 flex flex-col items-center justify-center z-20 bg-white/90 backdrop-blur-sm rounded-b-xl">
                   <i data-lucide="database-backup" class="w-8 h-8 text-slate-400 mb-1"></i>
                   <div id="statusMessageMtdFurnipro" class="text-slate-600 text-xs font-medium">Belum ada data MTD Furnipro.</div>
                 </div>
-
                 <div class="flex-1 overflow-hidden relative bg-white scroll-container">
                   <div id="scrollWrapperMtdFurnipro" class="absolute w-full animate-scroll-infinite">
                     <div id="tableContentOriginalMtdFurnipro" class="space-y-1.5 p-2"></div>
@@ -469,18 +462,15 @@
                 </div>
               </div>
 
-
               <!-- 4. MTD BY COMSER -->
               <div class="bottom-card-container">
                 <div class="bg-slate-900 text-white font-extrabold text-center text-sm py-1.5 border-b border-slate-800 shadow-md z-10 shrink-0 tracking-wider">
                   MTD BY COMSER
                 </div>
-
                 <div id="emptyStatusMtdComser" class="hidden absolute inset-0 pt-12 flex flex-col items-center justify-center z-20 bg-white/90 backdrop-blur-sm rounded-b-xl">
                   <i data-lucide="database-backup" class="w-8 h-8 text-slate-400 mb-1"></i>
                   <div id="statusMessageMtdComser" class="text-slate-600 text-xs font-medium">Belum ada data MTD Comser.</div>
                 </div>
-
                 <div class="flex-1 overflow-hidden relative bg-white scroll-container">
                   <div id="scrollWrapperMtdComser" class="absolute w-full animate-scroll-infinite">
                     <div id="tableContentOriginalMtdComser" class="space-y-1.5 p-2"></div>
@@ -496,14 +486,11 @@
 
         <!-- ================= LOWER THIRD BROADCAST FOOTER ================= -->
         <footer class="w-full h-[52px] flex items-center shrink-0 relative overflow-hidden z-50 bg-red-600">
-          
-          <!-- 1. KOTAK MERAH KIRI (INFO BOLO) -->
           <div class="bg-red-600 text-white px-6 h-full flex items-center gap-3 shrink-0 z-30 shadow-lg relative font-sans">
             <i data-lucide="volume-2" class="w-6 h-6 text-yellow-300 animate-pulse"></i>
             <span class="text-xl font-black tracking-widest uppercase text-white drop-shadow">INFO BOLO</span>
           </div>
 
-          <!-- 2. TRACK RUNNING TEXT BIRU TUA GELAP DENGAN TEKS PUTIH & UJUNG KANAN MIRING RED ACCENT -->
           <div class="bg-slate-900 text-white flex-1 h-full relative overflow-hidden flex items-center broadcast-slant-edge z-20 shadow-inner border-l border-red-700">
             <div class="absolute inset-0 overflow-hidden pointer-events-none">
               <div id="runningTextContainer" class="screen-marquee-anim text-lg font-bold text-white tracking-wider flex items-center h-full">
@@ -532,7 +519,6 @@
     let mtdComserList = [];
     let currentSlide = 0; 
 
-    // Fungsi Skala Proposional Smart TV Berbasis GPU
     function scaleDashboard() {
       const box = document.getElementById('tvAspectRatioBox');
       const canvas = document.getElementById('tvScaleCanvas');
@@ -550,7 +536,6 @@
 
     window.addEventListener('resize', scaleDashboard);
 
-    // Ambil setting aspek rasio dari tabel setting_tv
     async function fetchTvSettings() {
       try {
         const { data, error } = await supabaseClient
@@ -560,7 +545,6 @@
           .single();
 
         if (error) {
-          console.error('Gagal mengambil setting_tv:', error);
           scaleDashboard();
           return;
         }
@@ -575,22 +559,17 @@
           }
         }
       } catch (err) {
-        console.error('Error fetching TV settings:', err);
         scaleDashboard();
       }
     }
 
-    // Ambil data master karyawan dari tabel data_karyawan (nip_kar -> nama_kar)[cite: 5]
     async function fetchKaryawanData() {
       try {
         const { data, error } = await supabaseClient
           .from('data_karyawan')
           .select('nip_kar, nama_kar');
 
-        if (error) {
-          console.error('Gagal mengambil data_karyawan:', error);
-          return;
-        }
+        if (error) return;
 
         if (data) {
           karyawanMap = {};
@@ -600,19 +579,15 @@
             }
           });
         }
-      } catch (err) {
-        console.error('Error fetching data_karyawan:', err);
-      }
+      } catch (err) {}
     }
 
-    // Helper untuk mendapatkan nama pendek dari tabel data_karyawan berdasarkan NIP[cite: 5]
     function getEmployeeName(nip, fallbackName) {
       if (nip === undefined || nip === null) return fallbackName || 'NONAME';
       const cleanNip = String(nip).trim();
       return karyawanMap[cleanNip] || fallbackName || cleanNip;
     }
 
-    // Jam Digital Dashboard
     function updateClock() {
       const now = new Date();
       document.getElementById('currentTime').innerText = now.toLocaleTimeString('id-ID');
@@ -636,7 +611,6 @@
     const scrollWrapperMtdComser = document.getElementById('scrollWrapperMtdComser');
     if (scrollWrapperMtdComser) scrollWrapperMtdComser.style.animationDuration = '40s';
 
-    // 1. Fetch & Render Top Sales Data (Daily Sales)
     async function fetchSalesData() {
       const emptyStatus = document.getElementById('emptyStatus');
       const statusMessage = document.getElementById('statusMessage');
@@ -648,7 +622,6 @@
           .order('total', { ascending: false });
 
         if (error) {
-          console.error('Gagal mengambil data sales:', error);
           emptyStatus.classList.remove('hidden');
           statusMessage.innerText = 'Gagal memuat data: ' + error.message;
           return;
@@ -659,9 +632,7 @@
           renderDashboard();
         }
       } catch (err) {
-        console.error('Terjadi kesalahan:', err);
         emptyStatus.classList.remove('hidden');
-        statusMessage.innerText = 'Terjadi kesalahan sistem.';
       }
     }
 
@@ -717,7 +688,7 @@
           textEffectClass = "text-outline-white font-bold";
           numberStyle = "text-outline-white font-extrabold text-xl";
           crownMarkup = `
-            <div class="absolute -top-3.5 left-1/2 -translate-x-1/2 z-20 text-amber-600 drop-shadow-[0_2px_4px_rgba(217,119,6,0.8)]">
+            <div class="absolute -top-3.5 left-1/2 -translate-x-1/2 z-20 text-amber-600 drop-shadow-[0_2px_3px_rgba(217,119,6,0.8)]">
               <i data-lucide="crown" class="w-6 h-6 fill-amber-500"></i>
             </div>`;
         }
@@ -726,6 +697,8 @@
           <div class="grid grid-cols-12 items-center px-4 py-2.5 transition shadow-sm ${rowClass}">
             <div class="col-span-4 flex items-center justify-center gap-3">
               <span class="font-bold text-lg w-6 text-right ${numberStyle}">${rank}.</span>
+              
+              <!-- [PANDUAN UKURAN FOTO TABEL UTAMA]: w-14 h-14 (Ubah ke w-12 h-12 untuk memperkecil, atau w-16 h-16 untuk memperbesar) -->
               <div class="relative w-14 h-14 rounded-lg border-2 ${borderPhotoStyle} bg-slate-200 shrink-0 shadow-md">
                 ${crownMarkup}
                 <div class="w-full h-full rounded-[6px] overflow-hidden relative z-10">
@@ -733,10 +706,16 @@
                 </div>
               </div>
             </div>
+
             <div class="col-span-4 pl-2">
+              <!-- [PANDUAN UKURAN TEKS NAMA]: text-base (Ubah ke text-sm jika ingin memperkecil, atau text-lg untuk memperbesar) -->
               <div class="text-slate-900 text-base tracking-wide truncate ${textEffectClass}">${displayName}</div>
+              
+              <!-- [PANDUAN UKURAN TEKS NIP]: text-xs (Ubah ke text-[10px] untuk memperkecil) -->
               <div class="text-xs font-mono text-blue-600 font-semibold mt-0.5 ${textEffectClass}">NIP: ${item.nip}</div>
             </div>
+
+            <!-- [PANDUAN UKURAN NOMINAL RP]: text-lg (Ubah ke text-base untuk memperkecil, atau text-xl untuk memperbesar) -->
             <div class="col-span-4 text-right font-mono font-bold text-emerald-600 text-lg ${textEffectClass}">
               Rp ${Number(item.total).toLocaleString('id-ID')}
             </div>
@@ -749,8 +728,6 @@
       lucide.createIcons();
     }
 
-
-    // 1.2. Fetch & Render Sales Departemen Today
     async function fetchDeptData() {
       const emptyStatusDept = document.getElementById('emptyStatusDept');
       const statusMessageDept = document.getElementById('statusMessageDept');
@@ -773,12 +750,7 @@
           deptList = data;
           renderDeptDashboard();
         }
-      } catch (err) {
-        if (emptyStatusDept) {
-          emptyStatusDept.classList.remove('hidden');
-          statusMessageDept.innerText = 'Terjadi kesalahan sistem.';
-        }
-      }
+      } catch (err) {}
     }
 
     function renderDeptDashboard() {
@@ -838,6 +810,8 @@
           <div class="grid grid-cols-12 items-center px-3 py-1.5 transition shadow-sm ${rowClass}">
             <div class="col-span-4 flex items-center justify-center gap-2">
               <span class="font-bold text-sm w-5 text-right ${numberStyle}">${rank}.</span>
+              
+              <!-- [PANDUAN FOTO TABEL BAWAH]: w-9 h-9 (Ubah ke w-8 h-8 untuk memperkecil, atau w-10 h-10 untuk memperbesar) -->
               <div class="relative w-9 h-9 rounded-md border-2 ${borderPhotoStyle} bg-slate-200 shrink-0 shadow-sm">
                 ${crownMarkup}
                 <div class="w-full h-full rounded-[4px] overflow-hidden relative z-10">
@@ -845,10 +819,14 @@
                 </div>
               </div>
             </div>
+
             <div class="col-span-4 pl-1">
+              <!-- [PANDUAN TEKS TABEL BAWAH]: text-xs (Ubah ke text-sm untuk memperbesar) -->
               <div class="text-slate-900 text-xs font-semibold tracking-wide truncate ${textEffectClass}">${namaDept}</div>
               <div class="text-[10px] font-mono text-blue-600 font-bold mt-0.5 ${textEffectClass}">CODE: ${kodeDept}</div>
             </div>
+
+            <!-- [PANDUAN NOMINAL TABEL BAWAH]: text-xs -->
             <div class="col-span-4 text-right font-mono font-bold text-emerald-600 text-xs ${textEffectClass}">
               Rp ${excludePpn.toLocaleString('id-ID')}
             </div>
@@ -861,8 +839,6 @@
       lucide.createIcons();
     }
 
-
-    // 1.3. Fetch & Render MTD By Sales
     async function fetchMtdSalesData() {
       const emptyStatus = document.getElementById('emptyStatusMtdSales');
       const statusMessage = document.getElementById('statusMessageMtdSales');
@@ -873,24 +849,13 @@
           .select('*')
           .order('mtd_total', { ascending: false });
 
-        if (error) {
-          if (emptyStatus) {
-            emptyStatus.classList.remove('hidden');
-            statusMessage.innerText = 'Gagal memuat data: ' + error.message;
-          }
-          return;
-        }
+        if (error) return;
 
         if (data) {
           mtdSalesList = data;
           renderMtdSalesDashboard();
         }
-      } catch (err) {
-        if (emptyStatus) {
-          emptyStatus.classList.remove('hidden');
-          statusMessage.innerText = 'Terjadi kesalahan sistem.';
-        }
-      }
+      } catch (err) {}
     }
 
     function renderMtdSalesDashboard() {
@@ -973,8 +938,6 @@
       lucide.createIcons();
     }
 
-
-    // 1.4. Fetch & Render MTD By Furnipro
     async function fetchMtdFurniproData() {
       const emptyStatus = document.getElementById('emptyStatusMtdFurnipro');
       const statusMessage = document.getElementById('statusMessageMtdFurnipro');
@@ -985,24 +948,13 @@
           .select('*')
           .order('qty_mtdfp', { ascending: false });
 
-        if (error) {
-          if (emptyStatus) {
-            emptyStatus.classList.remove('hidden');
-            statusMessage.innerText = 'Gagal memuat data: ' + error.message;
-          }
-          return;
-        }
+        if (error) return;
 
         if (data) {
           mtdFurniproList = data;
           renderMtdFurniproDashboard();
         }
-      } catch (err) {
-        if (emptyStatus) {
-          emptyStatus.classList.remove('hidden');
-          statusMessage.innerText = 'Terjadi kesalahan sistem.';
-        }
-      }
+      } catch (err) {}
     }
 
     function renderMtdFurniproDashboard() {
@@ -1085,8 +1037,6 @@
       lucide.createIcons();
     }
 
-
-    // 1.5. Fetch & Render MTD By Comser
     async function fetchMtdComserData() {
       const emptyStatus = document.getElementById('emptyStatusMtdComser');
       const statusMessage = document.getElementById('statusMessageMtdComser');
@@ -1097,24 +1047,13 @@
           .select('*')
           .order('total_mtdcnc', { ascending: false });
 
-        if (error) {
-          if (emptyStatus) {
-            emptyStatus.classList.remove('hidden');
-            statusMessage.innerText = 'Gagal memuat data: ' + error.message;
-          }
-          return;
-        }
+        if (error) return;
 
         if (data) {
           mtdComserList = data;
           renderMtdComserDashboard();
         }
-      } catch (err) {
-        if (emptyStatus) {
-          emptyStatus.classList.remove('hidden');
-          statusMessage.innerText = 'Terjadi kesalahan sistem.';
-        }
-      }
+      } catch (err) {}
     }
 
     function renderMtdComserDashboard() {
@@ -1197,8 +1136,6 @@
       lucide.createIcons();
     }
 
-
-    // 1.6. FETCH & RENDER RUNNING TEXT DARI TABEL "running_text" & KOLOM "run_text"
     async function fetchRunningText() {
       const container = document.getElementById('runningTextContainer');
       if (!container) return;
@@ -1226,14 +1163,9 @@
         const joinedText = rawTexts.join(separator);
 
         container.innerHTML = `<span>${joinedText}</span>`;
-      } catch (err) {
-        console.error('Error fetching running text:', err);
-        container.innerHTML = `<span>SELAMAT DATANG DI INFORMA MOG MALANG &nbsp;&nbsp;&bull;&nbsp;&nbsp; LIVE TV DASHBOARD</span>`;
-      }
+      } catch (err) {}
     }
 
-
-    // 2A. Fetch & Render Top 1 MTD Sales (Carousel Kanan)
     async function fetchTop1MtdSales() {
       try {
         const { data, error } = await supabaseClient
@@ -1256,6 +1188,7 @@
 
         container.innerHTML = `
           <div class="flex flex-col items-center justify-center text-center w-full relative px-2">
+            <!-- [PANDUAN UKURAN FOTO CAROUSEL]: w-32 h-32 (Ubah ke w-28 h-28 untuk memperkecil, atau w-36 h-36 untuk memperbesar) -->
             <div class="relative w-32 h-32 rounded-2xl border-4 border-yellow-500 shadow-lg bg-slate-200 overflow-hidden mb-2">
               <div class="absolute -top-3 left-1/2 -translate-x-1/2 z-20 text-yellow-500 drop-shadow-[0_2px_4px_rgba(234,179,8,0.9)]">
                 <i data-lucide="crown" class="w-8 h-8 fill-yellow-400"></i>
@@ -1264,7 +1197,10 @@
             </div>
 
             <div class="text-[10px] font-mono uppercase tracking-widest text-amber-600 font-extrabold mb-0.5">CHAMPION OF THE MONTH</div>
+            
+            <!-- [PANDUAN TEKS NAMA CAROUSEL]: text-xl (Ubah ke text-lg untuk memperkecil) -->
             <h3 class="text-xl font-extrabold text-slate-900 mb-0.5 tracking-tight line-clamp-1">${displayName}</h3>
+            
             <div class="text-xs font-semibold text-slate-600 mb-2">NIP: <span class="font-mono text-blue-600 font-bold">${nip}</span></div>
             
             <div class="w-full bg-amber-50 border border-amber-200 rounded-xl p-2.5 shadow-inner">
@@ -1274,13 +1210,9 @@
           </div>
         `;
         lucide.createIcons();
-      } catch (err) {
-        console.error('Gagal memuat Top 1 MTD Sales:', err);
-      }
+      } catch (err) {}
     }
 
-
-    // 2B. Fetch & Render Best Furnipro (Carousel Kanan)
     async function fetchTop1MtdFurnipro() {
       try {
         const { data, error } = await supabaseClient
@@ -1318,13 +1250,9 @@
           </div>
         `;
         lucide.createIcons();
-      } catch (err) {
-        console.error('Gagal memuat Best Furnipro:', err);
-      }
+      } catch (err) {}
     }
 
-
-    // 2C. Fetch & Render Best Comser (Carousel Kanan)
     async function fetchTop1MtdComser() {
       try {
         const { data, error } = await supabaseClient
@@ -1362,13 +1290,9 @@
           </div>
         `;
         lucide.createIcons();
-      } catch (err) {
-        console.error('Gagal memuat Best Comser:', err);
-      }
+      } catch (err) {}
     }
 
-
-    // 3. Carousel Switcher (5 Detik per Card View)
     function startCarouselTimer() {
       setInterval(() => {
         const track = document.getElementById('mtdSliderTrack');
@@ -1401,8 +1325,6 @@
       }, 5000);
     }
 
-
-    // 4. Fetch & Compute Realtime Gauge Chart Data
     async function updateGaugeData() {
       try {
         const { data: targetData, error: targetError } = await supabaseClient
@@ -1482,83 +1404,30 @@
         } else {
           arcElement.style.stroke = '#f59e0b';
         }
-
-      } catch (err) {
-        console.error('Gagal memperbarui gauge:', err);
-      }
+      } catch (err) {}
     }
 
-
-    // 5. Saluran Supabase Realtime Sync Terintegrasi
     function setupRealtime() {
-      supabaseClient
-        .channel('realtime_setting_tv')
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'setting_tv' }, () => fetchTvSettings())
-        .subscribe();
-
-      supabaseClient
-        .channel('realtime_data_karyawan')
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'data_karyawan' }, async () => {
-          await fetchKaryawanData();
-          renderDashboard();
-          renderMtdSalesDashboard();
-          renderMtdFurniproDashboard();
-          renderMtdComserDashboard();
-          fetchTop1MtdSales();
-          fetchTop1MtdFurnipro();
-          fetchTop1MtdComser();
-        })
-        .subscribe();
-
-      supabaseClient
-        .channel('realtime_laporan_sales')
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'laporan_sales' }, () => fetchSalesData())
-        .subscribe();
-
-      supabaseClient
-        .channel('realtime_laporan_departemen')
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'laporan_departemen' }, () => {
-          fetchDeptData();
-          updateGaugeData();
-        })
-        .subscribe();
-
-      supabaseClient
-        .channel('realtime_mtd_sales')
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'mtd_sales' }, () => {
-          fetchTop1MtdSales();
-          fetchMtdSalesData();
-        })
-        .subscribe();
-
-      supabaseClient
-        .channel('realtime_mtd_fp')
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'mtd_fp' }, () => {
-          fetchTop1MtdFurnipro();
-          fetchMtdFurniproData();
-        })
-        .subscribe();
-
-      supabaseClient
-        .channel('realtime_mtd_comser')
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'mtd_comser' }, () => {
-          fetchTop1MtdComser();
-          fetchMtdComserData();
-        })
-        .subscribe();
-
-      supabaseClient
-        .channel('realtime_target')
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'target_today' }, () => updateGaugeData())
-        .subscribe();
-
-      supabaseClient
-        .channel('realtime_running_text')
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'running_text' }, () => fetchRunningText())
-        .subscribe();
+      supabaseClient.channel('realtime_setting_tv').on('postgres_changes', { event: '*', schema: 'public', table: 'setting_tv' }, () => fetchTvSettings()).subscribe();
+      supabaseClient.channel('realtime_data_karyawan').on('postgres_changes', { event: '*', schema: 'public', table: 'data_karyawan' }, async () => {
+        await fetchKaryawanData();
+        renderDashboard();
+        renderMtdSalesDashboard();
+        renderMtdFurniproDashboard();
+        renderMtdComserDashboard();
+        fetchTop1MtdSales();
+        fetchTop1MtdFurnipro();
+        fetchTop1MtdComser();
+      }).subscribe();
+      supabaseClient.channel('realtime_laporan_sales').on('postgres_changes', { event: '*', schema: 'public', table: 'laporan_sales' }, () => fetchSalesData()).subscribe();
+      supabaseClient.channel('realtime_laporan_departemen').on('postgres_changes', { event: '*', schema: 'public', table: 'laporan_departemen' }, () => { fetchDeptData(); updateGaugeData(); }).subscribe();
+      supabaseClient.channel('realtime_mtd_sales').on('postgres_changes', { event: '*', schema: 'public', table: 'mtd_sales' }, () => { fetchTop1MtdSales(); fetchMtdSalesData(); }).subscribe();
+      supabaseClient.channel('realtime_mtd_fp').on('postgres_changes', { event: '*', schema: 'public', table: 'mtd_fp' }, () => { fetchTop1MtdFurnipro(); fetchMtdFurniproData(); }).subscribe();
+      supabaseClient.channel('realtime_mtd_comser').on('postgres_changes', { event: '*', schema: 'public', table: 'mtd_comser' }, () => { fetchTop1MtdComser(); fetchMtdComserData(); }).subscribe();
+      supabaseClient.channel('realtime_target').on('postgres_changes', { event: '*', schema: 'public', table: 'target_today' }, () => updateGaugeData()).subscribe();
+      supabaseClient.channel('realtime_running_text').on('postgres_changes', { event: '*', schema: 'public', table: 'running_text' }, () => fetchRunningText()).subscribe();
     }
 
-    // Polling Cadangan (Backup Sync)
     function startBackupPolling() {
       setInterval(async () => {
         await fetchKaryawanData();
