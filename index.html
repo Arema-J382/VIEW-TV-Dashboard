@@ -711,12 +711,12 @@
               <!-- [PANDUAN UKURAN TEKS NAMA]: text-base (Ubah ke text-sm jika ingin memperkecil, atau text-lg untuk memperbesar) -->
               <div class="text-slate-900 text-xl tracking-wide truncate ${textEffectClass}">${displayName}</div>
               
-              <!-- [PANDUAN UKURAN TEKS NIP]: text-base (Ubah ke text-[10px] untuk memperkecil) -->
-              <div class="text-xs font-mono text-blue-600 font-semibold mt-0.5 ${textEffectClass}">NIP: ${item.nip}</div>
+              <!-- [PANDUAN UKURAN TEKS NIP]: text-xs (Ubah ke text-[10px] untuk memperkecil) -->
+              <div class="text-base font-mono text-blue-600 font-semibold mt-0.5 ${textEffectClass}">NIP: ${item.nip}</div>
             </div>
 
-            <!-- [PANDUAN UKURAN NOMINAL RP]: text-xl (Ubah ke text-base untuk memperkecil, atau text-xl untuk memperbesar) -->
-            <div class="col-span-4 text-right font-mono font-bold text-emerald-600 text-lg ${textEffectClass}">
+            <!-- [PANDUAN UKURAN NOMINAL RP]: text-lg (Ubah ke text-base untuk memperkecil, atau text-xl untuk memperbesar) -->
+            <div class="col-span-4 text-right font-mono font-bold text-emerald-600 text-xl ${textEffectClass}">
               Rp ${Number(item.total).toLocaleString('id-ID')}
             </div>
           </div>
