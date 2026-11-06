@@ -498,7 +498,7 @@
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     const TARGET_TV_ID = 'TV-Anas';
 
-    let karyawanMap = {}; // Penyimpanan lookup nama pendek dari tabel data_karyawan berdasarkan NIP
+    let karyawanMap = {}; // Lookup map [nip_kar] -> nama_kar dari tabel data_karyawan
     let salesList = [];
     let deptList = [];
     let mtdSalesList = [];
@@ -554,12 +554,12 @@
       }
     }
 
-    // Ambil data master karyawan dari tabel data_karyawan (nip -> nama_kar)
+    // Ambil data master karyawan dari tabel data_karyawan (nip_kar -> nama_kar)
     async function fetchKaryawanData() {
       try {
         const { data, error } = await supabaseClient
           .from('data_karyawan')
-          .select('nip, nama_kar');
+          .select('nip_kar, nama_kar');
 
         if (error) {
           console.error('Gagal mengambil data_karyawan:', error);
@@ -569,10 +569,11 @@
         if (data) {
           karyawanMap = {};
           data.forEach(item => {
-            if (item.nip) {
-              karyawanMap[String(item.nip).trim()] = item.nama_kar;
+            if (item.nip_kar !== undefined && item.nip_kar !== null) {
+              karyawanMap[String(item.nip_kar).trim()] = item.nama_kar;
             }
           });
+          console.log("Karyawan Map berhasil dimuat:", karyawanMap);
         }
       } catch (err) {
         console.error('Error fetching data_karyawan:', err);
@@ -581,7 +582,7 @@
 
     // Helper untuk mendapatkan nama pendek dari tabel data_karyawan berdasarkan NIP
     function getEmployeeName(nip, fallbackName) {
-      if (!nip) return fallbackName || 'NONAME';
+      if (nip === undefined || nip === null) return fallbackName || 'NONAME';
       const cleanNip = String(nip).trim();
       return karyawanMap[cleanNip] || fallbackName || cleanNip;
     }
