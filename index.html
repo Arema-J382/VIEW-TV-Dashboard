@@ -13,14 +13,38 @@
   <script src="https://unpkg.com/lucide@latest"></script>
 
   <style>
-    /* Mengunci ukuran layout pas 100% tanpa scroll bar */
+    /* Optimasi Rendering Teks Agar Tajam & Tidak Buram di TV */
+    * {
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      text-rendering: optimizeLegibility;
+    }
+
     body {
       margin: 0;
       padding: 0;
       width: 100vw;
       height: 100vh;
       overflow: hidden;
-      background-color: #020617; /* Background gelap elegan di luar area TV */
+      background-color: #020617;
+    }
+
+    /* KANVAS UTAMA FULL HD DENGAN HARDWARE ACCELERATION */
+    .tv-canvas {
+      width: 1920px;
+      height: 1080px;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      transform-origin: center center;
+      display: flex;
+      flex-direction: column;
+      background-color: #eff6ff;
+      overflow: hidden;
+      box-sizing: border-box;
+      will-change: transform;
+      backface-visibility: hidden;
     }
 
     /* CONTAINER UTAMA DASHBOARD */
@@ -34,7 +58,7 @@
       height: 100%;
     }
 
-    /* BARIS ATAS (GAUGE, LIVE TOP SALES, CAROUSEL) */
+    /* BARIS ATAS */
     .top-row {
       display: flex;
       flex-direction: row;
@@ -44,7 +68,7 @@
       width: 100%;
     }
 
-    /* BARIS BAWAH (4 TABEL CARD VIEW BERJEJER RAPI) */
+    /* BARIS BAWAH */
     .bottom-row {
       display: flex;
       flex-direction: row;
@@ -54,7 +78,7 @@
       width: 100%;
     }
 
-    /* AREA GAUGE CHART (TARGET TODAY) */
+    /* AREA GAUGE CHART */
     .gauge-section-container {
       width: 500px;
       height: 380px;
@@ -68,7 +92,7 @@
       position: relative;
     }
 
-    /* AREA TABEL LIVE TOP SALES TODAY */
+    /* AREA TABEL LIVE TOP SALES */
     .custom-table-container {
       width: 600px;               
       height: 380px;            
@@ -79,7 +103,7 @@
       z-index: 10;
     }
 
-    /* AREA KANAN (BEST SALES, FURNIPRO & COMSER CAROUSEL) */
+    /* AREA KANAN (CAROUSEL) */
     .mtd-top1-container {
       width: 500px;
       height: 380px;
@@ -108,7 +132,7 @@
       position: relative;
     }
 
-    /* Animasi Glow */
+    /* Animasi Glow dengan GPU Acceleration */
     @keyframes goldGlow {
       0%, 100% { box-shadow: 0 0 10px rgba(234, 179, 8, 0.5), 0 0 20px rgba(245, 158, 11, 0.3); }
       50% { box-shadow: 0 0 22px rgba(234, 179, 8, 0.9), 0 0 32px rgba(239, 68, 68, 0.6); }
@@ -139,14 +163,15 @@
       animation: emeraldGlow 2s infinite ease-in-out;
     }
 
-    /* Animasi Scrolling Vertikal Tabel */
+    /* Animasi Scrolling Vertikal Tabel yang Smooth (Hardware Accelerated) */
     @keyframes scrollUp {
-      0% { transform: translateY(0); }
-      100% { transform: translateY(-50%); }
+      0% { transform: translate3d(0, 0, 0); }
+      100% { transform: translate3d(0, -50%, 0); }
     }
 
     .animate-scroll-infinite {
       animation: scrollUp linear infinite;
+      will-change: transform;
     }
     
     .scroll-container:hover .animate-scroll-infinite {
@@ -198,15 +223,16 @@
       width: 300%;
       height: 100%;
       transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+      will-change: transform;
     }
 
-    /* ANIMASI RUNNING TEXT */
+    /* Animasi Running Text yang Super Smooth (Translate3D GPU) */
     @keyframes screenMarquee {
       0% {
-        transform: translateX(1920px);
+        transform: translate3d(1920px, 0, 0);
       }
       100% {
-        transform: translateX(-100%);
+        transform: translate3d(-100%, 0, 0);
       }
     }
 
@@ -214,6 +240,7 @@
       position: absolute;
       white-space: nowrap;
       will-change: transform;
+      backface-visibility: hidden;
       animation: screenMarquee 28s linear infinite;
     }
 
@@ -221,13 +248,12 @@
       animation-play-state: paused;
     }
 
-    /* TRACK RUNNING TEXT DENGAN UJUNG MIRING WARNA MERAH */
     .broadcast-slant-edge {
       clip-path: polygon(0 0, calc(100% - 35px) 0, 100% 100%, 0 100%);
     }
   </style>
 </head>
-<body class="bg-slate-950 text-slate-800 flex items-center justify-center font-sans select-none h-screen w-screen overflow-hidden m-0 p-0">
+<body class="bg-slate-950 text-slate-800 select-none overflow-hidden m-0 p-0">
 
   <!-- SAFE-AREA CONTAINER (Pencegah Overscan Layar Smart TV 2.5%) -->
   <div class="w-full h-full p-[2.5%] box-border flex items-center justify-center overflow-hidden">
@@ -235,8 +261,8 @@
     <!-- CONTAINER ASPECT RATIO DINAMIS DARI SUPABASE -->
     <div id="tvAspectRatioBox" class="w-full max-h-full flex items-center justify-center relative overflow-hidden" style="aspect-ratio: 70 / 39;">
       
-      <!-- KANVAS UTAMA 1920x1080 YANG DISKALAKAN SECARA PROPOSIONAL KE LAYAR TV -->
-      <div id="tvScaleCanvas" class="absolute w-[1920px] h-[1080px] origin-center flex flex-col bg-blue-50 rounded-2xl shadow-2xl overflow-hidden box-border">
+      <!-- KANVAS UTAMA 1920x1080 YANG DISKALAKAN DENGAN AKselerasi GPU -->
+      <div id="tvScaleCanvas" class="tv-canvas rounded-2xl shadow-2xl">
 
         <!-- ================= HEADER DASHBOARD ================= -->
         <header class="bg-slate-900 border-b border-slate-800 px-10 py-3 flex justify-between items-center shadow-md z-20 shrink-0 h-[80px]">
@@ -498,7 +524,7 @@
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     const TARGET_TV_ID = 'TV-Anas';
 
-    let karyawanMap = {}; // Lookup map [nip_kar] -> nama_kar dari tabel data_karyawan
+    let karyawanMap = {};
     let salesList = [];
     let deptList = [];
     let mtdSalesList = [];
@@ -506,7 +532,7 @@
     let mtdComserList = [];
     let currentSlide = 0; 
 
-    // Fungsi Skala Otomatis untuk Smart TV (Mencegah Clipping & Overscan)
+    // Fungsi Skala Proposional Smart TV Berbasis GPU
     function scaleDashboard() {
       const box = document.getElementById('tvAspectRatioBox');
       const canvas = document.getElementById('tvScaleCanvas');
@@ -519,7 +545,7 @@
       const scaleY = boxHeight / 1080;
       const scale = Math.min(scaleX, scaleY);
 
-      canvas.style.transform = `scale(${scale})`;
+      canvas.style.transform = `translate(-50%, -50%) scale(${scale})`;
     }
 
     window.addEventListener('resize', scaleDashboard);
@@ -554,7 +580,7 @@
       }
     }
 
-    // Ambil data master karyawan dari tabel data_karyawan (nip_kar -> nama_kar)
+    // Ambil data master karyawan dari tabel data_karyawan (nip_kar -> nama_kar)[cite: 5]
     async function fetchKaryawanData() {
       try {
         const { data, error } = await supabaseClient
@@ -573,14 +599,13 @@
               karyawanMap[String(item.nip_kar).trim()] = item.nama_kar;
             }
           });
-          console.log("Karyawan Map berhasil dimuat:", karyawanMap);
         }
       } catch (err) {
         console.error('Error fetching data_karyawan:', err);
       }
     }
 
-    // Helper untuk mendapatkan nama pendek dari tabel data_karyawan berdasarkan NIP
+    // Helper untuk mendapatkan nama pendek dari tabel data_karyawan berdasarkan NIP[cite: 5]
     function getEmployeeName(nip, fallbackName) {
       if (nip === undefined || nip === null) return fallbackName || 'NONAME';
       const cleanNip = String(nip).trim();
