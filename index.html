@@ -498,6 +498,7 @@
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     const TARGET_TV_ID = 'TV-Anas';
 
+    let karyawanMap = {}; // Penyimpanan lookup nama pendek dari tabel data_karyawan berdasarkan NIP
     let salesList = [];
     let deptList = [];
     let mtdSalesList = [];
@@ -551,6 +552,38 @@
         console.error('Error fetching TV settings:', err);
         scaleDashboard();
       }
+    }
+
+    // Ambil data master karyawan dari tabel data_karyawan (nip -> nama_kar)
+    async function fetchKaryawanData() {
+      try {
+        const { data, error } = await supabaseClient
+          .from('data_karyawan')
+          .select('nip, nama_kar');
+
+        if (error) {
+          console.error('Gagal mengambil data_karyawan:', error);
+          return;
+        }
+
+        if (data) {
+          karyawanMap = {};
+          data.forEach(item => {
+            if (item.nip) {
+              karyawanMap[String(item.nip).trim()] = item.nama_kar;
+            }
+          });
+        }
+      } catch (err) {
+        console.error('Error fetching data_karyawan:', err);
+      }
+    }
+
+    // Helper untuk mendapatkan nama pendek dari tabel data_karyawan berdasarkan NIP
+    function getEmployeeName(nip, fallbackName) {
+      if (!nip) return fallbackName || 'NONAME';
+      const cleanNip = String(nip).trim();
+      return karyawanMap[cleanNip] || fallbackName || cleanNip;
     }
 
     // Jam Digital Dashboard
@@ -624,8 +657,9 @@
       salesList.forEach((item, index) => {
         const rank = index + 1;
         const bucketName = 'FOTO SALES';
+        const displayName = getEmployeeName(item.nip, item.nama);
         const imageUrl = `${SUPABASE_URL}/storage/v1/object/public/${encodeURIComponent(bucketName)}/${item.nip}.jpg`;
-        const fallbackAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(item.nama)}&background=0D8ABC&color=fff&size=128`;
+        const fallbackAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=0D8ABC&color=fff&size=128`;
 
         let rowClass = "bg-slate-50 border border-slate-200 hover:bg-slate-100 rounded-xl";
         let crownMarkup = "";
@@ -669,12 +703,12 @@
               <div class="relative w-14 h-14 rounded-lg border-2 ${borderPhotoStyle} bg-slate-200 shrink-0 shadow-md">
                 ${crownMarkup}
                 <div class="w-full h-full rounded-[6px] overflow-hidden relative z-10">
-                  <img src="${imageUrl}" alt="${item.nama}" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='${fallbackAvatar}';">
+                  <img src="${imageUrl}" alt="${displayName}" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='${fallbackAvatar}';">
                 </div>
               </div>
             </div>
             <div class="col-span-4 pl-2">
-              <div class="text-slate-900 text-base tracking-wide ${textEffectClass}">${item.nama}</div>
+              <div class="text-slate-900 text-base tracking-wide truncate ${textEffectClass}">${displayName}</div>
               <div class="text-xs font-mono text-blue-600 font-semibold mt-0.5 ${textEffectClass}">NIP: ${item.nip}</div>
             </div>
             <div class="col-span-4 text-right font-mono font-bold text-emerald-600 text-lg ${textEffectClass}">
@@ -854,11 +888,11 @@
         const rank = index + 1;
         const bucketName = 'FOTO SALES';
         const nip = item.mtd_nip || '';
-        const nama = item.mtd_nama || 'SALES';
+        const displayName = getEmployeeName(nip, item.mtd_nama);
         const total = Number(item.mtd_total || 0);
 
         const imageUrl = `${SUPABASE_URL}/storage/v1/object/public/${encodeURIComponent(bucketName)}/${encodeURIComponent(nip)}.jpg`;
-        const fallbackAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(nama)}&background=3b82f6&color=fff&size=128`;
+        const fallbackAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=3b82f6&color=fff&size=128`;
 
         let rowClass = "bg-slate-50 border border-slate-200 hover:bg-slate-100 rounded-lg";
         let crownMarkup = "";
@@ -893,12 +927,12 @@
               <div class="relative w-9 h-9 rounded-md border-2 ${borderPhotoStyle} bg-slate-200 shrink-0 shadow-sm">
                 ${crownMarkup}
                 <div class="w-full h-full rounded-[4px] overflow-hidden relative z-10">
-                  <img src="${imageUrl}" alt="${nama}" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='${fallbackAvatar}';">
+                  <img src="${imageUrl}" alt="${displayName}" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='${fallbackAvatar}';">
                 </div>
               </div>
             </div>
             <div class="col-span-4 pl-1">
-              <div class="text-slate-900 text-xs font-semibold tracking-wide truncate ${textEffectClass}">${nama}</div>
+              <div class="text-slate-900 text-xs font-semibold tracking-wide truncate ${textEffectClass}">${displayName}</div>
               <div class="text-[10px] font-mono text-blue-600 font-bold mt-0.5 ${textEffectClass}">NIP: ${nip}</div>
             </div>
             <div class="col-span-4 text-right font-mono font-bold text-emerald-600 text-xs ${textEffectClass}">
@@ -966,11 +1000,11 @@
         const rank = index + 1;
         const bucketName = 'FOTO SALES';
         const nip = item.nip_mtdfp || '';
-        const nama = item.nama_mtdfp || item.nama || 'FURNIPRO';
+        const displayName = getEmployeeName(nip, item.nama_mtdfp || item.nama);
         const qty = Number(item.qty_mtdfp || 0);
 
         const imageUrl = `${SUPABASE_URL}/storage/v1/object/public/${encodeURIComponent(bucketName)}/${encodeURIComponent(nip)}.jpg`;
-        const fallbackAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(nama)}&background=2563eb&color=fff&size=128`;
+        const fallbackAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=2563eb&color=fff&size=128`;
 
         let rowClass = "bg-slate-50 border border-slate-200 hover:bg-slate-100 rounded-lg";
         let crownMarkup = "";
@@ -1005,12 +1039,12 @@
               <div class="relative w-9 h-9 rounded-md border-2 ${borderPhotoStyle} bg-slate-200 shrink-0 shadow-sm">
                 ${crownMarkup}
                 <div class="w-full h-full rounded-[4px] overflow-hidden relative z-10">
-                  <img src="${imageUrl}" alt="${nama}" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='${fallbackAvatar}';">
+                  <img src="${imageUrl}" alt="${displayName}" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='${fallbackAvatar}';">
                 </div>
               </div>
             </div>
             <div class="col-span-4 pl-1">
-              <div class="text-slate-900 text-xs font-semibold tracking-wide truncate ${textEffectClass}">${nama}</div>
+              <div class="text-slate-900 text-xs font-semibold tracking-wide truncate ${textEffectClass}">${displayName}</div>
               <div class="text-[10px] font-mono text-blue-600 font-bold mt-0.5 ${textEffectClass}">NIP: ${nip}</div>
             </div>
             <div class="col-span-4 text-right font-mono font-bold text-blue-600 text-xs ${textEffectClass}">
@@ -1078,11 +1112,11 @@
         const rank = index + 1;
         const bucketName = 'FOTO SALES';
         const nip = item.nip_mtdcnc || '';
-        const nama = item.nama_mtdcnc || 'COMSER';
+        const displayName = getEmployeeName(nip, item.nama_mtdcnc);
         const total = Number(item.total_mtdcnc || 0);
 
         const imageUrl = `${SUPABASE_URL}/storage/v1/object/public/${encodeURIComponent(bucketName)}/${encodeURIComponent(nip)}.jpg`;
-        const fallbackAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(nama)}&background=10b981&color=fff&size=128`;
+        const fallbackAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=10b981&color=fff&size=128`;
 
         let rowClass = "bg-slate-50 border border-slate-200 hover:bg-slate-100 rounded-lg";
         let crownMarkup = "";
@@ -1117,12 +1151,12 @@
               <div class="relative w-9 h-9 rounded-md border-2 ${borderPhotoStyle} bg-slate-200 shrink-0 shadow-sm">
                 ${crownMarkup}
                 <div class="w-full h-full rounded-[4px] overflow-hidden relative z-10">
-                  <img src="${imageUrl}" alt="${nama}" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='${fallbackAvatar}';">
+                  <img src="${imageUrl}" alt="${displayName}" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='${fallbackAvatar}';">
                 </div>
               </div>
             </div>
             <div class="col-span-4 pl-1">
-              <div class="text-slate-900 text-xs font-semibold tracking-wide truncate ${textEffectClass}">${nama}</div>
+              <div class="text-slate-900 text-xs font-semibold tracking-wide truncate ${textEffectClass}">${displayName}</div>
               <div class="text-[10px] font-mono text-emerald-600 font-bold mt-0.5 ${textEffectClass}">NIP: ${nip}</div>
             </div>
             <div class="col-span-4 text-right font-mono font-bold text-emerald-600 text-xs ${textEffectClass}">
@@ -1187,12 +1221,12 @@
 
         const topMtd = data[0];
         const nip = topMtd.mtd_nip || '-';
-        const nama = topMtd.mtd_nama || 'NONAME';
+        const displayName = getEmployeeName(nip, topMtd.mtd_nama);
         const total = Number(topMtd.mtd_total || 0);
 
         const bucketName = 'FOTO SALES';
         const imageUrl = `${SUPABASE_URL}/storage/v1/object/public/${encodeURIComponent(bucketName)}/${nip}.jpg`;
-        const fallbackAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(nama)}&background=eab308&color=fff&size=128`;
+        const fallbackAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=eab308&color=fff&size=128`;
 
         container.innerHTML = `
           <div class="flex flex-col items-center justify-center text-center w-full relative px-2">
@@ -1200,11 +1234,11 @@
               <div class="absolute -top-3 left-1/2 -translate-x-1/2 z-20 text-yellow-500 drop-shadow-[0_2px_4px_rgba(234,179,8,0.9)]">
                 <i data-lucide="crown" class="w-8 h-8 fill-yellow-400"></i>
               </div>
-              <img src="${imageUrl}" alt="${nama}" class="w-full h-full object-cover pt-1" onerror="this.onerror=null; this.src='${fallbackAvatar}';">
+              <img src="${imageUrl}" alt="${displayName}" class="w-full h-full object-cover pt-1" onerror="this.onerror=null; this.src='${fallbackAvatar}';">
             </div>
 
             <div class="text-[10px] font-mono uppercase tracking-widest text-amber-600 font-extrabold mb-0.5">CHAMPION OF THE MONTH</div>
-            <h3 class="text-xl font-extrabold text-slate-900 mb-0.5 tracking-tight line-clamp-1">${nama}</h3>
+            <h3 class="text-xl font-extrabold text-slate-900 mb-0.5 tracking-tight line-clamp-1">${displayName}</h3>
             <div class="text-xs font-semibold text-slate-600 mb-2">NIP: <span class="font-mono text-blue-600 font-bold">${nip}</span></div>
             
             <div class="w-full bg-amber-50 border border-amber-200 rounded-xl p-2.5 shadow-inner">
@@ -1234,21 +1268,21 @@
 
         const topFp = data[0];
         const nip = topFp.nip_mtdfp || '-';
-        const nama = topFp.nama_mtdfp || topFp.nama || 'NONAME';
+        const displayName = getEmployeeName(nip, topFp.nama_mtdfp || topFp.nama);
         const qty = Number(topFp.qty_mtdfp || 0);
 
         const bucketName = 'FOTO SALES';
         const imageUrl = `${SUPABASE_URL}/storage/v1/object/public/${encodeURIComponent(bucketName)}/${nip}.jpg`;
-        const fallbackAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(nama)}&background=2563eb&color=fff&size=128`;
+        const fallbackAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=2563eb&color=fff&size=128`;
 
         container.innerHTML = `
           <div class="flex flex-col items-center justify-center text-center w-full relative px-2">
             <div class="relative w-32 h-32 rounded-2xl border-4 border-blue-500 shadow-lg bg-slate-200 overflow-hidden mb-2">
-              <img src="${imageUrl}" alt="${nama}" class="w-full h-full object-cover pt-1" onerror="this.onerror=null; this.src='${fallbackAvatar}';">
+              <img src="${imageUrl}" alt="${displayName}" class="w-full h-full object-cover pt-1" onerror="this.onerror=null; this.src='${fallbackAvatar}';">
             </div>
 
             <div class="text-[10px] font-mono uppercase tracking-widest text-blue-600 font-extrabold mb-0.5">CHAMPION FURNIPRO</div>
-            <h3 class="text-xl font-extrabold text-slate-900 mb-0.5 tracking-tight line-clamp-1">${nama}</h3>
+            <h3 class="text-xl font-extrabold text-slate-900 mb-0.5 tracking-tight line-clamp-1">${displayName}</h3>
             <div class="text-xs font-semibold text-slate-600 mb-2">NIP: <span class="font-mono text-blue-600 font-bold">${nip}</span></div>
             
             <div class="w-full bg-blue-50 border border-blue-200 rounded-xl p-2.5 shadow-inner">
@@ -1278,21 +1312,21 @@
 
         const topComser = data[0];
         const nip = topComser.nip_mtdcnc || '-';
-        const nama = topComser.nama_mtdcnc || 'NONAME';
+        const displayName = getEmployeeName(nip, topComser.nama_mtdcnc);
         const total = Number(topComser.total_mtdcnc || 0);
 
         const bucketName = 'FOTO SALES';
         const imageUrl = `${SUPABASE_URL}/storage/v1/object/public/${encodeURIComponent(bucketName)}/${nip}.jpg`;
-        const fallbackAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(nama)}&background=10b981&color=fff&size=128`;
+        const fallbackAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=10b981&color=fff&size=128`;
 
         container.innerHTML = `
           <div class="flex flex-col items-center justify-center text-center w-full relative px-2">
             <div class="relative w-32 h-32 rounded-2xl border-4 border-emerald-500 shadow-lg bg-slate-200 overflow-hidden mb-2">
-              <img src="${imageUrl}" alt="${nama}" class="w-full h-full object-cover pt-1" onerror="this.onerror=null; this.src='${fallbackAvatar}';">
+              <img src="${imageUrl}" alt="${displayName}" class="w-full h-full object-cover pt-1" onerror="this.onerror=null; this.src='${fallbackAvatar}';">
             </div>
 
             <div class="text-[10px] font-mono uppercase tracking-widest text-emerald-600 font-extrabold mb-0.5">CHAMPION COMSER</div>
-            <h3 class="text-xl font-extrabold text-slate-900 mb-0.5 tracking-tight line-clamp-1">${nama}</h3>
+            <h3 class="text-xl font-extrabold text-slate-900 mb-0.5 tracking-tight line-clamp-1">${displayName}</h3>
             <div class="text-xs font-semibold text-slate-600 mb-2">NIP: <span class="font-mono text-emerald-600 font-bold">${nip}</span></div>
             
             <div class="w-full bg-emerald-50 border border-emerald-200 rounded-xl p-2.5 shadow-inner">
@@ -1437,6 +1471,20 @@
         .subscribe();
 
       supabaseClient
+        .channel('realtime_data_karyawan')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'data_karyawan' }, async () => {
+          await fetchKaryawanData();
+          renderDashboard();
+          renderMtdSalesDashboard();
+          renderMtdFurniproDashboard();
+          renderMtdComserDashboard();
+          fetchTop1MtdSales();
+          fetchTop1MtdFurnipro();
+          fetchTop1MtdComser();
+        })
+        .subscribe();
+
+      supabaseClient
         .channel('realtime_laporan_sales')
         .on('postgres_changes', { event: '*', schema: 'public', table: 'laporan_sales' }, () => fetchSalesData())
         .subscribe();
@@ -1486,7 +1534,8 @@
 
     // Polling Cadangan (Backup Sync)
     function startBackupPolling() {
-      setInterval(() => {
+      setInterval(async () => {
+        await fetchKaryawanData();
         fetchTvSettings();
         fetchSalesData();
         fetchDeptData();
@@ -1501,9 +1550,10 @@
       }, 10000);
     }
 
-    document.addEventListener("DOMContentLoaded", () => {
+    document.addEventListener("DOMContentLoaded", async () => {
       lucide.createIcons();
-      fetchTvSettings();
+      await fetchKaryawanData();
+      await fetchTvSettings();
       fetchSalesData();
       fetchDeptData();
       fetchMtdSalesData();
