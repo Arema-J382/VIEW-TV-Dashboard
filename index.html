@@ -13,20 +13,24 @@
   <script src="https://unpkg.com/lucide@latest"></script>
 
   <style>
-    /* PENGATURAN LAYAR & RESPONSIF TV ADAPTIF */
+    /* PENGATURAN DASAR LAYAR & PENGUNCI RASIO 16:9 */
     html, body {
       width: 100vw;
       height: 100vh;
       overflow: hidden;
       margin: 0;
       padding: 0;
-      background-color: #0f172a;
+      background-color: #090d16;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
-    /* CONTAINER UTAMA DENGAN SKALA OTOMATIS BERBASIS RESOLUSI TV */
+    /* CONTAINER UTAMA DENGAN RASIO 16:9 TERKUNCI (1920x1080) */
     #tvScaleWrapper {
       width: 1920px;
       height: 1080px;
+      aspect-ratio: 16 / 9;
       position: absolute;
       top: 50%;
       left: 50%;
@@ -34,7 +38,7 @@
       transform-origin: center center;
       display: flex;
       flex-direction: column;
-      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
       background: #f8fafc;
       overflow: hidden;
     }
@@ -216,7 +220,7 @@
       transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
-    /* ANIMASI TRUE OUT-OF-SCREEN MARQUEE (MULAI DARI LUAR LAYAR KANAN HINGGA KIRI) */
+    /* ANIMASI TRUE OUT-OF-SCREEN MARQUEE */
     @keyframes screenMarquee {
       0% {
         transform: translateX(1920px);
@@ -243,10 +247,10 @@
     }
   </style>
 </head>
-<body class="bg-slate-950 text-slate-800 flex items-center justify-center font-sans select-none overflow-hidden">
+<body>
 
-  <!-- ================= CONTAINER UTAMA SKALA TV ADAPTIF ================= -->
-  <div id="tvScaleWrapper" class="bg-blue-50">
+  <!-- ================= CONTAINER UTAMA SKALA 16:9 OTOMATIS ================= -->
+  <div id="tvScaleWrapper">
 
     <!-- ================= HEADER DASHBOARD ================= -->
     <header class="bg-slate-900 border-b border-slate-800 px-10 py-3 flex justify-between items-center shadow-md z-20 shrink-0 h-[80px]">
@@ -487,7 +491,7 @@
         <span class="text-xl font-black tracking-widest uppercase text-white drop-shadow">INFO BOLO</span>
       </div>
 
-      <!-- 2. TRACK RUNNING TEXT BIRU TUA GELAP DENGAN TEKS PUTIH & UJUNG KANAN MIRING RED ACCENT -->
+      <!-- 2. TRACK RUNNING TEXT BIRU TUA GELAP -->
       <div class="bg-slate-900 text-white flex-1 h-full relative overflow-hidden flex items-center broadcast-slant-edge z-20 shadow-inner border-l border-red-700">
         <div class="absolute inset-0 overflow-hidden pointer-events-none">
           <div id="runningTextContainer" class="screen-marquee-anim text-lg font-bold text-white tracking-wider flex items-center h-full">
@@ -500,7 +504,7 @@
   </div>
 
   <script>
-    // Fungsi Penskalaan Otomatis Ukuran Layar TV Adaptif
+    // Fungsi Pengunci & Penskalaan Otomatis Rasio 16:9
     function updateTvScale() {
       const wrapper = document.getElementById('tvScaleWrapper');
       if (!wrapper) return;
@@ -1112,7 +1116,7 @@
     }
 
 
-    // 1.6. FETCH & RENDER RUNNING TEXT DARI TABEL "running_text" & KOLOM "run_text"
+    // 1.6. FETCH & RENDER RUNNING TEXT
     async function fetchRunningText() {
       const container = document.getElementById('runningTextContainer');
       if (!container) return;
@@ -1136,7 +1140,7 @@
           ];
         }
 
-        const separator = '    •    ';
+        const separator = '   •   ';
         const joinedText = rawTexts.join(separator);
 
         container.innerHTML = `<span>${joinedText}</span>`;
@@ -1147,7 +1151,7 @@
     }
 
 
-    // 2A. Fetch & Render Top 1 MTD Sales (Carousel Kanan)
+    // 2A. Fetch & Render Top 1 MTD Sales
     async function fetchTop1MtdSales() {
       try {
         const { data, error } = await supabaseClient
@@ -1194,7 +1198,7 @@
     }
 
 
-    // 2B. Fetch & Render Best Furnipro (Carousel Kanan)
+    // 2B. Fetch & Render Best Furnipro
     async function fetchTop1MtdFurnipro() {
       try {
         const { data, error } = await supabaseClient
@@ -1238,7 +1242,7 @@
     }
 
 
-    // 2C. Fetch & Render Best Comser (Carousel Kanan)
+    // 2C. Fetch & Render Best Comser
     async function fetchTop1MtdComser() {
       try {
         const { data, error } = await supabaseClient
@@ -1282,7 +1286,7 @@
     }
 
 
-    // 3. Carousel Switcher (5 Detik per Card View)
+    // 3. Carousel Switcher
     function startCarouselTimer() {
       setInterval(() => {
         const track = document.getElementById('mtdSliderTrack');
@@ -1316,7 +1320,7 @@
     }
 
 
-    // 4. Fetch & Compute Realtime Gauge Chart Data
+    // 4. Gauge Chart Realtime Computation
     async function updateGaugeData() {
       try {
         const { data: targetData, error: targetError } = await supabaseClient
@@ -1403,7 +1407,7 @@
     }
 
 
-    // 5. Saluran Supabase Realtime Sync Terintegrasi
+    // 5. Supabase Realtime Channels
     function setupRealtime() {
       supabaseClient
         .channel('realtime_laporan_sales')
@@ -1453,7 +1457,7 @@
         .subscribe();
     }
 
-    // Polling Cadangan (Backup Sync)
+    // Backup Polling
     function startBackupPolling() {
       setInterval(() => {
         fetchSalesData();
