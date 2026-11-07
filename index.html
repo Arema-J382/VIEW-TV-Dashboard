@@ -915,7 +915,7 @@
           <div class="grid grid-cols-12 items-center px-3 py-1.5 transition shadow-sm ${rowClass}">
             <div class="col-span-4 flex items-center justify-center gap-2">
               <span class="font-bold text-sm w-5 text-right ${numberStyle}">${rank}.</span>
-              <div class="relative w-9 h-9 rounded-md border-2 ${borderPhotoStyle} bg-slate-200 shrink-0 shadow-sm">
+              <div class="relative w-14 h-14 rounded-md border-2 ${borderPhotoStyle} bg-slate-200 shrink-0 shadow-sm">
                 ${crownMarkup}
                 <div class="w-full h-full rounded-[4px] overflow-hidden relative z-10">
                   <img src="${imageUrl}" alt="${displayName}" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='${fallbackAvatar}';">
@@ -923,10 +923,10 @@
               </div>
             </div>
             <div class="col-span-4 pl-1">
-              <div class="text-slate-900 text-xs font-semibold tracking-wide truncate ${textEffectClass}">${displayName}</div>
+              <div class="text-slate-900 text-base font-semibold tracking-wide truncate ${textEffectClass}">${displayName}</div>
               <div class="text-[10px] font-mono text-blue-600 font-bold mt-0.5 ${textEffectClass}">NIP: ${nip}</div>
             </div>
-            <div class="col-span-4 text-right font-mono font-bold text-emerald-600 text-xs ${textEffectClass}">
+            <div class="col-span-4 text-right font-mono font-bold text-emerald-600 text-base ${textEffectClass}">
               Rp ${total.toLocaleString('id-ID')}
             </div>
           </div>
