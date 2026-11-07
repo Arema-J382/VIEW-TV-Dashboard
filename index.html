@@ -13,9 +13,6 @@
   <script src="https://unpkg.com/lucide@latest"></script>
 
   <style>
-    /* ==========================================================================
-       OPTIMASI RENDERING AGAR TEKS TAJAM & ANIMASI TIDAK PATAH-PATAH DI SMART TV
-       ========================================================================== */
     * {
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
@@ -31,7 +28,6 @@
       background-color: #020617;
     }
 
-    /* KANVAS UTAMA FULL HD DENGAN HARDWARE ACCELERATION */
     .tv-canvas {
       width: 1920px;
       height: 1080px;
@@ -77,11 +73,6 @@
       width: 100%;
     }
 
-    /* ==========================================================================
-       PANDUAN EDIT UKURAN KOTAK / CARD VIEW BARIS ATAS
-       ========================================================================== */
-
-    /* 1. KOTAK GAUGE CHART (TARGET TODAY) */
     .gauge-section-container {
       width: 500px;
       height: 380px;
@@ -95,7 +86,6 @@
       position: relative;
     }
 
-    /* 2. KOTAK TABEL LIVE TOP SALES (TENGAH) */
     .custom-table-container {
       width: 600px;
       height: 380px;
@@ -106,7 +96,6 @@
       z-index: 10;
     }
 
-    /* 3. KOTAK CAROUSEL KANAN (BEST SALES, FURNIPRO, COMSER) */
     .mtd-top1-container {
       width: 500px;
       height: 380px;
@@ -121,9 +110,6 @@
       transition: all 0.5s ease-in-out;
     }
 
-    /* ==========================================================================
-       PANDUAN EDIT UKURAN KOTAK / CARD VIEW BARIS BAWAH (4 TABEL KECIL)
-       ========================================================================== */
     .bottom-card-container {
       width: 440px;
       height: 340px;
@@ -137,7 +123,6 @@
       position: relative;
     }
 
-    /* Animasi Glow */
     @keyframes goldGlow {
       0%, 100% { box-shadow: 0 0 10px rgba(234, 179, 8, 0.5), 0 0 20px rgba(245, 158, 11, 0.3); }
       50% { box-shadow: 0 0 22px rgba(234, 179, 8, 0.9), 0 0 32px rgba(239, 68, 68, 0.6); }
@@ -269,7 +254,7 @@
       
       <div id="tvScaleCanvas" class="tv-canvas rounded-2xl shadow-2xl">
 
-        <!-- ================= HEADER DASHBOARD ================= -->
+        <!-- HEADER DASHBOARD -->
         <header class="bg-slate-900 border-b border-slate-800 px-10 py-3 flex justify-between items-center shadow-md z-20 shrink-0 h-[80px]">
           <div class="flex items-center gap-4">
             <div class="bg-blue-600 p-2.5 rounded-2xl text-white shadow-lg shadow-blue-600/30">
@@ -293,15 +278,15 @@
           </div>
         </header>
 
-        <!-- ================= MAIN VIEW ================= -->
+        <!-- MAIN VIEW -->
         <main class="flex-1 relative overflow-hidden bg-blue-50 px-6 py-2 flex items-center justify-center">
           
           <div class="dashboard-layout">
 
-            <!-- ================= BARIS ATAS ================= -->
+            <!-- BARIS ATAS -->
             <div class="top-row">
               
-              <!-- 1. GAUGE CHART SECTION -->
+              <!-- GAUGE CHART SECTION -->
               <div id="gaugeContainer" class="gauge-section-container">
                 <div class="bg-slate-900 text-white font-extrabold text-center text-lg py-1.5 border-b border-slate-800 shadow-md tracking-wider">
                   TARGET TODAY
@@ -344,8 +329,7 @@
                 </div>
               </div>
 
-
-              <!-- 2. LIVE TOP SALES TODAY (TENGAH) -->
+              <!-- LIVE TOP SALES TODAY -->
               <div class="custom-table-container flex flex-col relative z-10">
                 <div class="bg-slate-900 text-white font-extrabold text-center text-xl py-2.5 rounded-t-xl border-b border-slate-800 shadow-md z-10 shrink-0 tracking-wider">
                   LIVE TOP SALES TODAY
@@ -365,8 +349,7 @@
                 </div>
               </div>
 
-
-              <!-- 3. BEST SALES CAROUSEL (KANAN) -->
+              <!-- BEST SALES CAROUSEL -->
               <div id="rightCardContainer" class="mtd-top1-container gold-glow-container flex flex-col relative z-10 overflow-hidden">
                 <div id="sliderHeader" class="bg-slate-900 text-white font-extrabold text-center text-xl py-2.5 border-b border-slate-800 shadow-md z-20 shrink-0 tracking-wider flex items-center justify-center gap-2 transition-colors duration-500">
                   <i data-lucide="award" id="sliderHeaderIcon" class="w-6 h-6 text-yellow-400"></i>
@@ -407,11 +390,9 @@
 
             </div>
 
-
-            <!-- ================= BARIS BAWAH: 4 TABEL CARD VIEW ================= -->
+            <!-- BARIS BAWAH: 4 TABEL CARD VIEW -->
             <div class="bottom-row">
 
-              <!-- 1. SALES DEPARTEMEN TODAY -->
               <div class="bottom-card-container">
                 <div class="bg-slate-900 text-white font-extrabold text-center text-sm py-1.5 border-b border-slate-800 shadow-md z-10 shrink-0 tracking-wider">
                   SALES DEPARTEMEN TODAY
@@ -428,7 +409,6 @@
                 </div>
               </div>
 
-              <!-- 2. MTD BY SALES -->
               <div class="bottom-card-container">
                 <div class="bg-slate-900 text-white font-extrabold text-center text-sm py-1.5 border-b border-slate-800 shadow-md z-10 shrink-0 tracking-wider">
                   MTD BY SALES
@@ -445,7 +425,6 @@
                 </div>
               </div>
 
-              <!-- 3. MTD BY FURNIPRO -->
               <div class="bottom-card-container">
                 <div class="bg-slate-900 text-white font-extrabold text-center text-sm py-1.5 border-b border-slate-800 shadow-md z-10 shrink-0 tracking-wider">
                   MTD BY FURNIPRO
@@ -462,7 +441,6 @@
                 </div>
               </div>
 
-              <!-- 4. MTD BY COMSER -->
               <div class="bottom-card-container">
                 <div class="bg-slate-900 text-white font-extrabold text-center text-sm py-1.5 border-b border-slate-800 shadow-md z-10 shrink-0 tracking-wider">
                   MTD BY COMSER
@@ -484,7 +462,7 @@
           </div>
         </main>
 
-        <!-- ================= LOWER THIRD BROADCAST FOOTER ================= -->
+        <!-- LOWER THIRD BROADCAST FOOTER -->
         <footer class="w-full h-[52px] flex items-center shrink-0 relative overflow-hidden z-50 bg-red-600">
           <div class="bg-red-600 text-white px-6 h-full flex items-center gap-3 shrink-0 z-30 shadow-lg relative font-sans">
             <i data-lucide="volume-2" class="w-6 h-6 text-yellow-300 animate-pulse"></i>
@@ -563,7 +541,7 @@
       }
     }
 
-    // --- INTEGRASI PENGATURAN SOUNDS & AUTO-PLAY DI WEB 2 ---
+    // FUNGSI AUTO-PLAY LAGU WEB 2 REAL-TIME
     async function initSoundsPlayer() {
       const audioBacksound = document.getElementById('audioBacksound');
       const audioSoundSales = document.getElementById('audioSoundSales');
@@ -585,7 +563,7 @@
               if (pubUrl && pubUrl.publicUrl) {
                 if (!audioBacksound.src.includes(encodeURIComponent(fileName))) {
                   audioBacksound.src = pubUrl.publicUrl;
-                  audioBacksound.play().catch(e => console.log('Autoplay backsound pending user interaction:', e));
+                  audioBacksound.play().catch(e => console.log('Autoplay backsound pending interaction:', e));
                 }
               }
             } else {
@@ -598,7 +576,7 @@
               if (pubUrl && pubUrl.publicUrl) {
                 if (!audioSoundSales.src.includes(encodeURIComponent(fileName))) {
                   audioSoundSales.src = pubUrl.publicUrl;
-                  audioSoundSales.play().catch(e => console.log('Autoplay sound sales pending user interaction:', e));
+                  audioSoundSales.play().catch(e => console.log('Autoplay sound sales pending interaction:', e));
                 }
               }
             } else {
@@ -611,7 +589,6 @@
 
       await checkAndPlaySounds();
 
-      // Realtime subscription untuk setting_sounds
       supabaseClient
         .channel('public:setting_sounds')
         .on('postgres_changes', { event: '*', schema: 'public', table: 'setting_sounds' }, payload => {
@@ -1492,7 +1469,7 @@
       lucide.createIcons();
       await fetchKaryawanData();
       await fetchTvSettings();
-      await initSoundsPlayer(); // Inisialisasi Audio Player & Sync Realtime Sound
+      await initSoundsPlayer();
       fetchSalesData();
       fetchDeptData();
       fetchMtdSalesData();
