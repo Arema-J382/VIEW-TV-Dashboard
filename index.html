@@ -568,7 +568,7 @@
       }
     }
 
-    // PERBAIKAN UTAMA: Validasi Fleksibel (Selama ada nama file dan tidak secara eksplisit non-aktif, lagu diputar)
+    // DISINKRONKAN: Memeriksa isi tabel status_backsound secara dinamis
     async function initSoundsPlayer() {
       const audioBacksound = document.getElementById('audioBacksound');
       const audioSoundSales = document.getElementById('audioSoundSales');
@@ -578,41 +578,25 @@
 
       async function checkAndPlaySounds() {
         const { data, error } = await supabaseClient
-          .from('setting_sounds')
+          .from('status_backsound')
           .select('*');
 
-        if (error || !data) return;
+        if (error) return;
 
         let activeBacksoundFile = null;
         let activeSoundSalesFile = null;
 
-        data.forEach(item => {
-          // Gabungkan seluruh kemungkinan kolom status menjadi teks huruf besar
-          const statusText = String(item.status || item.aktif || item.is_active || '').toUpperCase();
-          
-          // Lagu dianggap non-aktif HANYA JIKA status secara eksplisit mengandung kata NON, FALSE, 0, OFF, atau INACTIVE
-          const isExplicitlyInactive = 
-            statusText.includes('NON') || 
-            statusText === 'FALSE' || 
-            statusText === '0' || 
-            statusText === 'OFF' || 
-            statusText === 'INACTIVE';
-
-          // Jika ada file dan tidak non-aktif, maka aktif!
-          const isItemActive = item.file_name && !isExplicitlyInactive;
-
-          if (item.bucket_name === 'BACKSOUND') {
-            if (isItemActive) {
-              activeBacksoundFile = item.file_name;
+        if (data && data.length > 0) {
+          data.forEach(item => {
+            if (item.bucket_name === 'BACKSOUND') {
+              activeBacksoundFile = item.nama_lagu;
+            } else if (item.bucket_name === 'SOUND SALES') {
+              activeSoundSalesFile = item.nama_lagu;
             }
-          } else if (item.bucket_name === 'SOUND SALES') {
-            if (isItemActive) {
-              activeSoundSalesFile = item.file_name;
-            }
-          }
-        });
+          });
+        }
 
-        // Kontrol Backsound Real-time
+        // --- KONTROL BUCKET BACKSOUND ---
         if (activeBacksoundFile) {
           const { data: pubData } = supabaseClient.storage.from('BACKSOUND').getPublicUrl(activeBacksoundFile);
           const publicUrl = pubData?.publicUrl;
@@ -625,12 +609,13 @@
             audioBacksound.play().catch(e => {});
           }
         } else {
+          // JIKA TABEL KOSONG / DIHAPUS (NON AKTIF), LAGU BERHENTI SEKETIKA
           audioBacksound.pause();
           audioBacksound.currentTime = 0;
           audioBacksound.src = '';
         }
 
-        // Kontrol Sound Sales Real-time
+        // --- KONTROL BUCKET SOUND SALES ---
         if (activeSoundSalesFile) {
           const { data: pubData } = supabaseClient.storage.from('SOUND SALES').getPublicUrl(activeSoundSalesFile);
           const publicUrl = pubData?.publicUrl;
@@ -643,6 +628,7 @@
             audioSoundSales.play().catch(e => {});
           }
         } else {
+          // JIKA TABEL KOSONG / DIHAPUS (NON AKTIF), LAGU BERHENTI SEKETIKA
           audioSoundSales.pause();
           audioSoundSales.currentTime = 0;
           audioSoundSales.src = '';
@@ -651,10 +637,10 @@
 
       await checkAndPlaySounds();
 
-      // Realtime listener untuk mendeteksi perubahan status AKTIF / NON-AKTIF seketika
+      // Realtime listener untuk mendeteksi perubahan data (Insert/Delete) pada status_backsound seketika
       supabaseClient
-        .channel('public:setting_sounds')
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'setting_sounds' }, payload => {
+        .channel('public:status_backsound')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'status_backsound' }, payload => {
           checkAndPlaySounds();
         })
         .subscribe();
