@@ -243,7 +243,16 @@
 </head>
 <body class="bg-slate-950 text-slate-800 select-none overflow-hidden m-0 p-0">
 
-  <!-- AUDIO ELEMENTS FOR AUTO-PLAY INTEGRATION -->
+  <!-- OVERLAY UNTUK MENGAKTIFKAN AUDIO (MENANGANI KEBIJAKAN BROWSER AUTOPLAY) -->
+  <div id="audioUnlockOverlay" onclick="unlockAndPlayAudio()" class="fixed inset-0 bg-slate-950/90 z-[99999] flex flex-col items-center justify-center text-white cursor-pointer transition-opacity duration-500">
+    <div class="bg-blue-600 hover:bg-blue-700 p-8 rounded-3xl shadow-2xl flex flex-col items-center gap-4 border-2 border-blue-400 animate-bounce max-w-xl text-center mx-4">
+      <i data-lucide="volume-2" class="w-16 h-16 text-yellow-300"></i>
+      <h2 class="text-2xl font-black tracking-wide">KLIK DI SINI UNTUK AKTIFKAN AUDIO TV</h2>
+      <p class="text-xs text-blue-100 font-medium">Klik untuk mulai memutar backsound dan sound sales secara looping otomatis.</p>
+    </div>
+  </div>
+
+  <!-- AUDIO ELEMENTS DENGAN LOOP AKTIF -->
   <audio id="audioBacksound" preload="auto" loop></audio>
   <audio id="audioSoundSales" preload="auto" loop></audio>
 
@@ -541,10 +550,33 @@
       }
     }
 
-    // FUNGSI AUTO-PLAY LAGU WEB 2 REAL-TIME
+    // FUNGSI UNTUK MENGAKTIFKAN AUDIO DAN MENGHILANGKAN OVERLAY KLIK
+    function unlockAndPlayAudio() {
+      const overlay = document.getElementById('audioUnlockOverlay');
+      if (overlay) {
+        overlay.style.opacity = '0';
+        setTimeout(() => overlay.remove(), 500);
+      }
+      
+      const audioBacksound = document.getElementById('audioBacksound');
+      const audioSoundSales = document.getElementById('audioSoundSales');
+
+      if (audioBacksound && audioBacksound.src) {
+        audioBacksound.play().catch(e => console.log('Backsound play error:', e));
+      }
+      if (audioSoundSales && audioSoundSales.src) {
+        audioSoundSales.play().catch(e => console.log('Sound Sales play error:', e));
+      }
+    }
+
+    // FUNGSI INISIALISASI PEMUTARAN LAGU DENGAN LOOPING TANPA HENTI
     async function initSoundsPlayer() {
       const audioBacksound = document.getElementById('audioBacksound');
       const audioSoundSales = document.getElementById('audioSoundSales');
+
+      // Pastikan loop aktif
+      audioBacksound.loop = true;
+      audioSoundSales.loop = true;
 
       async function checkAndPlaySounds() {
         const { data, error } = await supabaseClient
@@ -559,11 +591,15 @@
 
           if (bucket === 'BACKSOUND') {
             if (fileName) {
-              const { data: pubUrl } = supabaseClient.storage.from('BACKSOUND').getPublicUrl(fileName);
-              if (pubUrl && pubUrl.publicUrl) {
+              // PERBAIKAN PENTING: Ekstraksi publicUrl dengan benar sesuai Supabase v2
+              const { data: pubData } = supabaseClient.storage.from('BACKSOUND').getPublicUrl(fileName);
+              const publicUrl = pubData?.publicUrl;
+
+              if (publicUrl) {
                 if (!audioBacksound.src.includes(encodeURIComponent(fileName))) {
-                  audioBacksound.src = pubUrl.publicUrl;
-                  audioBacksound.play().catch(e => console.log('Autoplay backsound pending interaction:', e));
+                  audioBacksound.src = publicUrl;
+                  audioBacksound.load();
+                  audioBacksound.play().catch(e => console.log('Autoplay backsound menunggu interaksi:', e));
                 }
               }
             } else {
@@ -572,11 +608,14 @@
             }
           } else if (bucket === 'SOUND SALES') {
             if (fileName) {
-              const { data: pubUrl } = supabaseClient.storage.from('SOUND SALES').getPublicUrl(fileName);
-              if (pubUrl && pubUrl.publicUrl) {
+              const { data: pubData } = supabaseClient.storage.from('SOUND SALES').getPublicUrl(fileName);
+              const publicUrl = pubData?.publicUrl;
+
+              if (publicUrl) {
                 if (!audioSoundSales.src.includes(encodeURIComponent(fileName))) {
-                  audioSoundSales.src = pubUrl.publicUrl;
-                  audioSoundSales.play().catch(e => console.log('Autoplay sound sales pending interaction:', e));
+                  audioSoundSales.src = publicUrl;
+                  audioSoundSales.load();
+                  audioSoundSales.play().catch(e => console.log('Autoplay sound sales menunggu interaksi:', e));
                 }
               }
             } else {
@@ -589,6 +628,7 @@
 
       await checkAndPlaySounds();
 
+      // Realtime listener untuk perubahan status active sounds
       supabaseClient
         .channel('public:setting_sounds')
         .on('postgres_changes', { event: '*', schema: 'public', table: 'setting_sounds' }, payload => {
