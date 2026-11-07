@@ -568,7 +568,7 @@
       }
     }
 
-    // PERBAIKAN UTAMA: Validasi Status Aktif (Hanya putar jika status AKTIF / True)
+    // PERBAIKAN UTAMA: Validasi Fleksibel (Selama ada nama file dan tidak secara eksplisit non-aktif, lagu diputar)
     async function initSoundsPlayer() {
       const audioBacksound = document.getElementById('audioBacksound');
       const audioSoundSales = document.getElementById('audioSoundSales');
@@ -587,20 +587,26 @@
         let activeSoundSalesFile = null;
 
         data.forEach(item => {
-          // Periksa apakah status lagu benar-benar AKTIF atau True
-          const statusStr = String(item.status || '').toUpperCase();
-          const isItemActive = 
-            statusStr === 'AKTIF' || 
-            statusStr === 'TRUE' || 
-            item.is_active === true || 
-            item.aktif === true;
+          // Gabungkan seluruh kemungkinan kolom status menjadi teks huruf besar
+          const statusText = String(item.status || item.aktif || item.is_active || '').toUpperCase();
+          
+          // Lagu dianggap non-aktif HANYA JIKA status secara eksplisit mengandung kata NON, FALSE, 0, OFF, atau INACTIVE
+          const isExplicitlyInactive = 
+            statusText.includes('NON') || 
+            statusText === 'FALSE' || 
+            statusText === '0' || 
+            statusText === 'OFF' || 
+            statusText === 'INACTIVE';
+
+          // Jika ada file dan tidak non-aktif, maka aktif!
+          const isItemActive = item.file_name && !isExplicitlyInactive;
 
           if (item.bucket_name === 'BACKSOUND') {
-            if (item.file_name && isItemActive) {
+            if (isItemActive) {
               activeBacksoundFile = item.file_name;
             }
           } else if (item.bucket_name === 'SOUND SALES') {
-            if (item.file_name && isItemActive) {
+            if (isItemActive) {
               activeSoundSalesFile = item.file_name;
             }
           }
