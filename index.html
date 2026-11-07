@@ -550,7 +550,6 @@
       }
     }
 
-    // FUNGSI UNTUK MENGAKTIFKAN AUDIO DAN MENGHILANGKAN OVERLAY KLIK
     function unlockAndPlayAudio() {
       const overlay = document.getElementById('audioUnlockOverlay');
       if (overlay) {
@@ -561,7 +560,7 @@
       const audioBacksound = document.getElementById('audioBacksound');
       const audioSoundSales = document.getElementById('audioSoundSales');
 
-      if (audioBacksound && audioBacksound.src) {
+      if (audioBacksound && audioBacksound.src && !audioBacksound.paused === false) {
         audioBacksound.play().catch(e => console.log('Backsound play error:', e));
       }
       if (audioSoundSales && audioSoundSales.src) {
@@ -569,12 +568,11 @@
       }
     }
 
-    // FUNGSI INISIALISASI PEMUTARAN LAGU DENGAN LOOPING TANPA HENTI
+    // PERBAIKAN UTAMA: Penanganan Audio Real-Time Saat Tombol Non-Aktif / Null Dikirim
     async function initSoundsPlayer() {
       const audioBacksound = document.getElementById('audioBacksound');
       const audioSoundSales = document.getElementById('audioSoundSales');
 
-      // Pastikan loop aktif
       audioBacksound.loop = true;
       audioSoundSales.loop = true;
 
@@ -585,50 +583,57 @@
 
         if (error || !data) return;
 
+        let activeBacksoundFile = null;
+        let activeSoundSalesFile = null;
+
         data.forEach(item => {
-          const bucket = item.bucket_name;
-          const fileName = item.file_name;
-
-          if (bucket === 'BACKSOUND') {
-            if (fileName) {
-              // PERBAIKAN PENTING: Ekstraksi publicUrl dengan benar sesuai Supabase v2
-              const { data: pubData } = supabaseClient.storage.from('BACKSOUND').getPublicUrl(fileName);
-              const publicUrl = pubData?.publicUrl;
-
-              if (publicUrl) {
-                if (!audioBacksound.src.includes(encodeURIComponent(fileName))) {
-                  audioBacksound.src = publicUrl;
-                  audioBacksound.load();
-                  audioBacksound.play().catch(e => console.log('Autoplay backsound menunggu interaksi:', e));
-                }
-              }
-            } else {
-              audioBacksound.pause();
-              audioBacksound.src = '';
-            }
-          } else if (bucket === 'SOUND SALES') {
-            if (fileName) {
-              const { data: pubData } = supabaseClient.storage.from('SOUND SALES').getPublicUrl(fileName);
-              const publicUrl = pubData?.publicUrl;
-
-              if (publicUrl) {
-                if (!audioSoundSales.src.includes(encodeURIComponent(fileName))) {
-                  audioSoundSales.src = publicUrl;
-                  audioSoundSales.load();
-                  audioSoundSales.play().catch(e => console.log('Autoplay sound sales menunggu interaksi:', e));
-                }
-              }
-            } else {
-              audioSoundSales.pause();
-              audioSoundSales.src = '';
-            }
+          if (item.bucket_name === 'BACKSOUND') {
+            activeBacksoundFile = item.file_name;
+          } else if (item.bucket_name === 'SOUND SALES') {
+            activeSoundSalesFile = item.file_name;
           }
         });
+
+        // KONTROL BACKSOUND: Jika ada file aktif, play. Jika null/kosong, pause dan kosongkan source seketika!
+        if (activeBacksoundFile) {
+          const { data: pubData } = supabaseClient.storage.from('BACKSOUND').getPublicUrl(activeBacksoundFile);
+          const publicUrl = pubData?.publicUrl;
+
+          if (publicUrl && !audioBacksound.src.includes(encodeURIComponent(activeBacksoundFile))) {
+            audioBacksound.src = publicUrl;
+            audioBacksound.load();
+            audioBacksound.play().catch(e => console.log('Autoplay backsound menunggu interaksi:', e));
+          } else if (audioBacksound.paused && audioBacksound.src) {
+            audioBacksound.play().catch(e => {});
+          }
+        } else {
+          audioBacksound.pause();
+          audioBacksound.currentTime = 0;
+          audioBacksound.src = '';
+        }
+
+        // KONTROL SOUND SALES: Jika ada file aktif, play. Jika null/kosong, pause dan kosongkan source seketika!
+        if (activeSoundSalesFile) {
+          const { data: pubData } = supabaseClient.storage.from('SOUND SALES').getPublicUrl(activeSoundSalesFile);
+          const publicUrl = pubData?.publicUrl;
+
+          if (publicUrl && !audioSoundSales.src.includes(encodeURIComponent(activeSoundSalesFile))) {
+            audioSoundSales.src = publicUrl;
+            audioSoundSales.load();
+            audioSoundSales.play().catch(e => console.log('Autoplay sound sales menunggu interaksi:', e));
+          } else if (audioSoundSales.paused && audioSoundSales.src) {
+            audioSoundSales.play().catch(e => {});
+          }
+        } else {
+          audioSoundSales.pause();
+          audioSoundSales.currentTime = 0;
+          audioSoundSales.src = '';
+        }
       }
 
       await checkAndPlaySounds();
 
-      // Realtime listener untuk perubahan status active sounds
+      // Realtime listener yang langsung merespons ketika tombol AKTIF/NON-AKTIF diubah di Web 1
       supabaseClient
         .channel('public:setting_sounds')
         .on('postgres_changes', { event: '*', schema: 'public', table: 'setting_sounds' }, payload => {
