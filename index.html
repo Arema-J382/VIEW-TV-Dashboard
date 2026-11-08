@@ -13,237 +13,63 @@
   <script src="https://unpkg.com/lucide@latest"></script>
 
   <style>
-    * {
-      -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
-      text-rendering: optimizeLegibility;
-    }
-
-    body {
-      margin: 0;
-      padding: 0;
-      width: 100vw;
-      height: 100vh;
-      overflow: hidden;
-      background-color: #020617;
-    }
-
+    * { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; text-rendering: optimizeLegibility; }
+    body { margin: 0; padding: 0; width: 100vw; height: 100vh; overflow: hidden; background-color: #020617; }
     .tv-canvas {
-      width: 1920px;
-      height: 1080px;
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      transform-origin: center center;
-      display: flex;
-      flex-direction: column;
-      background-color: #eff6ff;
-      overflow: hidden;
-      box-sizing: border-box;
-      will-change: transform;
-      backface-visibility: hidden;
+      width: 1920px; height: 1080px; position: absolute; top: 50%; left: 50%;
+      transform: translate(-50%, -50%); transform-origin: center center; display: flex; flex-direction: column;
+      background-color: #eff6ff; overflow: hidden; box-sizing: border-box; will-change: transform;
     }
-
-    .dashboard-layout {
-      display: flex;
-      flex-direction: column;
-      justify-content: flex-start;
-      align-items: center;
-      gap: 1rem;
-      width: 100%;
-      height: 100%;
-    }
-
-    .top-row {
-      display: flex;
-      flex-direction: row;
-      justify-content: center;
-      align-items: flex-start;
-      gap: 1.5rem;
-      width: 100%;
-    }
-
-    .bottom-row {
-      display: flex;
-      flex-direction: row;
-      justify-content: center;
-      align-items: flex-start;
-      gap: 1.25rem;
-      width: 100%;
-    }
-
-    .gauge-section-container {
-      width: 500px;
-      height: 380px;
-      background: #ffffff;
-      border-radius: 0.85rem;
-      box-shadow: 0 8px 20px -4px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-      border: 1px solid #bfdbfe;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-      position: relative;
-    }
-
-    .custom-table-container {
-      width: 600px;
-      height: 380px;
-      margin: 0;         
-      display: flex;
-      flex-direction: column;
-      position: relative;
-      z-index: 10;
-    }
-
-    .mtd-top1-container {
-      width: 500px;
-      height: 380px;
-      background: #ffffff;
-      border-radius: 1rem;
-      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-      position: relative;
-      z-index: 10;
-      transition: all 0.5s ease-in-out;
-    }
-
-    .bottom-card-container {
-      width: 440px;
-      height: 340px;
-      background: #ffffff;
-      border-radius: 0.85rem;
-      box-shadow: 0 8px 20px -4px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-      border: 1px solid #bfdbfe;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-      position: relative;
-    }
+    .dashboard-layout { display: flex; flex-direction: column; justify-content: flex-start; align-items: center; gap: 1rem; width: 100%; height: 100%; }
+    .top-row { display: flex; flex-direction: row; justify-content: center; align-items: flex-start; gap: 1.5rem; width: 100%; }
+    .bottom-row { display: flex; flex-direction: row; justify-content: center; align-items: flex-start; gap: 1.25rem; width: 100%; }
+    .gauge-section-container { width: 500px; height: 380px; background: #ffffff; border-radius: 0.85rem; box-shadow: 0 8px 20px -4px rgba(0,0,0,0.1); border: 1px solid #bfdbfe; display: flex; flex-direction: column; overflow: hidden; position: relative; }
+    .custom-table-container { width: 600px; height: 380px; display: flex; flex-direction: column; position: relative; z-index: 10; }
+    .mtd-top1-container { width: 500px; height: 380px; background: #ffffff; border-radius: 1rem; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1); display: flex; flex-direction: column; overflow: hidden; position: relative; z-index: 10; transition: all 0.5s ease-in-out; }
+    .bottom-card-container { width: 440px; height: 340px; background: #ffffff; border-radius: 0.85rem; box-shadow: 0 8px 20px -4px rgba(0,0,0,0.1); border: 1px solid #bfdbfe; display: flex; flex-direction: column; overflow: hidden; position: relative; }
 
     @keyframes goldGlow {
       0%, 100% { box-shadow: 0 0 10px rgba(234, 179, 8, 0.5), 0 0 20px rgba(245, 158, 11, 0.3); }
       50% { box-shadow: 0 0 22px rgba(234, 179, 8, 0.9), 0 0 32px rgba(239, 68, 68, 0.6); }
     }
-
     @keyframes cyanGlow {
       0%, 100% { box-shadow: 0 0 10px rgba(59, 130, 246, 0.6), 0 0 20px rgba(14, 165, 233, 0.4); }
       50% { box-shadow: 0 0 22px rgba(59, 130, 246, 1), 0 0 35px rgba(6, 182, 212, 0.8); }
     }
-
     @keyframes emeraldGlow {
       0%, 100% { box-shadow: 0 0 10px rgba(16, 185, 129, 0.6), 0 0 20px rgba(5, 150, 105, 0.4); }
       50% { box-shadow: 0 0 22px rgba(16, 185, 129, 1), 0 0 35px rgba(4, 120, 87, 0.8); }
     }
+    .gold-glow-container { border: 2px solid #eab308; animation: goldGlow 2s infinite ease-in-out; }
+    .cyan-glow-container { border: 2px solid #3b82f6; animation: cyanGlow 2s infinite ease-in-out; }
+    .emerald-glow-container { border: 2px solid #10b981; animation: emeraldGlow 2s infinite ease-in-out; }
 
-    .gold-glow-container {
-      border: 2px solid #eab308;
-      animation: goldGlow 2s infinite ease-in-out;
-    }
+    @keyframes scrollUp { 0% { transform: translate3d(0, 0, 0); } 100% { transform: translate3d(0, -50%, 0); } }
+    .animate-scroll-infinite { animation: scrollUp linear infinite; will-change: transform; }
+    .scroll-container:hover .animate-scroll-infinite { animation-play-state: paused; }
+    .text-outline-white { text-shadow: -0.75px -0.75px 0 #fff, 0.75px -0.75px 0 #fff, -0.75px 0.75px 0 #fff, 0.75px 0.75px 0 #fff, 0px 1px 2px rgba(0,0,0,0.12); }
 
-    .cyan-glow-container {
-      border: 2px solid #3b82f6;
-      animation: cyanGlow 2s infinite ease-in-out;
-    }
+    .fire-box-1 { background-color: #fefce8; border: 2px solid #eab308; border-radius: 0.75rem; animation: goldGlow 1.8s infinite ease-in-out; }
+    .fire-box-2 { background-color: #f8fafc; border: 2px solid #94a3b8; border-radius: 0.75rem; }
+    .fire-box-3 { background-color: #fff7ed; border: 2px solid #d97706; border-radius: 0.75rem; }
 
-    .emerald-glow-container {
-      border: 2px solid #10b981;
-      animation: emeraldGlow 2s infinite ease-in-out;
-    }
+    .slider-track { display: flex; width: 300%; height: 100%; transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1); will-change: transform; }
 
-    @keyframes scrollUp {
-      0% { transform: translate3d(0, 0, 0); }
-      100% { transform: translate3d(0, -50%, 0); }
-    }
+    @keyframes screenMarquee { 0% { transform: translate3d(1920px, 0, 0); } 100% { transform: translate3d(-100%, 0, 0); } }
+    .screen-marquee-anim { position: absolute; white-space: nowrap; will-change: transform; animation: screenMarquee 28s linear infinite; }
+    .broadcast-slant-edge { clip-path: polygon(0 0, calc(100% - 35px) 0, 100% 100%, 0 100%); }
 
-    .animate-scroll-infinite {
-      animation: scrollUp linear infinite;
-      will-change: transform;
+    /* Animasi Pop-Up Modern */
+    @keyframes popupEntrance {
+      0% { opacity: 0; transform: scale(0.8) translateY(30px); }
+      100% { opacity: 1; transform: scale(1) translateY(0); }
     }
-    
-    .scroll-container:hover .animate-scroll-infinite {
-      animation-play-state: paused;
-    }
-
-    .text-outline-white {
-      text-shadow: 
-        -0.75px -0.75px 0 #fff,  
-         0.75px -0.75px 0 #fff,
-        -0.75px  0.75px 0 #fff,
-         0.75px  0.75px 0 #fff,
-         0px     1px    2px rgba(0, 0, 0, 0.12);
-    }
-
-    @keyframes silverGlow {
-      0%, 100% { box-shadow: 0 0 8px rgba(148, 163, 184, 0.5), 0 0 16px rgba(56, 189, 248, 0.3); }
-      50% { box-shadow: 0 0 16px rgba(148, 163, 184, 0.9), 0 0 24px rgba(56, 189, 248, 0.6); }
-    }
-
-    @keyframes bronzeGlow {
-      0%, 100% { box-shadow: 0 0 8px rgba(217, 119, 6, 0.5), 0 0 16px rgba(234, 88, 12, 0.3); }
-      50% { box-shadow: 0 0 16px rgba(217, 119, 6, 0.9), 0 0 22px rgba(220, 38, 38, 0.6); }
-    }
-
-    .fire-box-1 {
-      background-color: #fefce8;
-      border: 2px solid #eab308;
-      border-radius: 0.75rem;
-      animation: goldGlow 1.8s infinite ease-in-out;
-    }
-
-    .fire-box-2 {
-      background-color: #f8fafc;
-      border: 2px solid #94a3b8;
-      border-radius: 0.75rem;
-      animation: silverGlow 2.2s infinite ease-in-out;
-    }
-
-    .fire-box-3 {
-      background-color: #fff7ed;
-      border: 2px solid #d97706;
-      border-radius: 0.75rem;
-      animation: bronzeGlow 2s infinite ease-in-out;
-    }
-
-    .slider-track {
-      display: flex;
-      width: 300%;
-      height: 100%;
-      transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
-      will-change: transform;
-    }
-
-    @keyframes screenMarquee {
-      0% {
-        transform: translate3d(1920px, 0, 0);
-      }
-      100% {
-        transform: translate3d(-100%, 0, 0);
-      }
-    }
-
-    .screen-marquee-anim {
-      position: absolute;
-      white-space: nowrap;
-      will-change: transform;
-      backface-visibility: hidden;
-      animation: screenMarquee 28s linear infinite;
-    }
-
-    .screen-marquee-anim:hover {
-      animation-play-state: paused;
-    }
-
-    .broadcast-slant-edge {
-      clip-path: polygon(0 0, calc(100% - 35px) 0, 100% 100%, 0 100%);
-    }
+    .animate-popup { animation: popupEntrance 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
   </style>
 </head>
 <body class="bg-slate-950 text-slate-800 select-none overflow-hidden m-0 p-0">
 
-  <!-- OVERLAY UNTUK MENGAKTIFKAN AUDIO (MENANGANI KEBIJAKAN BROWSER AUTOPLAY) -->
+  <!-- OVERLAY UNTUK MENGAKTIFKAN AUDIO -->
   <div id="audioUnlockOverlay" onclick="unlockAndPlayAudio()" class="fixed inset-0 bg-slate-950/90 z-[99999] flex flex-col items-center justify-center text-white cursor-pointer transition-opacity duration-500">
     <div class="bg-blue-600 hover:bg-blue-700 p-8 rounded-3xl shadow-2xl flex flex-col items-center gap-4 border-2 border-blue-400 animate-bounce max-w-xl text-center mx-4">
       <i data-lucide="volume-2" class="w-16 h-16 text-yellow-300"></i>
@@ -252,15 +78,43 @@
     </div>
   </div>
 
-  <!-- AUDIO ELEMENTS DENGAN LOOP AKTIF -->
+  <!-- POP-UP FULL BACKGROUND WARNA DENGAN DESIGN & ANIMASI MODERN (WEB 2) -->
+  <div id="modernSalesPopup" class="fixed inset-0 z-[88888] bg-gradient-to-br from-blue-900/95 via-indigo-950/95 to-slate-950/95 backdrop-blur-xl flex items-center justify-center p-6 hidden">
+    <div class="bg-white/95 border-2 border-yellow-400 p-8 rounded-3xl shadow-2xl max-w-xl w-full text-center relative overflow-hidden animate-popup">
+      <div class="absolute -top-10 -right-10 w-40 h-40 bg-yellow-400/20 rounded-full blur-2xl pointer-events-none"></div>
+      
+      <div class="inline-flex items-center gap-2 bg-yellow-500 text-slate-950 px-4 py-1.5 rounded-full font-extrabold text-xs mb-4 shadow-md uppercase tracking-wider">
+        <i data-lucide="award" class="w-4 h-4"></i> TWIBBON SALES ALERT 🌟
+      </div>
+
+      <div class="flex flex-col items-center">
+        <!-- Foto Karyawan -->
+        <div class="relative w-36 h-36 rounded-2xl border-4 border-yellow-400 shadow-xl overflow-hidden bg-slate-200 mb-3">
+          <img id="popupFoto" src="" alt="Foto Sales" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name=Sales&background=0D8ABC&color=fff&size=128';">
+        </div>
+
+        <h3 id="popupNama" class="text-2xl font-black text-slate-900 tracking-tight mb-1">-</h3>
+        <p class="text-xs font-mono text-blue-600 font-bold mb-4">INFORMA MOG MALANG (J382)</p>
+
+        <!-- Data Grid (Value Sales, Qty FP, Value Comser - Kosong Diabaikan) -->
+        <div id="popupDataGrid" class="grid grid-cols-1 sm:grid-cols-3 gap-3 w-full">
+          <!-- Diisi dinamis via JavaScript -->
+        </div>
+      </div>
+
+      <div class="mt-6 text-[11px] font-bold text-slate-400 uppercase tracking-widest">
+        Pop-up otomatis tertutup dalam 5 detik...
+      </div>
+    </div>
+  </div>
+
+  <!-- AUDIO ELEMENTS -->
   <audio id="audioBacksound" preload="auto" loop></audio>
   <audio id="audioSoundSales" preload="auto" loop></audio>
 
   <!-- SAFE-AREA CONTAINER -->
   <div class="w-full h-full p-[2.5%] box-border flex items-center justify-center overflow-hidden">
-    
     <div id="tvAspectRatioBox" class="w-full max-h-full flex items-center justify-center relative overflow-hidden" style="aspect-ratio: 70 / 39;">
-      
       <div id="tvScaleCanvas" class="tv-canvas rounded-2xl shadow-2xl">
 
         <!-- HEADER DASHBOARD -->
@@ -289,7 +143,6 @@
 
         <!-- MAIN VIEW -->
         <main class="flex-1 relative overflow-hidden bg-blue-50 px-6 py-2 flex items-center justify-center">
-          
           <div class="dashboard-layout">
 
             <!-- BARIS ATAS -->
@@ -307,16 +160,11 @@
                       <defs>
                         <path id="textArcAchieved" d="M 20 90 A 80 80 0 0 1 180 90" />
                       </defs>
-
                       <path id="gaugeBackgroundArc" d="M 20 90 A 80 80 0 0 1 180 90" fill="none" stroke="#cbd5e1" stroke-width="22" stroke-linecap="round"/>
                       <path id="gaugeProgressArc" d="M 20 90 A 80 80 0 0 1 180 90" fill="none" stroke="#3b82f6" stroke-width="22" stroke-linecap="round" stroke-dasharray="251.2" stroke-dashoffset="251.2" style="transition: stroke-dashoffset 1s ease-in-out, stroke 0.5s ease;"/>
-                      
                       <text dy="4.5" fill="#ffffff" font-size="9.5" font-weight="900" font-family="monospace">
-                        <textPath id="gaugeTextAchieved" href="#textArcAchieved" startOffset="0%" text-anchor="start" style="transition: startOffset 1s ease-in-out;">
-                          0.0%
-                        </textPath>
+                        <textPath id="gaugeTextAchieved" href="#textArcAchieved" startOffset="0%" text-anchor="start">0.0%</textPath>
                       </text>
-
                       <g id="gaugeNeedle" style="transform-origin: 100px 90px; transition: transform 1s cubic-bezier(0.4, 0, 0.2, 1); transform: rotate(-90deg);">
                         <line x1="100" y1="90" x2="100" y2="30" stroke="#0f172a" stroke-width="4" stroke-linecap="round"/>
                         <circle cx="100" cy="90" r="6.5" fill="#0f172a"/>
@@ -343,13 +191,10 @@
                 <div class="bg-slate-900 text-white font-extrabold text-center text-xl py-2.5 rounded-t-xl border-b border-slate-800 shadow-md z-10 shrink-0 tracking-wider">
                   LIVE TOP SALES TODAY
                 </div>
-
                 <div id="emptyStatus" class="hidden absolute inset-0 pt-16 flex flex-col items-center justify-center z-20 bg-white/90 backdrop-blur-sm rounded-b-xl">
                   <i data-lucide="database-backup" class="w-20 h-20 text-slate-400 mb-3"></i>
                   <div id="statusMessage" class="text-slate-600 text-lg font-medium">Belum ada data laporan sales di database.</div>
-                  <p class="text-slate-400 text-xs mt-1">Silakan input data melalui Admin Panel.</p>
                 </div>
-
                 <div class="flex-1 overflow-hidden relative border-x border-b border-blue-200 rounded-b-xl bg-white scroll-container shadow-lg">
                   <div id="scrollWrapper" class="absolute w-full animate-scroll-infinite">
                     <div id="tableContentOriginal" class="space-y-2.5 p-2.5"></div>
@@ -360,38 +205,20 @@
 
               <!-- BEST SALES CAROUSEL -->
               <div id="rightCardContainer" class="mtd-top1-container gold-glow-container flex flex-col relative z-10 overflow-hidden">
-                <div id="sliderHeader" class="bg-slate-900 text-white font-extrabold text-center text-xl py-2.5 border-b border-slate-800 shadow-md z-20 shrink-0 tracking-wider flex items-center justify-center gap-2 transition-colors duration-500">
+                <div id="sliderHeader" class="bg-slate-900 text-white font-extrabold text-center text-xl py-2.5 border-b border-slate-800 shadow-md z-20 shrink-0 tracking-wider flex items-center justify-center gap-2">
                   <i data-lucide="award" id="sliderHeaderIcon" class="w-6 h-6 text-yellow-400"></i>
                   <span id="sliderHeaderTitle">BEST SALES</span>
                 </div>
-
                 <div class="flex-1 relative overflow-hidden">
                   <div id="mtdSliderTrack" class="slider-track">
                     <div class="w-1/3 h-full flex flex-col items-center justify-center p-3 bg-gradient-to-b from-amber-50/50 to-white shrink-0">
-                      <div id="mtdTop1Content" class="w-full flex flex-col items-center justify-center">
-                        <div class="flex flex-col items-center justify-center text-slate-400 py-10">
-                          <i data-lucide="loader-2" class="w-9 h-9 animate-spin mb-2"></i>
-                          <p class="text-xs font-medium">Memuat Best Sales...</p>
-                        </div>
-                      </div>
+                      <div id="mtdTop1Content" class="w-full flex flex-col items-center justify-center"></div>
                     </div>
-
                     <div class="w-1/3 h-full flex flex-col items-center justify-center p-3 bg-gradient-to-b from-blue-50/50 to-white shrink-0">
-                      <div id="furniproTop1Content" class="w-full flex flex-col items-center justify-center">
-                        <div class="flex flex-col items-center justify-center text-slate-400 py-10">
-                          <i data-lucide="loader-2" class="w-9 h-9 animate-spin mb-2"></i>
-                          <p class="text-xs font-medium">Memuat Best Furnipro...</p>
-                        </div>
-                      </div>
+                      <div id="furniproTop1Content" class="w-full flex flex-col items-center justify-center"></div>
                     </div>
-
                     <div class="w-1/3 h-full flex flex-col items-center justify-center p-3 bg-gradient-to-b from-emerald-50/50 to-white shrink-0">
-                      <div id="comserTop1Content" class="w-full flex flex-col items-center justify-center">
-                        <div class="flex flex-col items-center justify-center text-slate-400 py-10">
-                          <i data-lucide="loader-2" class="w-9 h-9 animate-spin mb-2"></i>
-                          <p class="text-xs font-medium">Memuat Best Comser...</p>
-                        </div>
-                      </div>
+                      <div id="comserTop1Content" class="w-full flex flex-col items-center justify-center"></div>
                     </div>
                   </div>
                 </div>
@@ -401,15 +228,8 @@
 
             <!-- BARIS BAWAH: 4 TABEL CARD VIEW -->
             <div class="bottom-row">
-
               <div class="bottom-card-container">
-                <div class="bg-slate-900 text-white font-extrabold text-center text-sm py-1.5 border-b border-slate-800 shadow-md z-10 shrink-0 tracking-wider">
-                  SALES DEPARTEMEN TODAY
-                </div>
-                <div id="emptyStatusDept" class="hidden absolute inset-0 pt-12 flex flex-col items-center justify-center z-20 bg-white/90 backdrop-blur-sm rounded-b-xl">
-                  <i data-lucide="database-backup" class="w-8 h-8 text-slate-400 mb-1"></i>
-                  <div id="statusMessageDept" class="text-slate-600 text-xs font-medium">Belum ada data laporan departemen.</div>
-                </div>
+                <div class="bg-slate-900 text-white font-extrabold text-center text-sm py-1.5 border-b border-slate-800 shadow-md z-10 shrink-0 tracking-wider">SALES DEPARTEMEN TODAY</div>
                 <div class="flex-1 overflow-hidden relative bg-white scroll-container">
                   <div id="scrollWrapperDept" class="absolute w-full animate-scroll-infinite">
                     <div id="tableContentOriginalDept" class="space-y-1.5 p-2"></div>
@@ -417,15 +237,8 @@
                   </div>
                 </div>
               </div>
-
               <div class="bottom-card-container">
-                <div class="bg-slate-900 text-white font-extrabold text-center text-sm py-1.5 border-b border-slate-800 shadow-md z-10 shrink-0 tracking-wider">
-                  MTD BY SALES
-                </div>
-                <div id="emptyStatusMtdSales" class="hidden absolute inset-0 pt-12 flex flex-col items-center justify-center z-20 bg-white/90 backdrop-blur-sm rounded-b-xl">
-                  <i data-lucide="database-backup" class="w-8 h-8 text-slate-400 mb-1"></i>
-                  <div id="statusMessageMtdSales" class="text-slate-600 text-xs font-medium">Belum ada data MTD Sales.</div>
-                </div>
+                <div class="bg-slate-900 text-white font-extrabold text-center text-sm py-1.5 border-b border-slate-800 shadow-md z-10 shrink-0 tracking-wider">MTD BY SALES</div>
                 <div class="flex-1 overflow-hidden relative bg-white scroll-container">
                   <div id="scrollWrapperMtdSales" class="absolute w-full animate-scroll-infinite">
                     <div id="tableContentOriginalMtdSales" class="space-y-1.5 p-2"></div>
@@ -433,15 +246,8 @@
                   </div>
                 </div>
               </div>
-
               <div class="bottom-card-container">
-                <div class="bg-slate-900 text-white font-extrabold text-center text-sm py-1.5 border-b border-slate-800 shadow-md z-10 shrink-0 tracking-wider">
-                  MTD BY FURNIPRO
-                </div>
-                <div id="emptyStatusMtdFurnipro" class="hidden absolute inset-0 pt-12 flex flex-col items-center justify-center z-20 bg-white/90 backdrop-blur-sm rounded-b-xl">
-                  <i data-lucide="database-backup" class="w-8 h-8 text-slate-400 mb-1"></i>
-                  <div id="statusMessageMtdFurnipro" class="text-slate-600 text-xs font-medium">Belum ada data MTD Furnipro.</div>
-                </div>
+                <div class="bg-slate-900 text-white font-extrabold text-center text-sm py-1.5 border-b border-slate-800 shadow-md z-10 shrink-0 tracking-wider">MTD BY FURNIPRO</div>
                 <div class="flex-1 overflow-hidden relative bg-white scroll-container">
                   <div id="scrollWrapperMtdFurnipro" class="absolute w-full animate-scroll-infinite">
                     <div id="tableContentOriginalMtdFurnipro" class="space-y-1.5 p-2"></div>
@@ -449,15 +255,8 @@
                   </div>
                 </div>
               </div>
-
               <div class="bottom-card-container">
-                <div class="bg-slate-900 text-white font-extrabold text-center text-sm py-1.5 border-b border-slate-800 shadow-md z-10 shrink-0 tracking-wider">
-                  MTD BY COMSER
-                </div>
-                <div id="emptyStatusMtdComser" class="hidden absolute inset-0 pt-12 flex flex-col items-center justify-center z-20 bg-white/90 backdrop-blur-sm rounded-b-xl">
-                  <i data-lucide="database-backup" class="w-8 h-8 text-slate-400 mb-1"></i>
-                  <div id="statusMessageMtdComser" class="text-slate-600 text-xs font-medium">Belum ada data MTD Comser.</div>
-                </div>
+                <div class="bg-slate-900 text-white font-extrabold text-center text-sm py-1.5 border-b border-slate-800 shadow-md z-10 shrink-0 tracking-wider">MTD BY COMSER</div>
                 <div class="flex-1 overflow-hidden relative bg-white scroll-container">
                   <div id="scrollWrapperMtdComser" class="absolute w-full animate-scroll-infinite">
                     <div id="tableContentOriginalMtdComser" class="space-y-1.5 p-2"></div>
@@ -465,19 +264,17 @@
                   </div>
                 </div>
               </div>
-
             </div>
 
           </div>
         </main>
 
-        <!-- LOWER THIRD BROADCAST FOOTER -->
+        <!-- FOOTER RUNNING TEXT -->
         <footer class="w-full h-[52px] flex items-center shrink-0 relative overflow-hidden z-50 bg-red-600">
           <div class="bg-red-600 text-white px-6 h-full flex items-center gap-3 shrink-0 z-30 shadow-lg relative font-sans">
             <i data-lucide="volume-2" class="w-6 h-6 text-yellow-300 animate-pulse"></i>
             <span class="text-xl font-black tracking-widest uppercase text-white drop-shadow">INFO BOLO</span>
           </div>
-
           <div class="bg-slate-900 text-white flex-1 h-full relative overflow-hidden flex items-center broadcast-slant-edge z-20 shadow-inner border-l border-red-700">
             <div class="absolute inset-0 overflow-hidden pointer-events-none">
               <div id="runningTextContainer" class="screen-marquee-anim text-lg font-bold text-white tracking-wider flex items-center h-full">
@@ -499,177 +296,151 @@
     const TARGET_TV_ID = 'TV-Anas';
 
     let karyawanMap = {};
-    let salesList = [];
-    let deptList = [];
-    let mtdSalesList = [];
-    let mtdFurniproList = [];
-    let mtdComserList = [];
+    let salesList = [], deptList = [], mtdSalesList = [], mtdFurniproList = [], mtdComserList = [];
     let currentSlide = 0; 
+    let popupTimer = null;
 
     function scaleDashboard() {
       const box = document.getElementById('tvAspectRatioBox');
       const canvas = document.getElementById('tvScaleCanvas');
       if (!box || !canvas) return;
-
-      const boxWidth = box.clientWidth;
-      const boxHeight = box.clientHeight;
-
-      const scaleX = boxWidth / 1920;
-      const scaleY = boxHeight / 1080;
-      const scale = Math.min(scaleX, scaleY);
-
+      const scale = Math.min(box.clientWidth / 1920, box.clientHeight / 1080);
       canvas.style.transform = `translate(-50%, -50%) scale(${scale})`;
     }
-
     window.addEventListener('resize', scaleDashboard);
-
-    async function fetchTvSettings() {
-      try {
-        const { data, error } = await supabaseClient
-          .from('setting_tv')
-          .select('panjang_tv, tinggi_tv')
-          .eq('id_tv', TARGET_TV_ID)
-          .single();
-
-        if (error) {
-          scaleDashboard();
-          return;
-        }
-
-        if (data && data.panjang_tv && data.tinggi_tv) {
-          const panjang = Number(data.panjang_tv);
-          const tinggi = Number(data.tinggi_tv);
-          const box = document.getElementById('tvAspectRatioBox');
-          if (box) {
-            box.style.aspectRatio = `${panjang} / ${tinggi}`;
-            scaleDashboard();
-          }
-        }
-      } catch (err) {
-        scaleDashboard();
-      }
-    }
 
     function unlockAndPlayAudio() {
       const overlay = document.getElementById('audioUnlockOverlay');
-      if (overlay) {
-        overlay.style.opacity = '0';
-        setTimeout(() => overlay.remove(), 500);
-      }
-      
-      const audioBacksound = document.getElementById('audioBacksound');
-      const audioSoundSales = document.getElementById('audioSoundSales');
-
-      if (audioBacksound && audioBacksound.src) {
-        audioBacksound.play().catch(e => console.log('Backsound play error:', e));
-      }
-      if (audioSoundSales && audioSoundSales.src) {
-        audioSoundSales.play().catch(e => console.log('Sound Sales play error:', e));
-      }
+      if (overlay) { overlay.style.opacity = '0'; setTimeout(() => overlay.remove(), 500); }
+      checkAndPlaySounds();
     }
 
-    // DISINKRONKAN: Memeriksa isi tabel status_backsound secara dinamis
-    async function initSoundsPlayer() {
+    // --- INTEGRASI SOUNDS & STATUS SOUNDSTWIBBON DI WEB 2 ---
+    async function checkAndPlaySounds() {
       const audioBacksound = document.getElementById('audioBacksound');
       const audioSoundSales = document.getElementById('audioSoundSales');
 
       audioBacksound.loop = true;
       audioSoundSales.loop = true;
 
-      async function checkAndPlaySounds() {
-        const { data, error } = await supabaseClient
-          .from('status_backsound')
-          .select('*');
-
-        if (error) return;
-
-        let activeBacksoundFile = null;
-        let activeSoundSalesFile = null;
-
-        if (data && data.length > 0) {
-          data.forEach(item => {
-            if (item.bucket_name === 'BACKSOUND') {
-              activeBacksoundFile = item.nama_lagu;
-            } else if (item.bucket_name === 'SOUND SALES') {
-              activeSoundSalesFile = item.nama_lagu;
-            }
-          });
+      // Ambil status Card 1 (BACKSOUND)
+      const { data: backsoundData } = await supabaseClient.from('status_backsound').select('*').maybeSingle();
+      if (backsoundData && backsoundData.nama_lagu) {
+        const { data: pub } = supabaseClient.storage.from('BACKSOUND').getPublicUrl(backsoundData.nama_lagu);
+        if (pub?.publicUrl && !audioBacksound.src.includes(encodeURIComponent(backsoundData.nama_lagu))) {
+          audioBacksound.src = pub.publicUrl;
+          audioBacksound.load();
+          audioBacksound.play().catch(e => {});
+        } else if (audioBacksound.paused && audioBacksound.src) {
+          audioBacksound.play().catch(e => {});
         }
-
-        // --- KONTROL BUCKET BACKSOUND ---
-        if (activeBacksoundFile) {
-          const { data: pubData } = supabaseClient.storage.from('BACKSOUND').getPublicUrl(activeBacksoundFile);
-          const publicUrl = pubData?.publicUrl;
-
-          if (publicUrl && !audioBacksound.src.includes(encodeURIComponent(activeBacksoundFile))) {
-            audioBacksound.src = publicUrl;
-            audioBacksound.load();
-            audioBacksound.play().catch(e => console.log('Autoplay backsound:', e));
-          } else if (audioBacksound.paused && audioBacksound.src) {
-            audioBacksound.play().catch(e => {});
-          }
-        } else {
-          // JIKA TABEL KOSONG / DIHAPUS (NON AKTIF), LAGU BERHENTI SEKETIKA
-          audioBacksound.pause();
-          audioBacksound.currentTime = 0;
-          audioBacksound.src = '';
-        }
-
-        // --- KONTROL BUCKET SOUND SALES ---
-        if (activeSoundSalesFile) {
-          const { data: pubData } = supabaseClient.storage.from('SOUND SALES').getPublicUrl(activeSoundSalesFile);
-          const publicUrl = pubData?.publicUrl;
-
-          if (publicUrl && !audioSoundSales.src.includes(encodeURIComponent(activeSoundSalesFile))) {
-            audioSoundSales.src = publicUrl;
-            audioSoundSales.load();
-            audioSoundSales.play().catch(e => console.log('Autoplay sound sales:', e));
-          } else if (audioSoundSales.paused && audioSoundSales.src) {
-            audioSoundSales.play().catch(e => {});
-          }
-        } else {
-          // JIKA TABEL KOSONG / DIHAPUS (NON AKTIF), LAGU BERHENTI SEKETIKA
-          audioSoundSales.pause();
-          audioSoundSales.currentTime = 0;
-          audioSoundSales.src = '';
-        }
+      } else {
+        audioBacksound.pause();
+        audioBacksound.src = '';
       }
 
-      await checkAndPlaySounds();
+      // Ambil status Card 2 (SOUND SALES / status_soundtwibbon)
+      const { data: soundTwibbonData } = await supabaseClient.from('status_soundtwibbon').select('*').maybeSingle();
+      
+      if (soundTwibbonData && soundTwibbonData.nama_lagutw && soundTwibbonData.status_lagutw) {
+        // SAAT TOMBOL DOWNLOAD DI TWIBBON SALES DI KLIK DAN STATUS LAGUNYA AKTIF:
+        // Pause Card 1, Play Card 2, dan Tampilkan Pop-Up selama 5 detik
+        audioBacksound.pause();
 
-      // Realtime listener untuk mendeteksi perubahan data (Insert/Delete) pada status_backsound seketika
-      supabaseClient
-        .channel('public:status_backsound')
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'status_backsound' }, payload => {
-          checkAndPlaySounds();
-        })
-        .subscribe();
+        const { data: pub2 } = supabaseClient.storage.from('SOUND SALES').getPublicUrl(soundTwibbonData.nama_lagutw);
+        if (pub2?.publicUrl) {
+          audioSoundSales.src = pub2.publicUrl;
+          audioSoundSales.load();
+          audioSoundSales.play().catch(e => {});
+        }
+
+        triggerModernSalesPopup();
+      } else {
+        // JIKA POP-UP / STATUS TIDAK AKTIF: Hentikan Card 2, Putar kembali Card 1
+        audioSoundSales.pause();
+        audioSoundSales.currentTime = 0;
+        audioSoundSales.src = '';
+
+        if (backsoundData && backsoundData.nama_lagu) {
+          audioBacksound.play().catch(e => {});
+        }
+      }
+    }
+
+    function triggerModernSalesPopup() {
+      const popup = document.getElementById('modernSalesPopup');
+      const popupFoto = document.getElementById('popupFoto');
+      const popupNama = document.getElementById('popupNama');
+      const popupDataGrid = document.getElementById('popupDataGrid');
+
+      // Ambil data popup dari localStorage yang dikirim Web 1 saat download
+      const savedPopup = localStorage.getItem('web2_active_popup');
+      if (!savedPopup) return;
+
+      const data = JSON.parse(savedPopup);
+      const nip = data.nip || '';
+      const nama = data.nama || 'Karyawan Sales';
+      const valSales = data.valSales;
+      const qtyFp = data.qtyFp;
+      const valComser = data.valComser;
+
+      popupFoto.src = `${SUPABASE_URL}/storage/v1/object/public/FOTO SALES/${nip}.jpg`;
+      popupNama.innerText = nama;
+
+      // Buat grid dinamis (jika nilai kosong maka abaikan / tidak ditampilkan)
+      let gridHtml = '';
+      if (valSales) {
+        gridHtml += `
+          <div class="bg-blue-50 border border-blue-200 p-3.5 rounded-2xl shadow-sm text-center">
+            <div class="text-[10px] font-bold text-blue-600 uppercase mb-1">Value Sales</div>
+            <div class="text-lg font-black font-mono text-slate-900">${valSales}</div>
+          </div>
+        `;
+      }
+      if (qtyFp) {
+        gridHtml += `
+          <div class="bg-indigo-50 border border-indigo-200 p-3.5 rounded-2xl shadow-sm text-center">
+            <div class="text-[10px] font-bold text-indigo-600 uppercase mb-1">QTY FP</div>
+            <div class="text-lg font-black font-mono text-slate-900">${qtyFp}</div>
+          </div>
+        `;
+      }
+      if (valComser) {
+        gridHtml += `
+          <div class="bg-emerald-50 border border-emerald-200 p-3.5 rounded-2xl shadow-sm text-center">
+            <div class="text-[10px] font-bold text-emerald-600 uppercase mb-1">Value Comser</div>
+            <div class="text-lg font-black font-mono text-slate-900">${valComser}</div>
+          </div>
+        `;
+      }
+
+      popupDataGrid.innerHTML = gridHtml;
+      popup.classList.remove('hidden');
+
+      // Tutup otomatis setelah 5 detik lalu reset suara & hapus data
+      if (popupTimer) clearTimeout(popupTimer);
+      popupTimer = setTimeout(() => {
+        popup.classList.add('hidden');
+        localStorage.removeItem('web2_active_popup');
+        checkAndPlaySounds(); // Mengembalikan lagu Card 1
+      }, 5000);
+    }
+
+    async function initRealtimeListeners() {
+      supabaseClient.channel('public:status_backsound').on('postgres_changes', { event: '*', schema: 'public', table: 'status_backsound' }, () => checkAndPlaySounds()).subscribe();
+      supabaseClient.channel('public:status_soundtwibbon').on('postgres_changes', { event: '*', schema: 'public', table: 'status_soundtwibbon' }, () => checkAndPlaySounds()).subscribe();
+      supabaseClient.channel('public:laporan_sales').on('postgres_changes', { event: '*', schema: 'public', table: 'laporan_sales' }, () => fetchSalesData()).subscribe();
+      supabaseClient.channel('public:laporan_departemen').on('postgres_changes', { event: '*', schema: 'public', table: 'laporan_departemen' }, () => { fetchDeptData(); updateGaugeData(); }).subscribe();
     }
 
     async function fetchKaryawanData() {
-      try {
-        const { data, error } = await supabaseClient
-          .from('data_karyawan')
-          .select('nip_kar, nama_kar');
-
-        if (error) return;
-
-        if (data) {
-          karyawanMap = {};
-          data.forEach(item => {
-            if (item.nip_kar !== undefined && item.nip_kar !== null) {
-              karyawanMap[String(item.nip_kar).trim()] = item.nama_kar;
-            }
-          });
-        }
-      } catch (err) {}
+      const { data } = await supabaseClient.from('data_karyawan').select('nip_kar, nama_kar');
+      if (data) {
+        karyawanMap = {};
+        data.forEach(item => { karyawanMap[String(item.nip_kar).trim()] = item.nama_kar; });
+      }
     }
-
-    function getEmployeeName(nip, fallbackName) {
-      if (nip === undefined || nip === null) return fallbackName || 'NONAME';
-      const cleanNip = String(nip).trim();
-      return karyawanMap[cleanNip] || fallbackName || cleanNip;
-    }
+    function getEmployeeName(nip, fallback) { return karyawanMap[String(nip).trim()] || fallback || nip; }
 
     function updateClock() {
       const now = new Date();
@@ -679,859 +450,115 @@
     setInterval(updateClock, 1000);
     updateClock();
 
-    const scrollWrapper = document.getElementById('scrollWrapper');
-    if (scrollWrapper) scrollWrapper.style.animationDuration = '100s';
-
-    const scrollWrapperDept = document.getElementById('scrollWrapperDept');
-    if (scrollWrapperDept) scrollWrapperDept.style.animationDuration = '40s';
-
-    const scrollWrapperMtdSales = document.getElementById('scrollWrapperMtdSales');
-    if (scrollWrapperMtdSales) scrollWrapperMtdSales.style.animationDuration = '40s';
-
-    const scrollWrapperMtdFurnipro = document.getElementById('scrollWrapperMtdFurnipro');
-    if (scrollWrapperMtdFurnipro) scrollWrapperMtdFurnipro.style.animationDuration = '40s';
-
-    const scrollWrapperMtdComser = document.getElementById('scrollWrapperMtdComser');
-    if (scrollWrapperMtdComser) scrollWrapperMtdComser.style.animationDuration = '40s';
+    // Set scroll animation durations
+    ['scrollWrapper', 'scrollWrapperDept', 'scrollWrapperMtdSales', 'scrollWrapperMtdFurnipro', 'scrollWrapperMtdComser'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.style.animationDuration = '80s';
+    });
 
     async function fetchSalesData() {
-      const emptyStatus = document.getElementById('emptyStatus');
-      const statusMessage = document.getElementById('statusMessage');
-
-      try {
-        const { data, error } = await supabaseClient
-          .from('laporan_sales')
-          .select('*')
-          .order('total', { ascending: false });
-
-        if (error) {
-          emptyStatus.classList.remove('hidden');
-          statusMessage.innerText = 'Gagal memuat data: ' + error.message;
-          return;
-        }
-
-        if (data) {
-          salesList = data;
-          renderDashboard();
-        }
-      } catch (err) {
-        emptyStatus.classList.remove('hidden');
-      }
+      const { data } = await supabaseClient.from('laporan_sales').select('*').order('total', { ascending: false });
+      if (data) { salesList = data; renderDashboard(); }
     }
 
     function renderDashboard() {
-      const origContainer = document.getElementById('tableContentOriginal');
-      const cloneContainer = document.getElementById('tableContentClone');
-      const emptyStatus = document.getElementById('emptyStatus');
+      const orig = document.getElementById('tableContentOriginal');
+      const clone = document.getElementById('tableContentClone');
+      const empty = document.getElementById('emptyStatus');
+      if (salesList.length === 0) { empty.classList.remove('hidden'); orig.innerHTML = ''; clone.innerHTML = ''; return; }
+      empty.classList.add('hidden');
 
-      if (salesList.length === 0) {
-        emptyStatus.classList.remove('hidden');
-        origContainer.innerHTML = '';
-        cloneContainer.innerHTML = '';
-        return;
-      }
-
-      emptyStatus.classList.add('hidden');
-
-      let htmlRows = '';
+      let html = '';
       salesList.forEach((item, index) => {
         const rank = index + 1;
-        const bucketName = 'FOTO SALES';
-        const displayName = getEmployeeName(item.nip, item.nama);
-        const imageUrl = `${SUPABASE_URL}/storage/v1/object/public/${encodeURIComponent(bucketName)}/${item.nip}.jpg`;
-        const fallbackAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=0D8ABC&color=fff&size=128`;
+        const name = getEmployeeName(item.nip, item.nama);
+        const img = `${SUPABASE_URL}/storage/v1/object/public/FOTO SALES/${item.nip}.jpg`;
+        let box = "fire-box-2";
+        if (rank === 1) box = "fire-box-1";
+        else if (rank === 3) box = "fire-box-3";
 
-        let rowClass = "bg-slate-50 border border-slate-200 hover:bg-slate-100 rounded-xl";
-        let crownMarkup = "";
-        let borderPhotoStyle = "border-blue-500";
-        let textEffectClass = "";
-        let numberStyle = "text-slate-700";
-
-        if (rank === 1) {
-          rowClass = "fire-box-1";
-          borderPhotoStyle = "border-yellow-500 shadow-yellow-300";
-          textEffectClass = "text-outline-white font-bold";
-          numberStyle = "text-outline-white font-extrabold text-xl";
-          crownMarkup = `
-            <div class="absolute -top-3.5 left-1/2 -translate-x-1/2 z-20 text-yellow-500 drop-shadow-[0_2px_4px_rgba(234,179,8,0.8)]">
-              <i data-lucide="crown" class="w-6 h-6 fill-yellow-400"></i>
-            </div>`;
-        } else if (rank === 2) {
-          rowClass = "fire-box-2";
-          borderPhotoStyle = "border-slate-400 shadow-slate-300";
-          textEffectClass = "text-outline-white font-bold";
-          numberStyle = "text-outline-white font-extrabold text-xl";
-          crownMarkup = `
-            <div class="absolute -top-3.5 left-1/2 -translate-x-1/2 z-20 text-slate-400 drop-shadow-[0_2px_4px_rgba(148,163,184,0.8)]">
-              <i data-lucide="crown" class="w-6 h-6 fill-slate-300"></i>
-            </div>`;
-        } else if (rank === 3) {
-          rowClass = "fire-box-3";
-          borderPhotoStyle = "border-amber-600 shadow-amber-300";
-          textEffectClass = "text-outline-white font-bold";
-          numberStyle = "text-outline-white font-extrabold text-xl";
-          crownMarkup = `
-            <div class="absolute -top-3.5 left-1/2 -translate-x-1/2 z-20 text-amber-600 drop-shadow-[0_2px_3px_rgba(217,119,6,0.8)]">
-              <i data-lucide="crown" class="w-6 h-6 fill-amber-500"></i>
-            </div>`;
-        }
-
-        htmlRows += `
-          <div class="grid grid-cols-12 items-center px-2.5 py-2.5 transition shadow-sm ${rowClass}">
+        html += `
+          <div class="grid grid-cols-12 items-center px-2.5 py-2.5 transition shadow-sm ${box}">
             <div class="col-span-4 flex items-center justify-center gap-3">
-              <span class="font-bold text-lg w-6 text-right ${numberStyle}">${rank}.</span>
-              <div class="relative w-20 h-20 rounded-lg border-2 ${borderPhotoStyle} bg-slate-200 shrink-0 shadow-md">
-                ${crownMarkup}
-                <div class="w-full h-full rounded-[6px] overflow-hidden relative z-10">
-                  <img src="${imageUrl}" alt="${displayName}" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='${fallbackAvatar}';">
-                </div>
+              <span class="font-bold text-lg w-6 text-right">${rank}.</span>
+              <div class="relative w-20 h-20 rounded-lg border-2 border-blue-500 bg-slate-200 shrink-0 shadow-md overflow-hidden">
+                <img src="${img}" class="w-full h-full object-cover" onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=0D8ABC&color=fff';">
               </div>
             </div>
-
             <div class="col-span-4 pl-2">
-              <div class="text-slate-900 font-bold text-2xl tracking-wide truncate ${textEffectClass}">${displayName}</div>
-              <div class="text-xs font-mono text-blue-600 font-semibold mt-0.5 ${textEffectClass}">NIP: ${item.nip}</div>
+              <div class="text-slate-900 font-bold text-2xl truncate">${name}</div>
+              <div class="text-xs font-mono text-blue-600 font-semibold">NIP: ${item.nip}</div>
             </div>
-
-            <div class="col-span-4 text-right font-mono font-bold text-emerald-600 text-xl ${textEffectClass}">
+            <div class="col-span-4 text-right font-mono font-bold text-emerald-600 text-xl">
               Rp ${Number(item.total).toLocaleString('id-ID')}
             </div>
           </div>
         `;
       });
-
-      origContainer.innerHTML = htmlRows;
-      cloneContainer.innerHTML = htmlRows;
-      lucide.createIcons();
+      orig.innerHTML = html; clone.innerHTML = html; lucide.createIcons();
     }
 
     async function fetchDeptData() {
-      const emptyStatusDept = document.getElementById('emptyStatusDept');
-      const statusMessageDept = document.getElementById('statusMessageDept');
-
-      try {
-        const { data, error } = await supabaseClient
-          .from('laporan_departemen')
-          .select('nama_dept, exclude_ppn, kode_dept')
-          .order('exclude_ppn', { ascending: false });
-
-        if (error) {
-          if (emptyStatusDept) {
-            emptyStatusDept.classList.remove('hidden');
-            statusMessageDept.innerText = 'Gagal memuat data: ' + error.message;
-          }
-          return;
-        }
-
-        if (data) {
-          deptList = data;
-          renderDeptDashboard();
-        }
-      } catch (err) {}
+      const { data } = await supabaseClient.from('laporan_departemen').select('*').order('exclude_ppn', { ascending: false });
+      if (data) { deptList = data; renderDeptDashboard(); }
     }
-
     function renderDeptDashboard() {
-      const origContainer = document.getElementById('tableContentOriginalDept');
-      const cloneContainer = document.getElementById('tableContentCloneDept');
-      const emptyStatusDept = document.getElementById('emptyStatusDept');
-
-      if (!origContainer || !cloneContainer) return;
-
-      if (deptList.length === 0) {
-        if (emptyStatusDept) emptyStatusDept.classList.remove('hidden');
-        origContainer.innerHTML = '';
-        cloneContainer.innerHTML = '';
-        return;
-      }
-
-      if (emptyStatusDept) emptyStatusDept.classList.add('hidden');
-
-      let htmlRows = '';
-      deptList.forEach((item, index) => {
-        const rank = index + 1;
-        const bucketName = 'PS';
-        const kodeDept = item.kode_dept || '';
-        const namaDept = item.nama_dept || 'DEPT';
-        const excludePpn = Number(item.exclude_ppn || 0);
-
-        const imageUrl = `${SUPABASE_URL}/storage/v1/object/public/${encodeURIComponent(bucketName)}/${encodeURIComponent(kodeDept)}.jpg`;
-        const fallbackAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(namaDept)}&background=3b82f6&color=fff&size=128`;
-
-        let rowClass = "bg-slate-50 border border-slate-200 hover:bg-slate-100 rounded-lg";
-        let crownMarkup = "";
-        let borderPhotoStyle = "border-blue-500";
-        let textEffectClass = "";
-        let numberStyle = "text-slate-700";
-
-        if (rank === 1) {
-          rowClass = "fire-box-1";
-          borderPhotoStyle = "border-yellow-500 shadow-yellow-300";
-          textEffectClass = "text-outline-white font-bold";
-          numberStyle = "text-outline-white font-extrabold text-sm";
-          crownMarkup = `<div class="absolute -top-2.5 left-1/2 -translate-x-1/2 z-20 text-yellow-500 drop-shadow-[0_2px_3px_rgba(234,179,8,0.8)]"><i data-lucide="crown" class="w-4 h-4 fill-yellow-400"></i></div>`;
-        } else if (rank === 2) {
-          rowClass = "fire-box-2";
-          borderPhotoStyle = "border-slate-400 shadow-slate-300";
-          textEffectClass = "text-outline-white font-bold";
-          numberStyle = "text-outline-white font-extrabold text-sm";
-          crownMarkup = `<div class="absolute -top-2.5 left-1/2 -translate-x-1/2 z-20 text-slate-400 drop-shadow-[0_2px_3px_rgba(148,163,184,0.8)]"><i data-lucide="crown" class="w-4 h-4 fill-slate-300"></i></div>`;
-        } else if (rank === 3) {
-          rowClass = "fire-box-3";
-          borderPhotoStyle = "border-amber-600 shadow-amber-300";
-          textEffectClass = "text-outline-white font-bold";
-          numberStyle = "text-outline-white font-extrabold text-sm";
-          crownMarkup = `<div class="absolute -top-2.5 left-1/2 -translate-x-1/2 z-20 text-amber-600 drop-shadow-[0_2px_3px_rgba(217,119,6,0.8)]"><i data-lucide="crown" class="w-4 h-4 fill-amber-500"></i></div>`;
-        }
-
-        htmlRows += `
-          <div class="grid grid-cols-12 items-center px-3 py-1.5 transition shadow-sm ${rowClass}">
-            <div class="col-span-4 flex items-center justify-center gap-2">
-              <span class="font-bold text-sm w-5 text-right ${numberStyle}">${rank}.</span>
-              <div class="relative w-9 h-9 rounded-md border-2 ${borderPhotoStyle} bg-slate-200 shrink-0 shadow-sm">
-                ${crownMarkup}
-                <div class="w-full h-full rounded-[4px] overflow-hidden relative z-10">
-                  <img src="${imageUrl}" alt="${namaDept}" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='${fallbackAvatar}';">
-                </div>
-              </div>
-            </div>
-
-            <div class="col-span-4 pl-1">
-              <div class="text-slate-900 text-xs font-semibold tracking-wide truncate ${textEffectClass}">${namaDept}</div>
-              <div class="text-[10px] font-mono text-blue-600 font-bold mt-0.5 ${textEffectClass}">CODE: ${kodeDept}</div>
-            </div>
-
-            <div class="col-span-4 text-right font-mono font-bold text-emerald-600 text-xs ${textEffectClass}">
-              Rp ${excludePpn.toLocaleString('id-ID')}
-            </div>
+      const orig = document.getElementById('tableContentOriginalDept');
+      const clone = document.getElementById('tableContentCloneDept');
+      if (!orig) return;
+      let html = '';
+      deptList.forEach((item, idx) => {
+        html += `
+          <div class="grid grid-cols-12 items-center px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg">
+            <div class="col-span-4 font-bold text-sm">${idx + 1}. ${item.kode_dept}</div>
+            <div class="col-span-4 text-xs font-semibold truncate">${item.nama_dept}</div>
+            <div class="col-span-4 text-right font-mono font-bold text-emerald-600 text-xs">Rp ${Number(item.exclude_ppn || 0).toLocaleString('id-ID')}</div>
           </div>
         `;
       });
-
-      origContainer.innerHTML = htmlRows;
-      cloneContainer.innerHTML = htmlRows;
-      lucide.createIcons();
+      orig.innerHTML = html; clone.innerHTML = html;
     }
 
-    async function fetchMtdSalesData() {
-      const emptyStatus = document.getElementById('emptyStatusMtdSales');
-      const statusMessage = document.getElementById('statusMessageMtdSales');
-
-      try {
-        const { data, error } = await supabaseClient
-          .from('mtd_sales')
-          .select('*')
-          .order('mtd_total', { ascending: false });
-
-        if (error) return;
-
-        if (data) {
-          mtdSalesList = data;
-          renderMtdSalesDashboard();
-        }
-      } catch (err) {}
-    }
-
-    function renderMtdSalesDashboard() {
-      const origContainer = document.getElementById('tableContentOriginalMtdSales');
-      const cloneContainer = document.getElementById('tableContentCloneMtdSales');
-      const emptyStatus = document.getElementById('emptyStatusMtdSales');
-
-      if (!origContainer || !cloneContainer) return;
-
-      if (mtdSalesList.length === 0) {
-        if (emptyStatus) emptyStatus.classList.remove('hidden');
-        origContainer.innerHTML = '';
-        cloneContainer.innerHTML = '';
-        return;
-      }
-
-      if (emptyStatus) emptyStatus.classList.add('hidden');
-
-      let htmlRows = '';
-      mtdSalesList.forEach((item, index) => {
-        const rank = index + 1;
-        const bucketName = 'FOTO SALES';
-        const nip = item.mtd_nip || '';
-        const displayName = getEmployeeName(nip, item.mtd_nama);
-        const total = Number(item.mtd_total || 0);
-
-        const imageUrl = `${SUPABASE_URL}/storage/v1/object/public/${encodeURIComponent(bucketName)}/${encodeURIComponent(nip)}.jpg`;
-        const fallbackAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=3b82f6&color=fff&size=128`;
-
-        let rowClass = "bg-slate-50 border border-slate-200 hover:bg-slate-100 rounded-lg";
-        let crownMarkup = "";
-        let borderPhotoStyle = "border-blue-500";
-        let textEffectClass = "";
-        let numberStyle = "text-slate-700";
-
-        if (rank === 1) {
-          rowClass = "fire-box-1";
-          borderPhotoStyle = "border-yellow-500 shadow-yellow-300";
-          textEffectClass = "text-outline-white font-bold";
-          numberStyle = "text-outline-white font-extrabold text-sm";
-          crownMarkup = `<div class="absolute -top-2.5 left-1/2 -translate-x-1/2 z-20 text-yellow-500 drop-shadow-[0_2px_3px_rgba(234,179,8,0.8)]"><i data-lucide="crown" class="w-4 h-4 fill-yellow-400"></i></div>`;
-        } else if (rank === 2) {
-          rowClass = "fire-box-2";
-          borderPhotoStyle = "border-slate-400 shadow-slate-300";
-          textEffectClass = "text-outline-white font-bold";
-          numberStyle = "text-outline-white font-extrabold text-sm";
-          crownMarkup = `<div class="absolute -top-2.5 left-1/2 -translate-x-1/2 z-20 text-slate-400 drop-shadow-[0_2px_3px_rgba(148,163,184,0.8)]"><i data-lucide="crown" class="w-4 h-4 fill-slate-300"></i></div>`;
-        } else if (rank === 3) {
-          rowClass = "fire-box-3";
-          borderPhotoStyle = "border-amber-600 shadow-amber-300";
-          textEffectClass = "text-outline-white font-bold";
-          numberStyle = "text-outline-white font-extrabold text-sm";
-          crownMarkup = `<div class="absolute -top-2.5 left-1/2 -translate-x-1/2 z-20 text-amber-600 drop-shadow-[0_2px_3px_rgba(217,119,6,0.8)]"><i data-lucide="crown" class="w-4 h-4 fill-amber-500"></i></div>`;
-        }
-
-        htmlRows += `
-          <div class="grid grid-cols-12 items-center px-3 py-1.5 transition shadow-sm ${rowClass}">
-            <div class="col-span-4 flex items-center justify-center gap-2">
-              <span class="font-bold text-sm w-5 text-right ${numberStyle}">${rank}.</span>
-              <div class="relative w-9 h-9 rounded-md border-2 ${borderPhotoStyle} bg-slate-200 shrink-0 shadow-sm">
-                ${crownMarkup}
-                <div class="w-full h-full rounded-[4px] overflow-hidden relative z-10">
-                  <img src="${imageUrl}" alt="${displayName}" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='${fallbackAvatar}';">
-                </div>
-              </div>
-            </div>
-            <div class="col-span-4 pl-1">
-              <div class="text-slate-900 text-xs font-semibold tracking-wide truncate ${textEffectClass}">${displayName}</div>
-              <div class="text-[10px] font-mono text-blue-600 font-bold mt-0.5 ${textEffectClass}">NIP: ${nip}</div>
-            </div>
-            <div class="col-span-4 text-right font-mono font-bold text-emerald-600 text-xs ${textEffectClass}">
-              Rp ${total.toLocaleString('id-ID')}
-            </div>
-          </div>
-        `;
-      });
-
-      origContainer.innerHTML = htmlRows;
-      cloneContainer.innerHTML = htmlRows;
-      lucide.createIcons();
-    }
-
-    async function fetchMtdFurniproData() {
-      const emptyStatus = document.getElementById('emptyStatusMtdFurnipro');
-      const statusMessage = document.getElementById('statusMessageMtdFurnipro');
-
-      try {
-        const { data, error } = await supabaseClient
-          .from('mtd_fp')
-          .select('*')
-          .order('qty_mtdfp', { ascending: false });
-
-        if (error) return;
-
-        if (data) {
-          mtdFurniproList = data;
-          renderMtdFurniproDashboard();
-        }
-      } catch (err) {}
-    }
-
-    function renderMtdFurniproDashboard() {
-      const origContainer = document.getElementById('tableContentOriginalMtdFurnipro');
-      const cloneContainer = document.getElementById('tableContentCloneMtdFurnipro');
-      const emptyStatus = document.getElementById('emptyStatusMtdFurnipro');
-
-      if (!origContainer || !cloneContainer) return;
-
-      if (mtdFurniproList.length === 0) {
-        if (emptyStatus) emptyStatus.classList.remove('hidden');
-        origContainer.innerHTML = '';
-        cloneContainer.innerHTML = '';
-        return;
-      }
-
-      if (emptyStatus) emptyStatus.classList.add('hidden');
-
-      let htmlRows = '';
-      mtdFurniproList.forEach((item, index) => {
-        const rank = index + 1;
-        const bucketName = 'FOTO SALES';
-        const nip = item.nip_mtdfp || '';
-        const displayName = getEmployeeName(nip, item.nama_mtdfp || item.nama);
-        const qty = Number(item.qty_mtdfp || 0);
-
-        const imageUrl = `${SUPABASE_URL}/storage/v1/object/public/${encodeURIComponent(bucketName)}/${encodeURIComponent(nip)}.jpg`;
-        const fallbackAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=2563eb&color=fff&size=128`;
-
-        let rowClass = "bg-slate-50 border border-slate-200 hover:bg-slate-100 rounded-lg";
-        let crownMarkup = "";
-        let borderPhotoStyle = "border-blue-500";
-        let textEffectClass = "";
-        let numberStyle = "text-slate-700";
-
-        if (rank === 1) {
-          rowClass = "fire-box-1";
-          borderPhotoStyle = "border-yellow-500 shadow-yellow-300";
-          textEffectClass = "text-outline-white font-bold";
-          numberStyle = "text-outline-white font-extrabold text-sm";
-          crownMarkup = `<div class="absolute -top-2.5 left-1/2 -translate-x-1/2 z-20 text-yellow-500 drop-shadow-[0_2px_3px_rgba(234,179,8,0.8)]"><i data-lucide="crown" class="w-4 h-4 fill-yellow-400"></i></div>`;
-        } else if (rank === 2) {
-          rowClass = "fire-box-2";
-          borderPhotoStyle = "border-slate-400 shadow-slate-300";
-          textEffectClass = "text-outline-white font-bold";
-          numberStyle = "text-outline-white font-extrabold text-sm";
-          crownMarkup = `<div class="absolute -top-2.5 left-1/2 -translate-x-1/2 z-20 text-slate-400 drop-shadow-[0_2px_3px_rgba(148,163,184,0.8)]"><i data-lucide="crown" class="w-4 h-4 fill-slate-300"></i></div>`;
-        } else if (rank === 3) {
-          rowClass = "fire-box-3";
-          borderPhotoStyle = "border-amber-600 shadow-amber-300";
-          textEffectClass = "text-outline-white font-bold";
-          numberStyle = "text-outline-white font-extrabold text-sm";
-          crownMarkup = `<div class="absolute -top-2.5 left-1/2 -translate-x-1/2 z-20 text-amber-600 drop-shadow-[0_2px_3px_rgba(217,119,6,0.8)]"><i data-lucide="crown" class="w-4 h-4 fill-amber-500"></i></div>`;
-        }
-
-        htmlRows += `
-          <div class="grid grid-cols-12 items-center px-3 py-1.5 transition shadow-sm ${rowClass}">
-            <div class="col-span-4 flex items-center justify-center gap-2">
-              <span class="font-bold text-sm w-5 text-right ${numberStyle}">${rank}.</span>
-              <div class="relative w-9 h-9 rounded-md border-2 ${borderPhotoStyle} bg-slate-200 shrink-0 shadow-sm">
-                ${crownMarkup}
-                <div class="w-full h-full rounded-[4px] overflow-hidden relative z-10">
-                  <img src="${imageUrl}" alt="${displayName}" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='${fallbackAvatar}';">
-                </div>
-              </div>
-            </div>
-            <div class="col-span-4 pl-1">
-              <div class="text-slate-900 text-xs font-semibold tracking-wide truncate ${textEffectClass}">${displayName}</div>
-              <div class="text-[10px] font-mono text-blue-600 font-bold mt-0.5 ${textEffectClass}">NIP: ${nip}</div>
-            </div>
-            <div class="col-span-4 text-right font-mono font-bold text-blue-600 text-xs ${textEffectClass}">
-              ${qty.toLocaleString('id-ID')} PCS
-            </div>
-          </div>
-        `;
-      });
-
-      origContainer.innerHTML = htmlRows;
-      cloneContainer.innerHTML = htmlRows;
-      lucide.createIcons();
-    }
-
-    async function fetchMtdComserData() {
-      const emptyStatus = document.getElementById('emptyStatusMtdComser');
-      const statusMessage = document.getElementById('statusMessageMtdComser');
-
-      try {
-        const { data, error } = await supabaseClient
-          .from('mtd_comser')
-          .select('*')
-          .order('total_mtdcnc', { ascending: false });
-
-        if (error) return;
-
-        if (data) {
-          mtdComserList = data;
-          renderMtdComserDashboard();
-        }
-      } catch (err) {}
-    }
-
-    function renderMtdComserDashboard() {
-      const origContainer = document.getElementById('tableContentOriginalMtdComser');
-      const cloneContainer = document.getElementById('tableContentCloneMtdComser');
-      const emptyStatus = document.getElementById('emptyStatusMtdComser');
-
-      if (!origContainer || !cloneContainer) return;
-
-      if (mtdComserList.length === 0) {
-        if (emptyStatus) emptyStatus.classList.remove('hidden');
-        origContainer.innerHTML = '';
-        cloneContainer.innerHTML = '';
-        return;
-      }
-
-      if (emptyStatus) emptyStatus.classList.add('hidden');
-
-      let htmlRows = '';
-      mtdComserList.forEach((item, index) => {
-        const rank = index + 1;
-        const bucketName = 'FOTO SALES';
-        const nip = item.nip_mtdcnc || '';
-        const displayName = getEmployeeName(nip, item.nama_mtdcnc);
-        const total = Number(item.total_mtdcnc || 0);
-
-        const imageUrl = `${SUPABASE_URL}/storage/v1/object/public/${encodeURIComponent(bucketName)}/${encodeURIComponent(nip)}.jpg`;
-        const fallbackAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=10b981&color=fff&size=128`;
-
-        let rowClass = "bg-slate-50 border border-slate-200 hover:bg-slate-100 rounded-lg";
-        let crownMarkup = "";
-        let borderPhotoStyle = "border-blue-500";
-        let textEffectClass = "";
-        let numberStyle = "text-slate-700";
-
-        if (rank === 1) {
-          rowClass = "fire-box-1";
-          borderPhotoStyle = "border-yellow-500 shadow-yellow-300";
-          textEffectClass = "text-outline-white font-bold";
-          numberStyle = "text-outline-white font-extrabold text-sm";
-          crownMarkup = `<div class="absolute -top-2.5 left-1/2 -translate-x-1/2 z-20 text-yellow-500 drop-shadow-[0_2px_3px_rgba(234,179,8,0.8)]"><i data-lucide="crown" class="w-4 h-4 fill-yellow-400"></i></div>`;
-        } else if (rank === 2) {
-          rowClass = "fire-box-2";
-          borderPhotoStyle = "border-slate-400 shadow-slate-300";
-          textEffectClass = "text-outline-white font-bold";
-          numberStyle = "text-outline-white font-extrabold text-sm";
-          crownMarkup = `<div class="absolute -top-2.5 left-1/2 -translate-x-1/2 z-20 text-slate-400 drop-shadow-[0_2px_3px_rgba(148,163,184,0.8)]"><i data-lucide="crown" class="w-4 h-4 fill-slate-300"></i></div>`;
-        } else if (rank === 3) {
-          rowClass = "fire-box-3";
-          borderPhotoStyle = "border-amber-600 shadow-amber-300";
-          textEffectClass = "text-outline-white font-bold";
-          numberStyle = "text-outline-white font-extrabold text-sm";
-          crownMarkup = `<div class="absolute -top-2.5 left-1/2 -translate-x-1/2 z-20 text-amber-600 drop-shadow-[0_2px_3px_rgba(217,119,6,0.8)]"><i data-lucide="crown" class="w-4 h-4 fill-amber-500"></i></div>`;
-        }
-
-        htmlRows += `
-          <div class="grid grid-cols-12 items-center px-3 py-1.5 transition shadow-sm ${rowClass}">
-            <div class="col-span-4 flex items-center justify-center gap-2">
-              <span class="font-bold text-sm w-5 text-right ${numberStyle}">${rank}.</span>
-              <div class="relative w-9 h-9 rounded-md border-2 ${borderPhotoStyle} bg-slate-200 shrink-0 shadow-sm">
-                ${crownMarkup}
-                <div class="w-full h-full rounded-[4px] overflow-hidden relative z-10">
-                  <img src="${imageUrl}" alt="${displayName}" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='${fallbackAvatar}';">
-                </div>
-              </div>
-            </div>
-            <div class="col-span-4 pl-1">
-              <div class="text-slate-900 text-xs font-semibold tracking-wide truncate ${textEffectClass}">${displayName}</div>
-              <div class="text-[10px] font-mono text-emerald-600 font-bold mt-0.5 ${textEffectClass}">NIP: ${nip}</div>
-            </div>
-            <div class="col-span-4 text-right font-mono font-bold text-emerald-600 text-xs ${textEffectClass}">
-              Rp ${total.toLocaleString('id-ID')}
-            </div>
-          </div>
-        `;
-      });
-
-      origContainer.innerHTML = htmlRows;
-      cloneContainer.innerHTML = htmlRows;
-      lucide.createIcons();
+    async function updateGaugeData() {
+      const { data } = await supabaseClient.from('target_today').select('*');
+      let target = (data && data.length > 0) ? Number(data[0].target || data[0].nilai || 250000000) : 250000000;
+      const { data: dept } = await supabaseClient.from('laporan_departemen').select('exclude_ppn');
+      let realized = 0;
+      if (dept) dept.forEach(d => realized += Number(d.exclude_ppn || 0));
+      
+      const pct = Math.min(Math.max((realized / target) * 100, 0), 100);
+      document.getElementById('gaugeProgressArc').style.strokeDashoffset = 251.2 - (pct / 100) * 251.2;
+      document.getElementById('gaugeNeedle').style.transform = `rotate(${-90 + (pct / 100) * 180}deg)`;
+      document.getElementById('gaugeTextAchieved').textContent = pct > 8 ? pct.toFixed(1) + '%' : '';
+      document.getElementById('gaugeRealtimeValue').innerText = 'Rp ' + realized.toLocaleString('id-ID');
+      document.getElementById('gaugeTargetValue').innerText = 'Rp ' + target.toLocaleString('id-ID');
     }
 
     async function fetchRunningText() {
-      const container = document.getElementById('runningTextContainer');
-      if (!container) return;
-
-      try {
-        const { data, error } = await supabaseClient
-          .from('running_text')
-          .select('run_text');
-
-        let rawTexts = [];
-
-        if (!error && data && data.length > 0) {
-          rawTexts = data.map(item => item.run_text).filter(Boolean);
-        }
-
-        if (rawTexts.length === 0) {
-          rawTexts = [
-            "SELAMAT DATANG DI INFORMA MOG MALANG (J382)",
-            "TINGKATKAN PENJUALAN DAN PERTAHANKAN SEMANGAT KINERJA TERBAIK HARI INI!",
-            "UTAMAKAN PELAYANAN TERBAIK KEPADA PELANGGAN SETIA INFORMA"
-          ];
-        }
-
-        const separator = '    •    ';
-        const joinedText = rawTexts.join(separator);
-
-        container.innerHTML = `<span>${joinedText}</span>`;
-      } catch (err) {}
-    }
-
-    async function fetchTop1MtdSales() {
-      try {
-        const { data, error } = await supabaseClient
-          .from('mtd_sales')
-          .select('*')
-          .order('mtd_total', { ascending: false })
-          .limit(1);
-
-        const container = document.getElementById('mtdTop1Content');
-        if (error || !data || data.length === 0) return;
-
-        const topMtd = data[0];
-        const nip = topMtd.mtd_nip || '-';
-        const displayName = getEmployeeName(nip, topMtd.mtd_nama);
-        const total = Number(topMtd.mtd_total || 0);
-
-        const bucketName = 'FOTO SALES';
-        const imageUrl = `${SUPABASE_URL}/storage/v1/object/public/${encodeURIComponent(bucketName)}/${nip}.jpg`;
-        const fallbackAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=eab308&color=fff&size=128`;
-
-        container.innerHTML = `
-          <div class="flex flex-col items-center justify-center text-center w-full relative px-2">
-            <div class="relative w-32 h-32 rounded-2xl border-4 border-yellow-500 shadow-lg bg-slate-200 overflow-hidden mb-2">
-              <div class="absolute -top-3 left-1/2 -translate-x-1/2 z-20 text-yellow-500 drop-shadow-[0_2px_4px_rgba(234,179,8,0.9)]">
-                <i data-lucide="crown" class="w-8 h-8 fill-yellow-400"></i>
-              </div>
-              <img src="${imageUrl}" alt="${displayName}" class="w-full h-full object-cover pt-1" onerror="this.onerror=null; this.src='${fallbackAvatar}';">
-            </div>
-
-            <div class="text-[10px] font-mono uppercase tracking-widest text-amber-600 font-extrabold mb-0.5">CHAMPION OF THE MONTH</div>
-            <h3 class="text-xl font-extrabold text-slate-900 mb-0.5 tracking-tight line-clamp-1">${displayName}</h3>
-            <div class="text-xs font-semibold text-slate-600 mb-2">NIP: <span class="font-mono text-blue-600 font-bold">${nip}</span></div>
-            
-            <div class="w-full bg-amber-50 border border-amber-200 rounded-xl p-2.5 shadow-inner">
-              <div class="text-[10px] font-bold text-amber-800 uppercase tracking-wider">TOTAL MTD SALES</div>
-              <div class="text-xl font-extrabold font-mono text-emerald-600 mt-0.5">Rp ${total.toLocaleString('id-ID')}</div>
-            </div>
-          </div>
-        `;
-        lucide.createIcons();
-      } catch (err) {}
-    }
-
-    async function fetchTop1MtdFurnipro() {
-      try {
-        const { data, error } = await supabaseClient
-          .from('mtd_fp')
-          .select('*')
-          .order('qty_mtdfp', { ascending: false })
-          .limit(1);
-
-        const container = document.getElementById('furniproTop1Content');
-        if (error || !data || data.length === 0) return;
-
-        const topFp = data[0];
-        const nip = topFp.nip_mtdfp || '-';
-        const displayName = getEmployeeName(nip, topFp.nama_mtdfp || topFp.nama);
-        const qty = Number(topFp.qty_mtdfp || 0);
-
-        const bucketName = 'FOTO SALES';
-        const imageUrl = `${SUPABASE_URL}/storage/v1/object/public/${encodeURIComponent(bucketName)}/${nip}.jpg`;
-        const fallbackAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=2563eb&color=fff&size=128`;
-
-        container.innerHTML = `
-          <div class="flex flex-col items-center justify-center text-center w-full relative px-2">
-            <div class="relative w-32 h-32 rounded-2xl border-4 border-blue-500 shadow-lg bg-slate-200 overflow-hidden mb-2">
-              <img src="${imageUrl}" alt="${displayName}" class="w-full h-full object-cover pt-1" onerror="this.onerror=null; this.src='${fallbackAvatar}';">
-            </div>
-
-            <div class="text-[10px] font-mono uppercase tracking-widest text-blue-600 font-extrabold mb-0.5">CHAMPION FURNIPRO</div>
-            <h3 class="text-xl font-extrabold text-slate-900 mb-0.5 tracking-tight line-clamp-1">${displayName}</h3>
-            <div class="text-xs font-semibold text-slate-600 mb-2">NIP: <span class="font-mono text-blue-600 font-bold">${nip}</span></div>
-            
-            <div class="w-full bg-blue-50 border border-blue-200 rounded-xl p-2.5 shadow-inner">
-              <div class="text-[10px] font-bold text-blue-800 uppercase tracking-wider">TOTAL MTD FURNIPRO</div>
-              <div class="text-xl font-extrabold font-mono text-blue-600 mt-0.5">${qty.toLocaleString('id-ID')} PCS</div>
-            </div>
-          </div>
-        `;
-        lucide.createIcons();
-      } catch (err) {}
-    }
-
-    async function fetchTop1MtdComser() {
-      try {
-        const { data, error } = await supabaseClient
-          .from('mtd_comser')
-          .select('*')
-          .order('total_mtdcnc', { ascending: false })
-          .limit(1);
-
-        const container = document.getElementById('comserTop1Content');
-        if (error || !data || data.length === 0) return;
-
-        const topComser = data[0];
-        const nip = topComser.nip_mtdcnc || '-';
-        const displayName = getEmployeeName(nip, topComser.nama_mtdcnc);
-        const total = Number(topComser.total_mtdcnc || 0);
-
-        const bucketName = 'FOTO SALES';
-        const imageUrl = `${SUPABASE_URL}/storage/v1/object/public/${encodeURIComponent(bucketName)}/${nip}.jpg`;
-        const fallbackAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=10b981&color=fff&size=128`;
-
-        container.innerHTML = `
-          <div class="flex flex-col items-center justify-center text-center w-full relative px-2">
-            <div class="relative w-32 h-32 rounded-2xl border-4 border-emerald-500 shadow-lg bg-slate-200 overflow-hidden mb-2">
-              <img src="${imageUrl}" alt="${displayName}" class="w-full h-full object-cover pt-1" onerror="this.onerror=null; this.src='${fallbackAvatar}';">
-            </div>
-
-            <div class="text-[10px] font-mono uppercase tracking-widest text-emerald-600 font-extrabold mb-0.5">CHAMPION COMSER</div>
-            <h3 class="text-xl font-extrabold text-slate-900 mb-0.5 tracking-tight line-clamp-1">${displayName}</h3>
-            <div class="text-xs font-semibold text-slate-600 mb-2">NIP: <span class="font-mono text-emerald-600 font-bold">${nip}</span></div>
-            
-            <div class="w-full bg-emerald-50 border border-emerald-200 rounded-xl p-2.5 shadow-inner">
-              <div class="text-[10px] font-bold text-emerald-800 uppercase tracking-wider">TOTAL MTD COMSER</div>
-              <div class="text-xl font-extrabold font-mono text-emerald-600 mt-0.5">Rp ${total.toLocaleString('id-ID')}</div>
-            </div>
-          </div>
-        `;
-        lucide.createIcons();
-      } catch (err) {}
+      const { data } = await supabaseClient.from('running_text').select('run_text');
+      let texts = (data && data.length > 0) ? data.map(d => d.run_text).filter(Boolean) : ["SELAMAT DATANG DI INFORMA MOG MALANG (J382)"];
+      document.getElementById('runningTextContainer').innerHTML = `<span>${texts.join('     •     ')}</span>`;
     }
 
     function startCarouselTimer() {
       setInterval(() => {
         const track = document.getElementById('mtdSliderTrack');
-        const headerTitle = document.getElementById('sliderHeaderTitle');
-        const headerIcon = document.getElementById('sliderHeaderIcon');
-        const rightContainer = document.getElementById('rightCardContainer');
-        const sliderHeader = document.getElementById('sliderHeader');
-        
         currentSlide = (currentSlide + 1) % 3;
-
-        if (currentSlide === 0) {
-          track.style.transform = 'translateX(0%)';
-          headerTitle.innerText = 'BEST SALES';
-          headerIcon.className = 'w-6 h-6 text-yellow-400';
-          rightContainer.className = 'mtd-top1-container gold-glow-container flex flex-col relative z-10 overflow-hidden';
-          sliderHeader.style.backgroundColor = '#0f172a';
-        } else if (currentSlide === 1) {
-          track.style.transform = 'translateX(-33.333%)';
-          headerTitle.innerText = 'BEST FURNIPRO';
-          headerIcon.className = 'w-6 h-6 text-blue-400';
-          rightContainer.className = 'mtd-top1-container cyan-glow-container flex flex-col relative z-10 overflow-hidden';
-          sliderHeader.style.backgroundColor = '#1e3a8a';
-        } else if (currentSlide === 2) {
-          track.style.transform = 'translateX(-66.666%)';
-          headerTitle.innerText = 'BEST COMSER';
-          headerIcon.className = 'w-6 h-6 text-emerald-400';
-          rightContainer.className = 'mtd-top1-container emerald-glow-container flex flex-col relative z-10 overflow-hidden';
-          sliderHeader.style.backgroundColor = '#065f46';
-        }
+        track.style.transform = `translateX(-${currentSlide * 33.333}%)`;
       }, 5000);
-    }
-
-    async function updateGaugeData() {
-      try {
-        const { data: targetData, error: targetError } = await supabaseClient
-          .from('target_today')
-          .select('*');
-
-        let targetValue = 0;
-        if (!targetError && targetData && targetData.length > 0) {
-          targetData.forEach(row => {
-            const keys = Object.keys(row);
-            let val = 0;
-            if (row.target !== undefined) val = Number(row.target) || 0;
-            else if (row.nilai !== undefined) val = Number(row.nilai) || 0;
-            else if (row.jumlah !== undefined) val = Number(row.jumlah) || 0;
-            else if (keys.length > 0) {
-              for (let k of keys) {
-                if (!isNaN(Number(row[k])) && Number(row[k]) > 0) {
-                  val = Number(row[k]) || 0;
-                  break;
-                }
-              }
-            }
-            targetValue += val;
-          });
-        }
-        if (targetValue <= 0) targetValue = 250000000;
-
-        const { data: deptData, error: deptError } = await supabaseClient
-          .from('laporan_departemen')
-          .select('*');
-
-        let realtimeSumExcludePpn = 0;
-        if (!deptError && deptData && deptData.length > 0) {
-          deptData.forEach(row => {
-            const keys = Object.keys(row);
-            const matchingKey = keys.find(k => k.toLowerCase().replace(/[^a-z0-9]/g, '') === 'excludeppn');
-            
-            let val = 0;
-            if (matchingKey && row[matchingKey] !== undefined) {
-              val = Number(row[matchingKey]) || 0;
-            } else if (row.exclude_ppn !== undefined) {
-              val = Number(row.exclude_ppn) || 0;
-            } else if (keys.length >= 5) {
-              val = Number(row[keys[4]]) || 0;
-            }
-            realtimeSumExcludePpn += val;
-          });
-        }
-
-        const percentage = targetValue > 0 ? (realtimeSumExcludePpn / targetValue) * 100 : 0;
-        const clampedPercent = Math.min(Math.max(percentage, 0), 100);
-        
-        const maxDash = 251.2;
-        const dashOffset = maxDash - (clampedPercent / 100) * maxDash;
-
-        document.getElementById('gaugeProgressArc').style.strokeDashoffset = dashOffset;
-        
-        const needleRotation = -90 + (clampedPercent / 100) * 180;
-        document.getElementById('gaugeNeedle').style.transform = `rotate(${needleRotation}deg)`;
-
-        const textAchieved = document.getElementById('gaugeTextAchieved');
-        if (clampedPercent > 8) {
-          textAchieved.textContent = percentage.toFixed(1) + '%';
-          textAchieved.setAttribute('startOffset', Math.max(2, (clampedPercent / 2) - 4) + '%');
-        } else {
-          textAchieved.textContent = ''; 
-        }
-
-        document.getElementById('gaugeRealtimeValue').innerText = 'Rp ' + realtimeSumExcludePpn.toLocaleString('id-ID');
-        document.getElementById('gaugeTargetValue').innerText = 'Rp ' + targetValue.toLocaleString('id-ID');
-
-        const arcElement = document.getElementById('gaugeProgressArc');
-        if (percentage >= 100) {
-          arcElement.style.stroke = '#10b981';
-        } else if (percentage >= 75) {
-          arcElement.style.stroke = '#3b82f6';
-        } else {
-          arcElement.style.stroke = '#f59e0b';
-        }
-      } catch (err) {}
-    }
-
-    function setupRealtime() {
-      supabaseClient.channel('realtime_setting_tv').on('postgres_changes', { event: '*', schema: 'public', table: 'setting_tv' }, () => fetchTvSettings()).subscribe();
-      supabaseClient.channel('realtime_data_karyawan').on('postgres_changes', { event: '*', schema: 'public', table: 'data_karyawan' }, async () => {
-        await fetchKaryawanData();
-        renderDashboard();
-        renderMtdSalesDashboard();
-        renderMtdFurniproDashboard();
-        renderMtdComserDashboard();
-        fetchTop1MtdSales();
-        fetchTop1MtdFurnipro();
-        fetchTop1MtdComser();
-      }).subscribe();
-      supabaseClient.channel('realtime_laporan_sales').on('postgres_changes', { event: '*', schema: 'public', table: 'laporan_sales' }, () => fetchSalesData()).subscribe();
-      supabaseClient.channel('realtime_laporan_departemen').on('postgres_changes', { event: '*', schema: 'public', table: 'laporan_departemen' }, () => { fetchDeptData(); updateGaugeData(); }).subscribe();
-      supabaseClient.channel('realtime_mtd_sales').on('postgres_changes', { event: '*', schema: 'public', table: 'mtd_sales' }, () => { fetchTop1MtdSales(); fetchMtdSalesData(); }).subscribe();
-      supabaseClient.channel('realtime_mtd_fp').on('postgres_changes', { event: '*', schema: 'public', table: 'mtd_fp' }, () => { fetchTop1MtdFurnipro(); fetchMtdFurniproData(); }).subscribe();
-      supabaseClient.channel('realtime_mtd_comser').on('postgres_changes', { event: '*', schema: 'public', table: 'mtd_comser' }, () => { fetchTop1MtdComser(); fetchMtdComserData(); }).subscribe();
-      supabaseClient.channel('realtime_target').on('postgres_changes', { event: '*', schema: 'public', table: 'target_today' }, () => updateGaugeData()).subscribe();
-      supabaseClient.channel('realtime_running_text').on('postgres_changes', { event: '*', schema: 'public', table: 'running_text' }, () => fetchRunningText()).subscribe();
-    }
-
-    function startBackupPolling() {
-      setInterval(async () => {
-        await fetchKaryawanData();
-        fetchTvSettings();
-        fetchSalesData();
-        fetchDeptData();
-        fetchMtdSalesData();
-        fetchMtdFurniproData();
-        fetchMtdComserData();
-        fetchTop1MtdSales();
-        fetchTop1MtdFurnipro();
-        fetchTop1MtdComser();
-        fetchRunningText();
-        updateGaugeData();
-      }, 10000);
     }
 
     document.addEventListener("DOMContentLoaded", async () => {
       lucide.createIcons();
+      scaleDashboard();
       await fetchKaryawanData();
-      await fetchTvSettings();
-      await initSoundsPlayer();
+      checkAndPlaySounds();
       fetchSalesData();
       fetchDeptData();
-      fetchMtdSalesData();
-      fetchMtdFurniproData();
-      fetchMtdComserData();
-      fetchTop1MtdSales();
-      fetchTop1MtdFurnipro();
-      fetchTop1MtdComser();
-      fetchRunningText();
       updateGaugeData();
-      setupRealtime();
+      fetchRunningText();
+      initRealtimeListeners();
       startCarouselTimer();
-      startBackupPolling();
     });
   </script>
 </body>
