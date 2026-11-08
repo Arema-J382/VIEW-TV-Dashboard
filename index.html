@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TV Dashboard - Laporan Sales, Gauge, Departemen & MTD Tables</title>
+  <title>TV Dashboard - Laporan Sales & Popup Twibbon Sales</title>
   
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -13,20 +13,115 @@
   <script src="https://unpkg.com/lucide@latest"></script>
 
   <style>
-    * { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; text-rendering: optimizeLegibility; }
-    body { margin: 0; padding: 0; width: 100vw; height: 100vh; overflow: hidden; background-color: #020617; }
-    .tv-canvas {
-      width: 1920px; height: 1080px; position: absolute; top: 50%; left: 50%;
-      transform: translate(-50%, -50%); transform-origin: center center; display: flex; flex-direction: column;
-      background-color: #eff6ff; overflow: hidden; box-sizing: border-box; will-change: transform;
+    * {
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      text-rendering: optimizeLegibility;
     }
-    .dashboard-layout { display: flex; flex-direction: column; justify-content: flex-start; align-items: center; gap: 1rem; width: 100%; height: 100%; }
-    .top-row { display: flex; flex-direction: row; justify-content: center; align-items: flex-start; gap: 1.5rem; width: 100%; }
-    .bottom-row { display: flex; flex-direction: row; justify-content: center; align-items: flex-start; gap: 1.25rem; width: 100%; }
-    .gauge-section-container { width: 500px; height: 380px; background: #ffffff; border-radius: 0.85rem; box-shadow: 0 8px 20px -4px rgba(0,0,0,0.1); border: 1px solid #bfdbfe; display: flex; flex-direction: column; overflow: hidden; position: relative; }
-    .custom-table-container { width: 600px; height: 380px; display: flex; flex-direction: column; position: relative; z-index: 10; }
-    .mtd-top1-container { width: 500px; height: 380px; background: #ffffff; border-radius: 1rem; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1); display: flex; flex-direction: column; overflow: hidden; position: relative; z-index: 10; transition: all 0.5s ease-in-out; }
-    .bottom-card-container { width: 440px; height: 340px; background: #ffffff; border-radius: 0.85rem; box-shadow: 0 8px 20px -4px rgba(0,0,0,0.1); border: 1px solid #bfdbfe; display: flex; flex-direction: column; overflow: hidden; position: relative; }
+
+    body {
+      margin: 0;
+      padding: 0;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      background-color: #020617;
+    }
+
+    .tv-canvas {
+      width: 1920px;
+      height: 1080px;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      transform-origin: center center;
+      display: flex;
+      flex-direction: column;
+      background-color: #eff6ff;
+      overflow: hidden;
+      box-sizing: border-box;
+      will-change: transform;
+      backface-visibility: hidden;
+    }
+
+    .dashboard-layout {
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      align-items: center;
+      gap: 1rem;
+      width: 100%;
+      height: 100%;
+    }
+
+    .top-row {
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+      align-items: flex-start;
+      gap: 1.5rem;
+      width: 100%;
+    }
+
+    .bottom-row {
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+      align-items: flex-start;
+      gap: 1.25rem;
+      width: 100%;
+    }
+
+    .gauge-section-container {
+      width: 500px;
+      height: 380px;
+      background: #ffffff;
+      border-radius: 0.85rem;
+      box-shadow: 0 8px 20px -4px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+      border: 1px solid #bfdbfe;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .custom-table-container {
+      width: 600px;
+      height: 380px;
+      margin: 0;         
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      z-index: 10;
+    }
+
+    .mtd-top1-container {
+      width: 500px;
+      height: 380px;
+      background: #ffffff;
+      border-radius: 1rem;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      position: relative;
+      z-index: 10;
+      transition: all 0.5s ease-in-out;
+    }
+
+    .bottom-card-container {
+      width: 440px;
+      height: 340px;
+      background: #ffffff;
+      border-radius: 0.85rem;
+      box-shadow: 0 8px 20px -4px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+      border: 1px solid #bfdbfe;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      position: relative;
+    }
 
     @keyframes goldGlow {
       0%, 100% { box-shadow: 0 0 10px rgba(234, 179, 8, 0.5), 0 0 20px rgba(245, 158, 11, 0.3); }
@@ -40,70 +135,116 @@
       0%, 100% { box-shadow: 0 0 10px rgba(16, 185, 129, 0.6), 0 0 20px rgba(5, 150, 105, 0.4); }
       50% { box-shadow: 0 0 22px rgba(16, 185, 129, 1), 0 0 35px rgba(4, 120, 87, 0.8); }
     }
+
     .gold-glow-container { border: 2px solid #eab308; animation: goldGlow 2s infinite ease-in-out; }
     .cyan-glow-container { border: 2px solid #3b82f6; animation: cyanGlow 2s infinite ease-in-out; }
     .emerald-glow-container { border: 2px solid #10b981; animation: emeraldGlow 2s infinite ease-in-out; }
 
-    @keyframes scrollUp { 0% { transform: translate3d(0, 0, 0); } 100% { transform: translate3d(0, -50%, 0); } }
+    @keyframes scrollUp {
+      0% { transform: translate3d(0, 0, 0); }
+      100% { transform: translate3d(0, -50%, 0); }
+    }
     .animate-scroll-infinite { animation: scrollUp linear infinite; will-change: transform; }
     .scroll-container:hover .animate-scroll-infinite { animation-play-state: paused; }
-    .text-outline-white { text-shadow: -0.75px -0.75px 0 #fff, 0.75px -0.75px 0 #fff, -0.75px 0.75px 0 #fff, 0.75px 0.75px 0 #fff, 0px 1px 2px rgba(0,0,0,0.12); }
+
+    .text-outline-white {
+      text-shadow: -0.75px -0.75px 0 #fff, 0.75px -0.75px 0 #fff, -0.75px 0.75px 0 #fff, 0.75px 0.75px 0 #fff, 0px 1px 2px rgba(0, 0, 0, 0.12);
+    }
+
+    @keyframes silverGlow {
+      0%, 100% { box-shadow: 0 0 8px rgba(148, 163, 184, 0.5), 0 0 16px rgba(56, 189, 248, 0.3); }
+      50% { box-shadow: 0 0 16px rgba(148, 163, 184, 0.9), 0 0 24px rgba(56, 189, 248, 0.6); }
+    }
+    @keyframes bronzeGlow {
+      0%, 100% { box-shadow: 0 0 8px rgba(217, 119, 6, 0.5), 0 0 16px rgba(234, 88, 12, 0.3); }
+      50% { box-shadow: 0 0 16px rgba(217, 119, 6, 0.9), 0 0 22px rgba(220, 38, 38, 0.6); }
+    }
 
     .fire-box-1 { background-color: #fefce8; border: 2px solid #eab308; border-radius: 0.75rem; animation: goldGlow 1.8s infinite ease-in-out; }
-    .fire-box-2 { background-color: #f8fafc; border: 2px solid #94a3b8; border-radius: 0.75rem; }
-    .fire-box-3 { background-color: #fff7ed; border: 2px solid #d97706; border-radius: 0.75rem; }
+    .fire-box-2 { background-color: #f8fafc; border: 2px solid #94a3b8; border-radius: 0.75rem; animation: silverGlow 2.2s infinite ease-in-out; }
+    .fire-box-3 { background-color: #fff7ed; border: 2px solid #d97706; border-radius: 0.75rem; animation: bronzeGlow 2s infinite ease-in-out; }
 
     .slider-track { display: flex; width: 300%; height: 100%; transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1); will-change: transform; }
 
-    @keyframes screenMarquee { 0% { transform: translate3d(1920px, 0, 0); } 100% { transform: translate3d(-100%, 0, 0); } }
+    @keyframes screenMarquee {
+      0% { transform: translate3d(1920px, 0, 0); }
+      100% { transform: translate3d(-100%, 0, 0); }
+    }
     .screen-marquee-anim { position: absolute; white-space: nowrap; will-change: transform; animation: screenMarquee 28s linear infinite; }
     .broadcast-slant-edge { clip-path: polygon(0 0, calc(100% - 35px) 0, 100% 100%, 0 100%); }
 
-    /* Animasi Pop-Up Modern */
-    @keyframes popupEntrance {
-      0% { opacity: 0; transform: scale(0.8) translateY(30px); }
-      100% { opacity: 1; transform: scale(1) translateY(0); }
+    /* KONFETI ANIMASI UNTUK POP UP */
+    @keyframes confettiFall {
+      0% { transform: translateY(-50px) rotate(0deg); opacity: 1; }
+      100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
     }
-    .animate-popup { animation: popupEntrance 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+    .confetti-piece {
+      position: absolute;
+      width: 12px;
+      height: 12px;
+      top: -20px;
+      animation: confettiFall 3s linear infinite;
+      z-index: 100000;
+    }
   </style>
 </head>
 <body class="bg-slate-950 text-slate-800 select-none overflow-hidden m-0 p-0">
 
   <!-- OVERLAY UNTUK MENGAKTIFKAN AUDIO -->
-  <div id="audioUnlockOverlay" onclick="unlockAndPlayAudio()" class="fixed inset-0 bg-slate-950/90 z-[99999] flex flex-col items-center justify-center text-white cursor-pointer transition-opacity duration-500">
+  <div id="audioUnlockOverlay" onclick="unlockAndPlayAudio()" class="fixed inset-0 bg-slate-950/90 z-[9999999] flex flex-col items-center justify-center text-white cursor-pointer transition-opacity duration-500">
     <div class="bg-blue-600 hover:bg-blue-700 p-8 rounded-3xl shadow-2xl flex flex-col items-center gap-4 border-2 border-blue-400 animate-bounce max-w-xl text-center mx-4">
       <i data-lucide="volume-2" class="w-16 h-16 text-yellow-300"></i>
-      <h2 class="text-2xl font-black tracking-wide">KLIK DI SINI UNTUK AKTIFKAN AUDIO TV</h2>
-      <p class="text-xs text-blue-100 font-medium">Klik untuk mulai memutar backsound dan sound sales secara looping otomatis.</p>
+      <h2 class="text-2xl font-black tracking-wide">KLIK DI SINI UNTUK AKTIFKAN AUDIO TV & DASHBOARD</h2>
+      <p class="text-xs text-blue-100 font-medium">Klik untuk memulai sistem pemutaran backsound & sound sales interaktif.</p>
     </div>
   </div>
 
-  <!-- POP-UP FULL BACKGROUND WARNA DENGAN DESIGN & ANIMASI MODERN (WEB 2) -->
-  <div id="modernSalesPopup" class="fixed inset-0 z-[88888] bg-gradient-to-br from-blue-900/95 via-indigo-950/95 to-slate-950/95 backdrop-blur-xl flex items-center justify-center p-6 hidden">
-    <div class="bg-white/95 border-2 border-yellow-400 p-8 rounded-3xl shadow-2xl max-w-xl w-full text-center relative overflow-hidden animate-popup">
-      <div class="absolute -top-10 -right-10 w-40 h-40 bg-yellow-400/20 rounded-full blur-2xl pointer-events-none"></div>
-      
-      <div class="inline-flex items-center gap-2 bg-yellow-500 text-slate-950 px-4 py-1.5 rounded-full font-extrabold text-xs mb-4 shadow-md uppercase tracking-wider">
-        <i data-lucide="award" class="w-4 h-4"></i> TWIBBON SALES ALERT 🌟
+  <!-- FULL SCREEN POP UP OVERLAY (WEB 2) -->
+  <div id="salesPopupOverlay" class="fixed inset-0 z-[999999] bg-gradient-to-br from-indigo-900/95 via-purple-900/95 to-slate-950/95 backdrop-blur-md flex items-center justify-center opacity-0 pointer-events-none transition-all duration-500 scale-95">
+    <!-- Kontainer Konfeti -->
+    <div id="confettiContainer" class="absolute inset-0 overflow-hidden pointer-events-none"></div>
+
+    <div class="relative bg-white/95 rounded-3xl shadow-2xl border-4 border-yellow-400 p-8 max-w-2xl w-full mx-4 flex flex-col items-center text-center transform transition-transform duration-500">
+      <!-- Emblem Berwarna -->
+      <div class="absolute -top-6 bg-gradient-to-r from-yellow-500 to-amber-600 text-white font-extrabold text-xs px-6 py-2 rounded-full shadow-lg border-2 border-yellow-200 uppercase tracking-widest flex items-center gap-2">
+        <i data-lucide="award" class="w-4 h-4 text-yellow-200"></i> TWIBBON SALES CHAMPION <i data-lucide="award" class="w-4 h-4 text-yellow-200"></i>
       </div>
 
-      <div class="flex flex-col items-center">
-        <!-- Foto Karyawan -->
-        <div class="relative w-36 h-36 rounded-2xl border-4 border-yellow-400 shadow-xl overflow-hidden bg-slate-200 mb-3">
-          <img id="popupFoto" src="" alt="Foto Sales" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name=Sales&background=0D8ABC&color=fff&size=128';">
+      <!-- Foto Karyawan -->
+      <div class="relative w-36 h-36 rounded-2xl border-4 border-blue-600 shadow-xl bg-slate-200 overflow-hidden mt-4 mb-4">
+        <img id="popupFoto" src="" alt="Foto Karyawan" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name=Sales&background=0D8ABC&color=fff&size=200';">
+      </div>
+
+      <!-- Nama Karyawan -->
+      <h2 id="popupNama" class="text-3xl font-black text-slate-900 mb-1 tracking-tight">-</h2>
+      <div id="popupNip" class="text-xs font-mono font-bold text-blue-600 bg-blue-50 px-3 py-1 rounded-full border border-blue-200 mb-6">NIP: -</div>
+
+      <!-- Grid Data Sales, Qty FP, Comser (Akan diabaikan jika kosong) -->
+      <div id="popupDataGrid" class="grid grid-cols-1 sm:grid-cols-3 gap-4 w-full">
+        <div id="boxValueSales" class="bg-emerald-50 border border-emerald-200 p-4 rounded-2xl shadow-inner flex flex-col items-center">
+          <div class="flex items-center gap-1.5 text-emerald-700 text-xs font-bold uppercase mb-1">
+            <i data-lucide="badge-dollar-sign" class="w-4 h-4"></i> Value Sales
+          </div>
+          <div id="popupValueSales" class="text-lg font-black font-mono text-emerald-800">-</div>
         </div>
 
-        <h3 id="popupNama" class="text-2xl font-black text-slate-900 tracking-tight mb-1">-</h3>
-        <p class="text-xs font-mono text-blue-600 font-bold mb-4">INFORMA MOG MALANG (J382)</p>
+        <div id="boxQtyFp" class="bg-blue-50 border border-blue-200 p-4 rounded-2xl shadow-inner flex flex-col items-center">
+          <div class="flex items-center gap-1.5 text-blue-700 text-xs font-bold uppercase mb-1">
+            <i data-lucide="package" class="w-4 h-4"></i> Qty FP
+          </div>
+          <div id="popupQtyFp" class="text-lg font-black font-mono text-blue-800">-</div>
+        </div>
 
-        <!-- Data Grid (Value Sales, Qty FP, Value Comser - Kosong Diabaikan) -->
-        <div id="popupDataGrid" class="grid grid-cols-1 sm:grid-cols-3 gap-3 w-full">
-          <!-- Diisi dinamis via JavaScript -->
+        <div id="boxValueComser" class="bg-purple-50 border border-purple-200 p-4 rounded-2xl shadow-inner flex flex-col items-center">
+          <div class="flex items-center gap-1.5 text-purple-700 text-xs font-bold uppercase mb-1">
+            <i data-lucide="headphones" class="w-4 h-4"></i> Value Comser
+          </div>
+          <div id="popupValueComser" class="text-lg font-black font-mono text-purple-800">-</div>
         </div>
       </div>
 
-      <div class="mt-6 text-[11px] font-bold text-slate-400 uppercase tracking-widest">
-        Pop-up otomatis tertutup dalam 5 detik...
+      <div class="mt-6 text-[11px] text-slate-400 font-medium animate-pulse">
+        Pop-up akan tertutup otomatis dalam <span id="popupCountdown" class="font-bold text-blue-600">5</span> detik...
       </div>
     </div>
   </div>
@@ -117,7 +258,7 @@
     <div id="tvAspectRatioBox" class="w-full max-h-full flex items-center justify-center relative overflow-hidden" style="aspect-ratio: 70 / 39;">
       <div id="tvScaleCanvas" class="tv-canvas rounded-2xl shadow-2xl">
 
-        <!-- HEADER DASHBOARD -->
+        <!-- HEADER -->
         <header class="bg-slate-900 border-b border-slate-800 px-10 py-3 flex justify-between items-center shadow-md z-20 shrink-0 h-[80px]">
           <div class="flex items-center gap-4">
             <div class="bg-blue-600 p-2.5 rounded-2xl text-white shadow-lg shadow-blue-600/30">
@@ -134,9 +275,9 @@
               <div id="currentTime" class="text-3xl font-mono font-bold text-slate-100">00:00:00</div>
               <div id="currentDate" class="text-xs text-slate-400">-</div>
             </div>
-            <div id="syncStatusBadge" class="bg-green-500/10 border border-green-500/20 text-green-400 px-4 py-2 rounded-full text-xs font-semibold flex items-center gap-2">
+            <div class="bg-green-500/10 border border-green-500/20 text-green-400 px-4 py-2 rounded-full text-xs font-semibold flex items-center gap-2">
               <span class="w-2.5 h-2.5 rounded-full bg-green-500 animate-pulse"></span>
-              <span id="syncStatusText">LIVE SYNC ACTIVE</span>
+              <span>LIVE SYNC ACTIVE</span>
             </div>
           </div>
         </header>
@@ -147,21 +288,15 @@
 
             <!-- BARIS ATAS -->
             <div class="top-row">
-              
-              <!-- GAUGE CHART SECTION -->
+              <!-- GAUGE CHART -->
               <div id="gaugeContainer" class="gauge-section-container">
-                <div class="bg-slate-900 text-white font-extrabold text-center text-lg py-1.5 border-b border-slate-800 shadow-md tracking-wider">
-                  TARGET TODAY
-                </div>
-
+                <div class="bg-slate-900 text-white font-extrabold text-center text-lg py-1.5 border-b border-slate-800 shadow-md tracking-wider">TARGET TODAY</div>
                 <div class="flex-1 flex flex-col items-center justify-center px-3 py-1 relative bg-gradient-to-b from-slate-50 to-white">
                   <div class="relative w-150 h-60 flex items-center justify-center">
                     <svg class="w-full h-full overflow-visible" viewBox="0 0 200 100">
-                      <defs>
-                        <path id="textArcAchieved" d="M 20 90 A 80 80 0 0 1 180 90" />
-                      </defs>
-                      <path id="gaugeBackgroundArc" d="M 20 90 A 80 80 0 0 1 180 90" fill="none" stroke="#cbd5e1" stroke-width="22" stroke-linecap="round"/>
-                      <path id="gaugeProgressArc" d="M 20 90 A 80 80 0 0 1 180 90" fill="none" stroke="#3b82f6" stroke-width="22" stroke-linecap="round" stroke-dasharray="251.2" stroke-dashoffset="251.2" style="transition: stroke-dashoffset 1s ease-in-out, stroke 0.5s ease;"/>
+                      <defs><path id="textArcAchieved" d="M 20 90 A 80 80 0 0 1 180 90" /></defs>
+                      <path d="M 20 90 A 80 80 0 0 1 180 90" fill="none" stroke="#cbd5e1" stroke-width="22" stroke-linecap="round"/>
+                      <path id="gaugeProgressArc" d="M 20 90 A 80 80 0 0 1 180 90" fill="none" stroke="#3b82f6" stroke-width="22" stroke-linecap="round" stroke-dasharray="251.2" stroke-dashoffset="251.2" style="transition: stroke-dashoffset 1s ease-in-out;"/>
                       <text dy="4.5" fill="#ffffff" font-size="9.5" font-weight="900" font-family="monospace">
                         <textPath id="gaugeTextAchieved" href="#textArcAchieved" startOffset="0%" text-anchor="start">0.0%</textPath>
                       </text>
@@ -172,14 +307,13 @@
                       </g>
                     </svg>
                   </div>
-
                   <div class="w-full flex flex-col gap-1.5 mt-1">
                     <div class="text-center bg-slate-100 py-1 px-3 rounded-lg border border-slate-200 shadow-inner flex justify-between items-center">
-                      <span class="text-2xl text-slate-500 font-bold uppercase tracking-wider">Realisasi</span>
+                      <span class="text-2xl text-slate-500 font-bold uppercase">Realisasi</span>
                       <span id="gaugeRealtimeValue" class="text-2xl font-extrabold font-mono text-emerald-600">Rp 0</span>
                     </div>
                     <div class="text-center bg-slate-100 py-1 px-3 rounded-lg border border-slate-200 shadow-inner flex justify-between items-center">
-                      <span class="text-2xl text-slate-500 font-bold uppercase tracking-wider">Target Today</span>
+                      <span class="text-2xl text-slate-500 font-bold uppercase">Target Today</span>
                       <span id="gaugeTargetValue" class="text-2xl font-extrabold font-mono text-red-600">Rp 0</span>
                     </div>
                   </div>
@@ -188,12 +322,10 @@
 
               <!-- LIVE TOP SALES TODAY -->
               <div class="custom-table-container flex flex-col relative z-10">
-                <div class="bg-slate-900 text-white font-extrabold text-center text-xl py-2.5 rounded-t-xl border-b border-slate-800 shadow-md z-10 shrink-0 tracking-wider">
-                  LIVE TOP SALES TODAY
-                </div>
-                <div id="emptyStatus" class="hidden absolute inset-0 pt-16 flex flex-col items-center justify-center z-20 bg-white/90 backdrop-blur-sm rounded-b-xl">
+                <div class="bg-slate-900 text-white font-extrabold text-center text-xl py-2.5 rounded-t-xl border-b border-slate-800 shadow-md z-10 shrink-0 tracking-wider">LIVE TOP SALES TODAY</div>
+                <div id="emptyStatus" class="hidden absolute inset-0 pt-16 flex flex-col items-center justify-center z-20 bg-white/90 rounded-b-xl">
                   <i data-lucide="database-backup" class="w-20 h-20 text-slate-400 mb-3"></i>
-                  <div id="statusMessage" class="text-slate-600 text-lg font-medium">Belum ada data laporan sales di database.</div>
+                  <div id="statusMessage" class="text-slate-600 text-lg font-medium">Belum ada data laporan sales.</div>
                 </div>
                 <div class="flex-1 overflow-hidden relative border-x border-b border-blue-200 rounded-b-xl bg-white scroll-container shadow-lg">
                   <div id="scrollWrapper" class="absolute w-full animate-scroll-infinite">
@@ -212,24 +344,23 @@
                 <div class="flex-1 relative overflow-hidden">
                   <div id="mtdSliderTrack" class="slider-track">
                     <div class="w-1/3 h-full flex flex-col items-center justify-center p-3 bg-gradient-to-b from-amber-50/50 to-white shrink-0">
-                      <div id="mtdTop1Content" class="w-full flex flex-col items-center justify-center"></div>
+                      <div id="mtdTop1Content" class="w-full flex flex-col items-center justify-center">Memuat...</div>
                     </div>
                     <div class="w-1/3 h-full flex flex-col items-center justify-center p-3 bg-gradient-to-b from-blue-50/50 to-white shrink-0">
-                      <div id="furniproTop1Content" class="w-full flex flex-col items-center justify-center"></div>
+                      <div id="furniproTop1Content" class="w-full flex flex-col items-center justify-center">Memuat...</div>
                     </div>
                     <div class="w-1/3 h-full flex flex-col items-center justify-center p-3 bg-gradient-to-b from-emerald-50/50 to-white shrink-0">
-                      <div id="comserTop1Content" class="w-full flex flex-col items-center justify-center"></div>
+                      <div id="comserTop1Content" class="w-full flex flex-col items-center justify-center">Memuat...</div>
                     </div>
                   </div>
                 </div>
               </div>
-
             </div>
 
-            <!-- BARIS BAWAH: 4 TABEL CARD VIEW -->
+            <!-- BARIS BAWAH: 4 TABEL -->
             <div class="bottom-row">
               <div class="bottom-card-container">
-                <div class="bg-slate-900 text-white font-extrabold text-center text-sm py-1.5 border-b border-slate-800 shadow-md z-10 shrink-0 tracking-wider">SALES DEPARTEMEN TODAY</div>
+                <div class="bg-slate-900 text-white font-extrabold text-center text-sm py-1.5 border-b border-slate-800">SALES DEPARTEMEN TODAY</div>
                 <div class="flex-1 overflow-hidden relative bg-white scroll-container">
                   <div id="scrollWrapperDept" class="absolute w-full animate-scroll-infinite">
                     <div id="tableContentOriginalDept" class="space-y-1.5 p-2"></div>
@@ -238,7 +369,7 @@
                 </div>
               </div>
               <div class="bottom-card-container">
-                <div class="bg-slate-900 text-white font-extrabold text-center text-sm py-1.5 border-b border-slate-800 shadow-md z-10 shrink-0 tracking-wider">MTD BY SALES</div>
+                <div class="bg-slate-900 text-white font-extrabold text-center text-sm py-1.5 border-b border-slate-800">MTD BY SALES</div>
                 <div class="flex-1 overflow-hidden relative bg-white scroll-container">
                   <div id="scrollWrapperMtdSales" class="absolute w-full animate-scroll-infinite">
                     <div id="tableContentOriginalMtdSales" class="space-y-1.5 p-2"></div>
@@ -247,7 +378,7 @@
                 </div>
               </div>
               <div class="bottom-card-container">
-                <div class="bg-slate-900 text-white font-extrabold text-center text-sm py-1.5 border-b border-slate-800 shadow-md z-10 shrink-0 tracking-wider">MTD BY FURNIPRO</div>
+                <div class="bg-slate-900 text-white font-extrabold text-center text-sm py-1.5 border-b border-slate-800">MTD BY FURNIPRO</div>
                 <div class="flex-1 overflow-hidden relative bg-white scroll-container">
                   <div id="scrollWrapperMtdFurnipro" class="absolute w-full animate-scroll-infinite">
                     <div id="tableContentOriginalMtdFurnipro" class="space-y-1.5 p-2"></div>
@@ -256,7 +387,7 @@
                 </div>
               </div>
               <div class="bottom-card-container">
-                <div class="bg-slate-900 text-white font-extrabold text-center text-sm py-1.5 border-b border-slate-800 shadow-md z-10 shrink-0 tracking-wider">MTD BY COMSER</div>
+                <div class="bg-slate-900 text-white font-extrabold text-center text-sm py-1.5 border-b border-slate-800">MTD BY COMSER</div>
                 <div class="flex-1 overflow-hidden relative bg-white scroll-container">
                   <div id="scrollWrapperMtdComser" class="absolute w-full animate-scroll-infinite">
                     <div id="tableContentOriginalMtdComser" class="space-y-1.5 p-2"></div>
@@ -271,14 +402,14 @@
 
         <!-- FOOTER RUNNING TEXT -->
         <footer class="w-full h-[52px] flex items-center shrink-0 relative overflow-hidden z-50 bg-red-600">
-          <div class="bg-red-600 text-white px-6 h-full flex items-center gap-3 shrink-0 z-30 shadow-lg relative font-sans">
+          <div class="bg-red-600 text-white px-6 h-full flex items-center gap-3 shrink-0 z-30 shadow-lg font-sans">
             <i data-lucide="volume-2" class="w-6 h-6 text-yellow-300 animate-pulse"></i>
-            <span class="text-xl font-black tracking-widest uppercase text-white drop-shadow">INFO BOLO</span>
+            <span class="text-xl font-black tracking-widest uppercase text-white">INFO BOLO</span>
           </div>
-          <div class="bg-slate-900 text-white flex-1 h-full relative overflow-hidden flex items-center broadcast-slant-edge z-20 shadow-inner border-l border-red-700">
+          <div class="bg-slate-900 text-white flex-1 h-full relative overflow-hidden flex items-center broadcast-slant-edge z-20">
             <div class="absolute inset-0 overflow-hidden pointer-events-none">
               <div id="runningTextContainer" class="screen-marquee-anim text-lg font-bold text-white tracking-wider flex items-center h-full">
-                <span>Memuat informasi running text...</span>
+                <span>Memuat informasi...</span>
               </div>
             </div>
           </div>
@@ -312,145 +443,145 @@
     function unlockAndPlayAudio() {
       const overlay = document.getElementById('audioUnlockOverlay');
       if (overlay) { overlay.style.opacity = '0'; setTimeout(() => overlay.remove(), 500); }
-      checkAndPlaySounds();
+      playBacksound();
     }
 
-    // --- INTEGRASI SOUNDS & STATUS SOUNDSTWIBBON DI WEB 2 ---
-    async function checkAndPlaySounds() {
+    async function playBacksound() {
+      const audioBacksound = document.getElementById('audioBacksound');
+      const { data } = await supabaseClient.from('status_backsound').select('*').eq('bucket_name', 'BACKSOUND').maybeSingle();
+      if (data && data.nama_lagu) {
+        const { data: pub } = supabaseClient.storage.from('BACKSOUND').getPublicUrl(data.nama_lagu);
+        if (pub?.publicUrl) {
+          audioBacksound.src = pub.publicUrl;
+          audioBacksound.play().catch(e => {});
+        }
+      }
+    }
+
+    // --- REALTIME LISTENER POPUP TWIBBON & SOUND SALES (CARD 2) ---
+    function setupPopupAndSoundRealtime() {
+      supabaseClient
+        .channel('public:popup_twibbon')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'popup_twibbon' }, payload => {
+          if (payload.eventType === 'INSERT' || payload.eventType === 'UPDATE') {
+            triggerSalesPopup(payload.new);
+          }
+        })
+        .subscribe();
+    }
+
+    async function triggerSalesPopup(data) {
+      if (!data) return;
+      const overlay = document.getElementById('salesPopupOverlay');
       const audioBacksound = document.getElementById('audioBacksound');
       const audioSoundSales = document.getElementById('audioSoundSales');
 
-      audioBacksound.loop = true;
-      audioSoundSales.loop = true;
+      // 1. Isi data ke modal popup
+      const nip = data.nip || '';
+      const nama = getEmployeeName(nip, data.nama);
+      const valSales = data.value || '';
+      const qtyFp = data.qtyfp || '';
+      const valComser = data.valuecnc || '';
 
-      // Ambil status Card 1 (BACKSOUND)
-      const { data: backsoundData } = await supabaseClient.from('status_backsound').select('*').maybeSingle();
-      if (backsoundData && backsoundData.nama_lagu) {
-        const { data: pub } = supabaseClient.storage.from('BACKSOUND').getPublicUrl(backsoundData.nama_lagu);
-        if (pub?.publicUrl && !audioBacksound.src.includes(encodeURIComponent(backsoundData.nama_lagu))) {
-          audioBacksound.src = pub.publicUrl;
-          audioBacksound.load();
-          audioBacksound.play().catch(e => {});
-        } else if (audioBacksound.paused && audioBacksound.src) {
-          audioBacksound.play().catch(e => {});
-        }
-      } else {
-        audioBacksound.pause();
-        audioBacksound.src = '';
-      }
+      document.getElementById('popupFoto').src = `${SUPABASE_URL}/storage/v1/object/public/FOTO SALES/${nip}.jpg`;
+      document.getElementById('popupNama').innerText = nama;
+      document.getElementById('popupNip').innerText = `NIP: ${nip}`;
 
-      // Ambil status Card 2 (SOUND SALES / status_soundtwibbon)
-      const { data: soundTwibbonData } = await supabaseClient.from('status_soundtwibbon').select('*').maybeSingle();
-      
-      if (soundTwibbonData && soundTwibbonData.nama_lagutw && soundTwibbonData.status_lagutw) {
-        // SAAT TOMBOL DOWNLOAD DI TWIBBON SALES DI KLIK DAN STATUS LAGUNYA AKTIF:
-        // Pause Card 1, Play Card 2, dan Tampilkan Pop-Up selama 5 detik
-        audioBacksound.pause();
+      // Handle field kosong (Sesuai ketentuan: jika kosong, abaikan / hidden)
+      const boxSales = document.getElementById('boxValueSales');
+      const boxFp = document.getElementById('boxQtyFp');
+      const boxComser = document.getElementById('boxValueComser');
 
-        const { data: pub2 } = supabaseClient.storage.from('SOUND SALES').getPublicUrl(soundTwibbonData.nama_lagutw);
-        if (pub2?.publicUrl) {
-          audioSoundSales.src = pub2.publicUrl;
-          audioSoundSales.load();
+      if (valSales) { document.getElementById('popupValueSales').innerText = valSales; boxSales.classList.remove('hidden'); } else { boxSales.classList.add('hidden'); }
+      if (qtyFp) { document.getElementById('popupQtyFp').innerText = qtyFp; boxFp.classList.remove('hidden'); } else { boxFp.classList.add('hidden'); }
+      if (valComser) { document.getElementById('popupValueComser').innerText = valComser; boxComser.classList.remove('hidden'); } else { boxComser.classList.add('hidden'); }
+
+      // 2. Tampilkan Konfeti Animasi
+      generateConfetti();
+
+      // 3. Kontrol Audio (Pause Card 1, Play Card 2 Sound Sales jika aktif di status_soundtwibbon)
+      audioBacksound.pause();
+
+      const { data: soundData } = await supabaseClient
+        .from('status_soundtwibbon')
+        .select('*')
+        .eq('bucket_nametw', 'SOUND SALES')
+        .maybeSingle();
+
+      if (soundData && soundData.nama_lagutw) {
+        const { data: pubSound } = supabaseClient.storage.from('SOUND SALES').getPublicUrl(soundData.nama_lagutw);
+        if (pubSound?.publicUrl) {
+          audioSoundSales.src = pubSound.publicUrl;
           audioSoundSales.play().catch(e => {});
         }
+      }
 
-        triggerModernSalesPopup();
-      } else {
-        // JIKA POP-UP / STATUS TIDAK AKTIF: Hentikan Card 2, Putar kembali Card 1
+      // 4. Tampilkan Pop Up (Full Screen, Durasi 5 Detik)
+      overlay.classList.remove('opacity-0', 'pointer-events-none', 'scale-95');
+      overlay.classList.add('opacity-100', 'scale-100');
+
+      let countdown = 5;
+      document.getElementById('popupCountdown').innerText = countdown;
+      const countInterval = setInterval(() => {
+        countdown--;
+        if (countdown >= 0) document.getElementById('popupCountdown').innerText = countdown;
+      }, 1000);
+
+      if (popupTimer) clearTimeout(popupTimer);
+
+      popupTimer = setTimeout(async () => {
+        clearInterval(countInterval);
+        // Tutup Pop Up
+        overlay.classList.remove('opacity-100', 'scale-100');
+        overlay.classList.add('opacity-0', 'pointer-events-none', 'scale-95');
+
+        // Hentikan Sound Sales dan Resume Card 1 Backsound
         audioSoundSales.pause();
         audioSoundSales.currentTime = 0;
-        audioSoundSales.src = '';
+        audioBacksound.play().catch(e => {});
 
-        if (backsoundData && backsoundData.nama_lagu) {
-          audioBacksound.play().catch(e => {});
-        }
-      }
-    }
-
-    function triggerModernSalesPopup() {
-      const popup = document.getElementById('modernSalesPopup');
-      const popupFoto = document.getElementById('popupFoto');
-      const popupNama = document.getElementById('popupNama');
-      const popupDataGrid = document.getElementById('popupDataGrid');
-
-      // Ambil data popup dari localStorage yang dikirim Web 1 saat download
-      const savedPopup = localStorage.getItem('web2_active_popup');
-      if (!savedPopup) return;
-
-      const data = JSON.parse(savedPopup);
-      const nip = data.nip || '';
-      const nama = data.nama || 'Karyawan Sales';
-      const valSales = data.valSales;
-      const qtyFp = data.qtyFp;
-      const valComser = data.valComser;
-
-      popupFoto.src = `${SUPABASE_URL}/storage/v1/object/public/FOTO SALES/${nip}.jpg`;
-      popupNama.innerText = nama;
-
-      // Buat grid dinamis (jika nilai kosong maka abaikan / tidak ditampilkan)
-      let gridHtml = '';
-      if (valSales) {
-        gridHtml += `
-          <div class="bg-blue-50 border border-blue-200 p-3.5 rounded-2xl shadow-sm text-center">
-            <div class="text-[10px] font-bold text-blue-600 uppercase mb-1">Value Sales</div>
-            <div class="text-lg font-black font-mono text-slate-900">${valSales}</div>
-          </div>
-        `;
-      }
-      if (qtyFp) {
-        gridHtml += `
-          <div class="bg-indigo-50 border border-indigo-200 p-3.5 rounded-2xl shadow-sm text-center">
-            <div class="text-[10px] font-bold text-indigo-600 uppercase mb-1">QTY FP</div>
-            <div class="text-lg font-black font-mono text-slate-900">${qtyFp}</div>
-          </div>
-        `;
-      }
-      if (valComser) {
-        gridHtml += `
-          <div class="bg-emerald-50 border border-emerald-200 p-3.5 rounded-2xl shadow-sm text-center">
-            <div class="text-[10px] font-bold text-emerald-600 uppercase mb-1">Value Comser</div>
-            <div class="text-lg font-black font-mono text-slate-900">${valComser}</div>
-          </div>
-        `;
-      }
-
-      popupDataGrid.innerHTML = gridHtml;
-      popup.classList.remove('hidden');
-
-      // Tutup otomatis setelah 5 detik lalu reset suara & hapus data
-      if (popupTimer) clearTimeout(popupTimer);
-      popupTimer = setTimeout(() => {
-        popup.classList.add('hidden');
-        localStorage.removeItem('web2_active_popup');
-        checkAndPlaySounds(); // Mengembalikan lagu Card 1
+        // Hapus data popup_twibbon & status_soundtwibbon otomatis sesuai permintaan
+        await supabaseClient.from('popup_twibbon').delete().eq('nip', nip);
+        await supabaseClient.from('status_soundtwibbon').delete().eq('bucket_nametw', 'SOUND SALES');
       }, 5000);
     }
 
-    async function initRealtimeListeners() {
-      supabaseClient.channel('public:status_backsound').on('postgres_changes', { event: '*', schema: 'public', table: 'status_backsound' }, () => checkAndPlaySounds()).subscribe();
-      supabaseClient.channel('public:status_soundtwibbon').on('postgres_changes', { event: '*', schema: 'public', table: 'status_soundtwibbon' }, () => checkAndPlaySounds()).subscribe();
-      supabaseClient.channel('public:laporan_sales').on('postgres_changes', { event: '*', schema: 'public', table: 'laporan_sales' }, () => fetchSalesData()).subscribe();
-      supabaseClient.channel('public:laporan_departemen').on('postgres_changes', { event: '*', schema: 'public', table: 'laporan_departemen' }, () => { fetchDeptData(); updateGaugeData(); }).subscribe();
+    function generateConfetti() {
+      const container = document.getElementById('confettiContainer');
+      container.innerHTML = '';
+      const colors = ['#eab308', '#3b82f6', '#10b981', '#ec4899', '#8b5cf6', '#f97316'];
+      for (let i = 0; i < 50; i++) {
+        const div = document.createElement('div');
+        div.className = 'confetti-piece';
+        div.style.left = Math.random() * 100 + '%';
+        div.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+        div.style.animationDelay = (Math.random() * 2) + 's';
+        div.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+        container.appendChild(div);
+      }
     }
 
+    // --- DATA FETCHING & UI RENDER ---
     async function fetchKaryawanData() {
       const { data } = await supabaseClient.from('data_karyawan').select('nip_kar, nama_kar');
       if (data) {
         karyawanMap = {};
-        data.forEach(item => { karyawanMap[String(item.nip_kar).trim()] = item.nama_kar; });
+        data.forEach(item => { if (item.nip_kar) karyawanMap[String(item.nip_kar).trim()] = item.nama_kar; });
       }
     }
-    function getEmployeeName(nip, fallback) { return karyawanMap[String(nip).trim()] || fallback || nip; }
 
-    function updateClock() {
+    function getEmployeeName(nip, fallback) {
+      if (!nip) return fallback || 'NONAME';
+      return karyawanMap[String(nip).trim()] || fallback || String(nip);
+    }
+
+    setInterval(() => {
       const now = new Date();
       document.getElementById('currentTime').innerText = now.toLocaleTimeString('id-ID');
       document.getElementById('currentDate').innerText = now.toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-    }
-    setInterval(updateClock, 1000);
-    updateClock();
+    }, 1000);
 
-    // Set scroll animation durations
+    // Animasi Scroll Marquee Setup
     ['scrollWrapper', 'scrollWrapperDept', 'scrollWrapperMtdSales', 'scrollWrapperMtdFurnipro', 'scrollWrapperMtdComser'].forEach(id => {
       const el = document.getElementById(id);
       if (el) el.style.animationDuration = '80s';
@@ -473,21 +604,20 @@
         const rank = index + 1;
         const name = getEmployeeName(item.nip, item.nama);
         const img = `${SUPABASE_URL}/storage/v1/object/public/FOTO SALES/${item.nip}.jpg`;
-        let box = "fire-box-2";
-        if (rank === 1) box = "fire-box-1";
-        else if (rank === 3) box = "fire-box-3";
+        const avatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=0D8ABC&color=fff&size=128`;
+        let cls = rank === 1 ? 'fire-box-1' : rank === 2 ? 'fire-box-2' : rank === 3 ? 'fire-box-3' : 'bg-slate-50 border border-slate-200 rounded-xl';
 
         html += `
-          <div class="grid grid-cols-12 items-center px-2.5 py-2.5 transition shadow-sm ${box}">
+          <div class="grid grid-cols-12 items-center px-2.5 py-2.5 transition shadow-sm ${cls}">
             <div class="col-span-4 flex items-center justify-center gap-3">
               <span class="font-bold text-lg w-6 text-right">${rank}.</span>
-              <div class="relative w-20 h-20 rounded-lg border-2 border-blue-500 bg-slate-200 shrink-0 shadow-md overflow-hidden">
-                <img src="${img}" class="w-full h-full object-cover" onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=0D8ABC&color=fff';">
+              <div class="relative w-20 h-20 rounded-lg border-2 border-blue-500 bg-slate-200 overflow-hidden shadow-md">
+                <img src="${img}" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='${avatar}';">
               </div>
             </div>
             <div class="col-span-4 pl-2">
               <div class="text-slate-900 font-bold text-2xl truncate">${name}</div>
-              <div class="text-xs font-mono text-blue-600 font-semibold">NIP: ${item.nip}</div>
+              <div class="text-xs font-mono text-blue-600 font-semibold mt-0.5">NIP: ${item.nip}</div>
             </div>
             <div class="col-span-4 text-right font-mono font-bold text-emerald-600 text-xl">
               Rp ${Number(item.total).toLocaleString('id-ID')}
@@ -495,70 +625,35 @@
           </div>
         `;
       });
-      orig.innerHTML = html; clone.innerHTML = html; lucide.createIcons();
-    }
-
-    async function fetchDeptData() {
-      const { data } = await supabaseClient.from('laporan_departemen').select('*').order('exclude_ppn', { ascending: false });
-      if (data) { deptList = data; renderDeptDashboard(); }
-    }
-    function renderDeptDashboard() {
-      const orig = document.getElementById('tableContentOriginalDept');
-      const clone = document.getElementById('tableContentCloneDept');
-      if (!orig) return;
-      let html = '';
-      deptList.forEach((item, idx) => {
-        html += `
-          <div class="grid grid-cols-12 items-center px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg">
-            <div class="col-span-4 font-bold text-sm">${idx + 1}. ${item.kode_dept}</div>
-            <div class="col-span-4 text-xs font-semibold truncate">${item.nama_dept}</div>
-            <div class="col-span-4 text-right font-mono font-bold text-emerald-600 text-xs">Rp ${Number(item.exclude_ppn || 0).toLocaleString('id-ID')}</div>
-          </div>
-        `;
-      });
       orig.innerHTML = html; clone.innerHTML = html;
+      lucide.createIcons();
     }
 
     async function updateGaugeData() {
-      const { data } = await supabaseClient.from('target_today').select('*');
-      let target = (data && data.length > 0) ? Number(data[0].target || data[0].nilai || 250000000) : 250000000;
-      const { data: dept } = await supabaseClient.from('laporan_departemen').select('exclude_ppn');
-      let realized = 0;
-      if (dept) dept.forEach(d => realized += Number(d.exclude_ppn || 0));
+      const { data: targetData } = await supabaseClient.from('target_today').select('*');
+      let target = targetData && targetData.length > 0 ? Number(targetData[0].target || targetData[0].nilai || 250000000) : 250000000;
       
-      const pct = Math.min(Math.max((realized / target) * 100, 0), 100);
-      document.getElementById('gaugeProgressArc').style.strokeDashoffset = 251.2 - (pct / 100) * 251.2;
-      document.getElementById('gaugeNeedle').style.transform = `rotate(${-90 + (pct / 100) * 180}deg)`;
-      document.getElementById('gaugeTextAchieved').textContent = pct > 8 ? pct.toFixed(1) + '%' : '';
-      document.getElementById('gaugeRealtimeValue').innerText = 'Rp ' + realized.toLocaleString('id-ID');
+      const { data: deptData } = await supabaseClient.from('laporan_departemen').select('*');
+      let realtime = 0;
+      if (deptData) { deptData.forEach(d => { realtime += Number(d.exclude_ppn || 0); }); }
+
+      const pct = target > 0 ? (realtime / target) * 100 : 0;
+      const clamped = Math.min(Math.max(pct, 0), 100);
+      document.getElementById('gaugeProgressArc').style.strokeDashoffset = 251.2 - (clamped / 100) * 251.2;
+      document.getElementById('gaugeNeedle').style.transform = `rotate(${-90 + (clamped / 100) * 180}deg)`;
+      document.getElementById('gaugeTextAchieved').textContent = pct.toFixed(1) + '%';
+      document.getElementById('gaugeRealtimeValue').innerText = 'Rp ' + realtime.toLocaleString('id-ID');
       document.getElementById('gaugeTargetValue').innerText = 'Rp ' + target.toLocaleString('id-ID');
-    }
-
-    async function fetchRunningText() {
-      const { data } = await supabaseClient.from('running_text').select('run_text');
-      let texts = (data && data.length > 0) ? data.map(d => d.run_text).filter(Boolean) : ["SELAMAT DATANG DI INFORMA MOG MALANG (J382)"];
-      document.getElementById('runningTextContainer').innerHTML = `<span>${texts.join('     •     ')}</span>`;
-    }
-
-    function startCarouselTimer() {
-      setInterval(() => {
-        const track = document.getElementById('mtdSliderTrack');
-        currentSlide = (currentSlide + 1) % 3;
-        track.style.transform = `translateX(-${currentSlide * 33.333}%)`;
-      }, 5000);
     }
 
     document.addEventListener("DOMContentLoaded", async () => {
       lucide.createIcons();
       scaleDashboard();
       await fetchKaryawanData();
-      checkAndPlaySounds();
+      setupPopupAndSoundRealtime();
+      playBacksound();
       fetchSalesData();
-      fetchDeptData();
       updateGaugeData();
-      fetchRunningText();
-      initRealtimeListeners();
-      startCarouselTimer();
     });
   </script>
 </body>
