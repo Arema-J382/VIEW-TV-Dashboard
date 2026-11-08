@@ -156,10 +156,6 @@
       animation-play-state: paused;
     }
 
-    .text-outline-white {
-      text-shadow: -0.75px -0.75px 0 #fff, 0.75px -0.75px 0 #fff, -0.75px 0.75px 0 #fff, 0.75px 0.75px 0 #fff, 0px 1px 2px rgba(0, 0, 0, 0.12);
-    }
-
     @keyframes silverGlow {
       0%, 100% { box-shadow: 0 0 8px rgba(148, 163, 184, 0.5), 0 0 16px rgba(56, 189, 248, 0.3); }
       50% { box-shadow: 0 0 16px rgba(148, 163, 184, 0.9), 0 0 24px rgba(56, 189, 248, 0.6); }
@@ -184,7 +180,6 @@
     .screen-marquee-anim { position: absolute; white-space: nowrap; will-change: transform; animation: screenMarquee 28s linear infinite; }
     .broadcast-slant-edge { clip-path: polygon(0 0, calc(100% - 35px) 0, 100% 100%, 0 100%); }
 
-    /* KONFETI ANIMASI UNTUK POP UP */
     @keyframes confettiFall {
       0% { transform: translateY(-50px) rotate(0deg); opacity: 1; }
       100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
@@ -415,7 +410,6 @@
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ4c29wc25vcGV1cm54ZGtmc2JlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM1NzM4MjgsImV4cCI6MjEwOTE0OTgyOH0.53GRhBd5Pvjjcqbh4M9ok7HKfqJs7klyxPqomXMEzus'; 
 
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    const TARGET_TV_ID = 'TV-Anas';
 
     let karyawanMap = {};
     let salesList = [], deptList = [], mtdSalesList = [], mtdFurniproList = [], mtdComserList = [];
@@ -434,22 +428,25 @@
     function unlockAndPlayAudio() {
       const overlay = document.getElementById('audioUnlockOverlay');
       if (overlay) { overlay.style.opacity = '0'; setTimeout(() => overlay.remove(), 500); }
-      playBacksound();
+      syncBacksoundState();
     }
 
-    async function playBacksound() {
-      const audioBacksound = document.getElementById('audioBacksound');
-      const { data } = await supabaseClient.from('status_backsound').select('*').eq('bucket_name', 'BACKSOUND').maybeSingle();
-      if (data && data.nama_lagu) {
-        const { data: pub } = supabaseClient.storage.from('BACKSOUND').getPublicUrl(data.nama_lagu);
-        if (pub?.publicUrl) {
-          audioBacksound.src = pub.publicUrl;
-          audioBacksound.play().catch(e => {});
-        }
-      }
-    }
+    // REALTIME MONITORING UNTUK CARD 1 (BACKSOUND) & CARD 2 (SOUND SALES / POPUP)
+    function setupRealtimeListeners() {
+      supabaseClient
+        .channel('public:status_backsound')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'status_backsound' }, () => {
+          syncBacksoundState();
+        })
+        .subscribe();
 
-    function setupPopupAndSoundRealtime() {
+      supabaseClient
+        .channel('public:status_soundtwibbon')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'status_soundtwibbon' }, () => {
+          // Sinkronisasi status Sound Sales secara real-time
+        })
+        .subscribe();
+
       supabaseClient
         .channel('public:popup_twibbon')
         .on('postgres_changes', { event: '*', schema: 'public', table: 'popup_twibbon' }, payload => {
@@ -458,6 +455,23 @@
           }
         })
         .subscribe();
+    }
+
+    async function syncBacksoundState() {
+      const audioBacksound = document.getElementById('audioBacksound');
+      const { data } = await supabaseClient.from('status_backsound').select('*').eq('bucket_name', 'BACKSOUND').maybeSingle();
+
+      if (data && data.status_lagu === 'AKTIF' && data.nama_lagu) {
+        const { data: pub } = supabaseClient.storage.from('BACKSOUND').getPublicUrl(data.nama_lagu);
+        if (pub?.publicUrl) {
+          if (audioBacksound.src !== pub.publicUrl) {
+            audioBacksound.src = pub.publicUrl;
+          }
+          audioBacksound.play().catch(e => {});
+        }
+      } else {
+        audioBacksound.pause();
+      }
     }
 
     async function triggerSalesPopup(data) {
@@ -491,6 +505,7 @@
         .from('status_soundtwibbon')
         .select('*')
         .eq('bucket_nametw', 'SOUND SALES')
+        .eq('status_lagutw', 'AKTIF')
         .maybeSingle();
 
       if (soundData && soundData.nama_lagutw) {
@@ -520,10 +535,9 @@
 
         audioSoundSales.pause();
         audioSoundSales.currentTime = 0;
-        audioBacksound.play().catch(e => {});
+        syncBacksoundState();
 
         await supabaseClient.from('popup_twibbon').delete().eq('nip', nip);
-        await supabaseClient.from('status_soundtwibbon').delete().eq('bucket_nametw', 'SOUND SALES');
       }, 5000);
     }
 
@@ -914,8 +928,7 @@
       lucide.createIcons();
       scaleDashboard();
       await fetchKaryawanData();
-      setupPopupAndSoundRealtime();
-      playBacksound();
+      setupRealtimeListeners();
       
       // Load seluruh data dengan lengkap
       fetchSalesData();
