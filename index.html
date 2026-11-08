@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TV Dashboard - Laporan Sales & Popup Twibbon Sales</title>
+  <title>TV Dashboard - Laporan Sales, Gauge, Departemen & MTD Tables</title>
   
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -127,10 +127,12 @@
       0%, 100% { box-shadow: 0 0 10px rgba(234, 179, 8, 0.5), 0 0 20px rgba(245, 158, 11, 0.3); }
       50% { box-shadow: 0 0 22px rgba(234, 179, 8, 0.9), 0 0 32px rgba(239, 68, 68, 0.6); }
     }
+
     @keyframes cyanGlow {
       0%, 100% { box-shadow: 0 0 10px rgba(59, 130, 246, 0.6), 0 0 20px rgba(14, 165, 233, 0.4); }
       50% { box-shadow: 0 0 22px rgba(59, 130, 246, 1), 0 0 35px rgba(6, 182, 212, 0.8); }
     }
+
     @keyframes emeraldGlow {
       0%, 100% { box-shadow: 0 0 10px rgba(16, 185, 129, 0.6), 0 0 20px rgba(5, 150, 105, 0.4); }
       50% { box-shadow: 0 0 22px rgba(16, 185, 129, 1), 0 0 35px rgba(4, 120, 87, 0.8); }
@@ -144,8 +146,15 @@
       0% { transform: translate3d(0, 0, 0); }
       100% { transform: translate3d(0, -50%, 0); }
     }
-    .animate-scroll-infinite { animation: scrollUp linear infinite; will-change: transform; }
-    .scroll-container:hover .animate-scroll-infinite { animation-play-state: paused; }
+
+    .animate-scroll-infinite {
+      animation: scrollUp linear infinite;
+      will-change: transform;
+    }
+    
+    .scroll-container:hover .animate-scroll-infinite {
+      animation-play-state: paused;
+    }
 
     .text-outline-white {
       text-shadow: -0.75px -0.75px 0 #fff, 0.75px -0.75px 0 #fff, -0.75px 0.75px 0 #fff, 0.75px 0.75px 0 #fff, 0px 1px 2px rgba(0, 0, 0, 0.12);
@@ -155,6 +164,7 @@
       0%, 100% { box-shadow: 0 0 8px rgba(148, 163, 184, 0.5), 0 0 16px rgba(56, 189, 248, 0.3); }
       50% { box-shadow: 0 0 16px rgba(148, 163, 184, 0.9), 0 0 24px rgba(56, 189, 248, 0.6); }
     }
+
     @keyframes bronzeGlow {
       0%, 100% { box-shadow: 0 0 8px rgba(217, 119, 6, 0.5), 0 0 16px rgba(234, 88, 12, 0.3); }
       50% { box-shadow: 0 0 16px rgba(217, 119, 6, 0.9), 0 0 22px rgba(220, 38, 38, 0.6); }
@@ -170,6 +180,7 @@
       0% { transform: translate3d(1920px, 0, 0); }
       100% { transform: translate3d(-100%, 0, 0); }
     }
+
     .screen-marquee-anim { position: absolute; white-space: nowrap; will-change: transform; animation: screenMarquee 28s linear infinite; }
     .broadcast-slant-edge { clip-path: polygon(0 0, calc(100% - 35px) 0, 100% 100%, 0 100%); }
 
@@ -201,48 +212,31 @@
 
   <!-- FULL SCREEN POP UP OVERLAY (WEB 2) -->
   <div id="salesPopupOverlay" class="fixed inset-0 z-[999999] bg-gradient-to-br from-indigo-900/95 via-purple-900/95 to-slate-950/95 backdrop-blur-md flex items-center justify-center opacity-0 pointer-events-none transition-all duration-500 scale-95">
-    <!-- Kontainer Konfeti -->
     <div id="confettiContainer" class="absolute inset-0 overflow-hidden pointer-events-none"></div>
-
-    <div class="relative bg-white/95 rounded-3xl shadow-2xl border-4 border-yellow-400 p-8 max-w-2xl w-full mx-4 flex flex-col items-center text-center transform transition-transform duration-500">
-      <!-- Emblem Berwarna -->
+    <div class="relative bg-white/95 rounded-3xl shadow-2xl border-4 border-yellow-400 p-8 max-w-2xl w-full mx-4 flex flex-col items-center text-center">
       <div class="absolute -top-6 bg-gradient-to-r from-yellow-500 to-amber-600 text-white font-extrabold text-xs px-6 py-2 rounded-full shadow-lg border-2 border-yellow-200 uppercase tracking-widest flex items-center gap-2">
         <i data-lucide="award" class="w-4 h-4 text-yellow-200"></i> TWIBBON SALES CHAMPION <i data-lucide="award" class="w-4 h-4 text-yellow-200"></i>
       </div>
-
-      <!-- Foto Karyawan -->
       <div class="relative w-36 h-36 rounded-2xl border-4 border-blue-600 shadow-xl bg-slate-200 overflow-hidden mt-4 mb-4">
         <img id="popupFoto" src="" alt="Foto Karyawan" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name=Sales&background=0D8ABC&color=fff&size=200';">
       </div>
-
-      <!-- Nama Karyawan -->
       <h2 id="popupNama" class="text-3xl font-black text-slate-900 mb-1 tracking-tight">-</h2>
       <div id="popupNip" class="text-xs font-mono font-bold text-blue-600 bg-blue-50 px-3 py-1 rounded-full border border-blue-200 mb-6">NIP: -</div>
-
-      <!-- Grid Data Sales, Qty FP, Comser (Akan diabaikan jika kosong) -->
+      
       <div id="popupDataGrid" class="grid grid-cols-1 sm:grid-cols-3 gap-4 w-full">
         <div id="boxValueSales" class="bg-emerald-50 border border-emerald-200 p-4 rounded-2xl shadow-inner flex flex-col items-center">
-          <div class="flex items-center gap-1.5 text-emerald-700 text-xs font-bold uppercase mb-1">
-            <i data-lucide="badge-dollar-sign" class="w-4 h-4"></i> Value Sales
-          </div>
+          <div class="flex items-center gap-1.5 text-emerald-700 text-xs font-bold uppercase mb-1"><i data-lucide="badge-dollar-sign" class="w-4 h-4"></i> Value Sales</div>
           <div id="popupValueSales" class="text-lg font-black font-mono text-emerald-800">-</div>
         </div>
-
         <div id="boxQtyFp" class="bg-blue-50 border border-blue-200 p-4 rounded-2xl shadow-inner flex flex-col items-center">
-          <div class="flex items-center gap-1.5 text-blue-700 text-xs font-bold uppercase mb-1">
-            <i data-lucide="package" class="w-4 h-4"></i> Qty FP
-          </div>
+          <div class="flex items-center gap-1.5 text-blue-700 text-xs font-bold uppercase mb-1"><i data-lucide="package" class="w-4 h-4"></i> Qty FP</div>
           <div id="popupQtyFp" class="text-lg font-black font-mono text-blue-800">-</div>
         </div>
-
         <div id="boxValueComser" class="bg-purple-50 border border-purple-200 p-4 rounded-2xl shadow-inner flex flex-col items-center">
-          <div class="flex items-center gap-1.5 text-purple-700 text-xs font-bold uppercase mb-1">
-            <i data-lucide="headphones" class="w-4 h-4"></i> Value Comser
-          </div>
+          <div class="flex items-center gap-1.5 text-purple-700 text-xs font-bold uppercase mb-1"><i data-lucide="headphones" class="w-4 h-4"></i> Value Comser</div>
           <div id="popupValueComser" class="text-lg font-black font-mono text-purple-800">-</div>
         </div>
       </div>
-
       <div class="mt-6 text-[11px] text-slate-400 font-medium animate-pulse">
         Pop-up akan tertutup otomatis dalam <span id="popupCountdown" class="font-bold text-blue-600">5</span> detik...
       </div>
@@ -261,15 +255,12 @@
         <!-- HEADER -->
         <header class="bg-slate-900 border-b border-slate-800 px-10 py-3 flex justify-between items-center shadow-md z-20 shrink-0 h-[80px]">
           <div class="flex items-center gap-4">
-            <div class="bg-blue-600 p-2.5 rounded-2xl text-white shadow-lg shadow-blue-600/30">
-              <i data-lucide="tv" class="w-7 h-7"></i>
-            </div>
+            <div class="bg-blue-600 p-2.5 rounded-2xl text-white shadow-lg shadow-blue-600/30"><i data-lucide="tv" class="w-7 h-7"></i></div>
             <div>
               <h1 class="text-2xl font-bold tracking-wide text-white">INFORMA MOG MALANG (J382)</h1>
               <p class="text-xs text-blue-400 font-medium">LIVE TV DASHBOARD - LAPORAN SALES</p>
             </div>
           </div>
-          
           <div class="flex items-center gap-8">
             <div class="text-right">
               <div id="currentTime" class="text-3xl font-mono font-bold text-slate-100">00:00:00</div>
@@ -458,7 +449,6 @@
       }
     }
 
-    // --- REALTIME LISTENER POPUP TWIBBON & SOUND SALES (CARD 2) ---
     function setupPopupAndSoundRealtime() {
       supabaseClient
         .channel('public:popup_twibbon')
@@ -476,7 +466,6 @@
       const audioBacksound = document.getElementById('audioBacksound');
       const audioSoundSales = document.getElementById('audioSoundSales');
 
-      // 1. Isi data ke modal popup
       const nip = data.nip || '';
       const nama = getEmployeeName(nip, data.nama);
       const valSales = data.value || '';
@@ -487,7 +476,6 @@
       document.getElementById('popupNama').innerText = nama;
       document.getElementById('popupNip').innerText = `NIP: ${nip}`;
 
-      // Handle field kosong (Sesuai ketentuan: jika kosong, abaikan / hidden)
       const boxSales = document.getElementById('boxValueSales');
       const boxFp = document.getElementById('boxQtyFp');
       const boxComser = document.getElementById('boxValueComser');
@@ -496,10 +484,7 @@
       if (qtyFp) { document.getElementById('popupQtyFp').innerText = qtyFp; boxFp.classList.remove('hidden'); } else { boxFp.classList.add('hidden'); }
       if (valComser) { document.getElementById('popupValueComser').innerText = valComser; boxComser.classList.remove('hidden'); } else { boxComser.classList.add('hidden'); }
 
-      // 2. Tampilkan Konfeti Animasi
       generateConfetti();
-
-      // 3. Kontrol Audio (Pause Card 1, Play Card 2 Sound Sales jika aktif di status_soundtwibbon)
       audioBacksound.pause();
 
       const { data: soundData } = await supabaseClient
@@ -516,7 +501,6 @@
         }
       }
 
-      // 4. Tampilkan Pop Up (Full Screen, Durasi 5 Detik)
       overlay.classList.remove('opacity-0', 'pointer-events-none', 'scale-95');
       overlay.classList.add('opacity-100', 'scale-100');
 
@@ -531,16 +515,13 @@
 
       popupTimer = setTimeout(async () => {
         clearInterval(countInterval);
-        // Tutup Pop Up
         overlay.classList.remove('opacity-100', 'scale-100');
         overlay.classList.add('opacity-0', 'pointer-events-none', 'scale-95');
 
-        // Hentikan Sound Sales dan Resume Card 1 Backsound
         audioSoundSales.pause();
         audioSoundSales.currentTime = 0;
         audioBacksound.play().catch(e => {});
 
-        // Hapus data popup_twibbon & status_soundtwibbon otomatis sesuai permintaan
         await supabaseClient.from('popup_twibbon').delete().eq('nip', nip);
         await supabaseClient.from('status_soundtwibbon').delete().eq('bucket_nametw', 'SOUND SALES');
       }, 5000);
@@ -561,7 +542,6 @@
       }
     }
 
-    // --- DATA FETCHING & UI RENDER ---
     async function fetchKaryawanData() {
       const { data } = await supabaseClient.from('data_karyawan').select('nip_kar, nama_kar');
       if (data) {
@@ -581,7 +561,6 @@
       document.getElementById('currentDate').innerText = now.toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
     }, 1000);
 
-    // Animasi Scroll Marquee Setup
     ['scrollWrapper', 'scrollWrapperDept', 'scrollWrapperMtdSales', 'scrollWrapperMtdFurnipro', 'scrollWrapperMtdComser'].forEach(id => {
       const el = document.getElementById(id);
       if (el) el.style.animationDuration = '80s';
@@ -596,8 +575,8 @@
       const orig = document.getElementById('tableContentOriginal');
       const clone = document.getElementById('tableContentClone');
       const empty = document.getElementById('emptyStatus');
-      if (salesList.length === 0) { empty.classList.remove('hidden'); orig.innerHTML = ''; clone.innerHTML = ''; return; }
-      empty.classList.add('hidden');
+      if (!salesList || salesList.length === 0) { if(empty) empty.classList.remove('hidden'); return; }
+      if(empty) empty.classList.add('hidden');
 
       let html = '';
       salesList.forEach((item, index) => {
@@ -625,8 +604,293 @@
           </div>
         `;
       });
+      if(orig) orig.innerHTML = html;
+      if(clone) clone.innerHTML = html;
+      lucide.createIcons();
+    }
+
+    async function fetchDeptData() {
+      const { data } = await supabaseClient.from('laporan_departemen').select('*').order('exclude_ppn', { ascending: false });
+      if (data) { deptList = data; renderDeptDashboard(); }
+    }
+
+    function renderDeptDashboard() {
+      const orig = document.getElementById('tableContentOriginalDept');
+      const clone = document.getElementById('tableContentCloneDept');
+      if (!orig || !clone || deptList.length === 0) return;
+
+      let html = '';
+      deptList.forEach((item, index) => {
+        const rank = index + 1;
+        const kode = item.kode_dept || '';
+        const nama = item.nama_dept || 'DEPT';
+        const exclude = Number(item.exclude_ppn || 0);
+        const img = `${SUPABASE_URL}/storage/v1/object/public/PS/${encodeURIComponent(kode)}.jpg`;
+        const avatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(nama)}&background=3b82f6&color=fff&size=128`;
+        let cls = rank === 1 ? 'fire-box-1' : rank === 2 ? 'fire-box-2' : rank === 3 ? 'fire-box-3' : 'bg-slate-50 border border-slate-200 rounded-lg';
+
+        html += `
+          <div class="grid grid-cols-12 items-center px-3 py-1.5 transition shadow-sm ${cls}">
+            <div class="col-span-4 flex items-center justify-center gap-2">
+              <span class="font-bold text-sm w-5 text-right">${rank}.</span>
+              <div class="relative w-9 h-9 rounded-md border-2 border-blue-500 bg-slate-200 overflow-hidden shadow-sm">
+                <img src="${img}" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='${avatar}';">
+              </div>
+            </div>
+            <div class="col-span-4 pl-1">
+              <div class="text-slate-900 text-xs font-semibold truncate">${nama}</div>
+              <div class="text-[10px] font-mono text-blue-600 font-bold">CODE: ${kode}</div>
+            </div>
+            <div class="col-span-4 text-right font-mono font-bold text-emerald-600 text-xs">
+              Rp ${exclude.toLocaleString('id-ID')}
+            </div>
+          </div>
+        `;
+      });
       orig.innerHTML = html; clone.innerHTML = html;
       lucide.createIcons();
+    }
+
+    async function fetchMtdSalesData() {
+      const { data } = await supabaseClient.from('mtd_sales').select('*').order('mtd_total', { ascending: false });
+      if (data) {
+        mtdSalesList = data;
+        const orig = document.getElementById('tableContentOriginalMtdSales');
+        const clone = document.getElementById('tableContentCloneMtdSales');
+        if (!orig || !clone || data.length === 0) return;
+        let html = '';
+        data.forEach((item, index) => {
+          const rank = index + 1;
+          const nip = item.mtd_nip || '';
+          const name = getEmployeeName(nip, item.mtd_nama);
+          const total = Number(item.mtd_total || 0);
+          const img = `${SUPABASE_URL}/storage/v1/object/public/FOTO SALES/${nip}.jpg`;
+          const avatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=3b82f6&color=fff&size=128`;
+          let cls = rank === 1 ? 'fire-box-1' : rank === 2 ? 'fire-box-2' : rank === 3 ? 'fire-box-3' : 'bg-slate-50 border border-slate-200 rounded-lg';
+
+          html += `
+            <div class="grid grid-cols-12 items-center px-3 py-1.5 transition shadow-sm ${cls}">
+              <div class="col-span-4 flex items-center justify-center gap-2">
+                <span class="font-bold text-sm w-5 text-right">${rank}.</span>
+                <div class="relative w-9 h-9 rounded-md border-2 border-blue-500 bg-slate-200 overflow-hidden shadow-sm">
+                  <img src="${img}" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='${avatar}';">
+                </div>
+              </div>
+              <div class="col-span-4 pl-1">
+                <div class="text-slate-900 text-xs font-semibold truncate">${name}</div>
+                <div class="text-[10px] font-mono text-blue-600 font-bold">NIP: ${nip}</div>
+              </div>
+              <div class="col-span-4 text-right font-mono font-bold text-emerald-600 text-xs">
+                Rp ${total.toLocaleString('id-ID')}
+              </div>
+            </div>
+          `;
+        });
+        orig.innerHTML = html; clone.innerHTML = html;
+        lucide.createIcons();
+      }
+    }
+
+    async function fetchMtdFurniproData() {
+      const { data } = await supabaseClient.from('mtd_fp').select('*').order('qty_mtdfp', { ascending: false });
+      if (data) {
+        const orig = document.getElementById('tableContentOriginalMtdFurnipro');
+        const clone = document.getElementById('tableContentCloneMtdFurnipro');
+        if (!orig || !clone || data.length === 0) return;
+        let html = '';
+        data.forEach((item, index) => {
+          const rank = index + 1;
+          const nip = item.nip_mtdfp || '';
+          const name = getEmployeeName(nip, item.nama_mtdfp || item.nama);
+          const qty = Number(item.qty_mtdfp || 0);
+          const img = `${SUPABASE_URL}/storage/v1/object/public/FOTO SALES/${nip}.jpg`;
+          const avatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=2563eb&color=fff&size=128`;
+          let cls = rank === 1 ? 'fire-box-1' : rank === 2 ? 'fire-box-2' : rank === 3 ? 'fire-box-3' : 'bg-slate-50 border border-slate-200 rounded-lg';
+
+          html += `
+            <div class="grid grid-cols-12 items-center px-3 py-1.5 transition shadow-sm ${cls}">
+              <div class="col-span-4 flex items-center justify-center gap-2">
+                <span class="font-bold text-sm w-5 text-right">${rank}.</span>
+                <div class="relative w-9 h-9 rounded-md border-2 border-blue-500 bg-slate-200 overflow-hidden shadow-sm">
+                  <img src="${img}" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='${avatar}';">
+                </div>
+              </div>
+              <div class="col-span-4 pl-1">
+                <div class="text-slate-900 text-xs font-semibold truncate">${name}</div>
+                <div class="text-[10px] font-mono text-blue-600 font-bold">NIP: ${nip}</div>
+              </div>
+              <div class="col-span-4 text-right font-mono font-bold text-blue-600 text-xs">
+                ${qty.toLocaleString('id-ID')} PCS
+              </div>
+            </div>
+          `;
+        });
+        orig.innerHTML = html; clone.innerHTML = html;
+        lucide.createIcons();
+      }
+    }
+
+    async function fetchMtdComserData() {
+      const { data } = await supabaseClient.from('mtd_comser').select('*').order('total_mtdcnc', { ascending: false });
+      if (data) {
+        const orig = document.getElementById('tableContentOriginalMtdComser');
+        const clone = document.getElementById('tableContentCloneMtdComser');
+        if (!orig || !clone || data.length === 0) return;
+        let html = '';
+        data.forEach((item, index) => {
+          const rank = index + 1;
+          const nip = item.nip_mtdcnc || '';
+          const name = getEmployeeName(nip, item.nama_mtdcnc);
+          const total = Number(item.total_mtdcnc || 0);
+          const img = `${SUPABASE_URL}/storage/v1/object/public/FOTO SALES/${nip}.jpg`;
+          const avatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=10b981&color=fff&size=128`;
+          let cls = rank === 1 ? 'fire-box-1' : rank === 2 ? 'fire-box-2' : rank === 3 ? 'fire-box-3' : 'bg-slate-50 border border-slate-200 rounded-lg';
+
+          html += `
+            <div class="grid grid-cols-12 items-center px-3 py-1.5 transition shadow-sm ${cls}">
+              <div class="col-span-4 flex items-center justify-center gap-2">
+                <span class="font-bold text-sm w-5 text-right">${rank}.</span>
+                <div class="relative w-9 h-9 rounded-md border-2 border-blue-500 bg-slate-200 overflow-hidden shadow-sm">
+                  <img src="${img}" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='${avatar}';">
+                </div>
+              </div>
+              <div class="col-span-4 pl-1">
+                <div class="text-slate-900 text-xs font-semibold truncate">${name}</div>
+                <div class="text-[10px] font-mono text-emerald-600 font-bold">NIP: ${nip}</div>
+              </div>
+              <div class="col-span-4 text-right font-mono font-bold text-emerald-600 text-xs">
+                Rp ${total.toLocaleString('id-ID')}
+              </div>
+            </div>
+          `;
+        });
+        orig.innerHTML = html; clone.innerHTML = html;
+        lucide.createIcons();
+      }
+    }
+
+    async function fetchTop1MtdSales() {
+      const { data } = await supabaseClient.from('mtd_sales').select('*').order('mtd_total', { ascending: false }).limit(1);
+      const container = document.getElementById('mtdTop1Content');
+      if (!container || !data || data.length === 0) return;
+      const top = data[0];
+      const nip = top.mtd_nip || '-';
+      const name = getEmployeeName(nip, top.mtd_nama);
+      const total = Number(top.mtd_total || 0);
+      const img = `${SUPABASE_URL}/storage/v1/object/public/FOTO SALES/${nip}.jpg`;
+      const avatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=eab308&color=fff&size=128`;
+
+      container.innerHTML = `
+        <div class="flex flex-col items-center justify-center text-center w-full relative px-2">
+          <div class="relative w-32 h-32 rounded-2xl border-4 border-yellow-500 shadow-lg bg-slate-200 overflow-hidden mb-2">
+            <div class="absolute -top-3 left-1/2 -translate-x-1/2 z-20 text-yellow-500"><i data-lucide="crown" class="w-8 h-8 fill-yellow-400"></i></div>
+            <img src="${img}" class="w-full h-full object-cover pt-1" onerror="this.onerror=null; this.src='${avatar}';">
+          </div>
+          <div class="text-[10px] font-mono uppercase tracking-widest text-amber-600 font-extrabold mb-0.5">CHAMPION OF THE MONTH</div>
+          <h3 class="text-xl font-extrabold text-slate-900 mb-0.5 line-clamp-1">${name}</h3>
+          <div class="text-xs font-semibold text-slate-600 mb-2">NIP: <span class="font-mono text-blue-600 font-bold">${nip}</span></div>
+          <div class="w-full bg-amber-50 border border-amber-200 rounded-xl p-2.5 shadow-inner">
+            <div class="text-[10px] font-bold text-amber-800 uppercase">TOTAL MTD SALES</div>
+            <div class="text-xl font-extrabold font-mono text-emerald-600 mt-0.5">Rp ${total.toLocaleString('id-ID')}</div>
+          </div>
+        </div>
+      `;
+      lucide.createIcons();
+    }
+
+    async function fetchTop1MtdFurnipro() {
+      const { data } = await supabaseClient.from('mtd_fp').select('*').order('qty_mtdfp', { ascending: false }).limit(1);
+      const container = document.getElementById('furniproTop1Content');
+      if (!container || !data || data.length === 0) return;
+      const top = data[0];
+      const nip = top.nip_mtdfp || '-';
+      const name = getEmployeeName(nip, top.nama_mtdfp || top.nama);
+      const qty = Number(top.qty_mtdfp || 0);
+      const img = `${SUPABASE_URL}/storage/v1/object/public/FOTO SALES/${nip}.jpg`;
+      const avatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=2563eb&color=fff&size=128`;
+
+      container.innerHTML = `
+        <div class="flex flex-col items-center justify-center text-center w-full relative px-2">
+          <div class="relative w-32 h-32 rounded-2xl border-4 border-blue-500 shadow-lg bg-slate-200 overflow-hidden mb-2">
+            <img src="${img}" class="w-full h-full object-cover pt-1" onerror="this.onerror=null; this.src='${avatar}';">
+          </div>
+          <div class="text-[10px] font-mono uppercase tracking-widest text-blue-600 font-extrabold mb-0.5">CHAMPION FURNIPRO</div>
+          <h3 class="text-xl font-extrabold text-slate-900 mb-0.5 line-clamp-1">${name}</h3>
+          <div class="text-xs font-semibold text-slate-600 mb-2">NIP: <span class="font-mono text-blue-600 font-bold">${nip}</span></div>
+          <div class="w-full bg-blue-50 border border-blue-200 rounded-xl p-2.5 shadow-inner">
+            <div class="text-[10px] font-bold text-blue-800 uppercase">TOTAL MTD FURNIPRO</div>
+            <div class="text-xl font-extrabold font-mono text-blue-600 mt-0.5">${qty.toLocaleString('id-ID')} PCS</div>
+          </div>
+        </div>
+      `;
+      lucide.createIcons();
+    }
+
+    async function fetchTop1MtdComser() {
+      const { data } = await supabaseClient.from('mtd_comser').select('*').order('total_mtdcnc', { ascending: false }).limit(1);
+      const container = document.getElementById('comserTop1Content');
+      if (!container || !data || data.length === 0) return;
+      const top = data[0];
+      const nip = top.nip_mtdcnc || '-';
+      const name = getEmployeeName(nip, top.nama_mtdcnc);
+      const total = Number(top.total_mtdcnc || 0);
+      const img = `${SUPABASE_URL}/storage/v1/object/public/FOTO SALES/${nip}.jpg`;
+      const avatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=10b981&color=fff&size=128`;
+
+      container.innerHTML = `
+        <div class="flex flex-col items-center justify-center text-center w-full relative px-2">
+          <div class="relative w-32 h-32 rounded-2xl border-4 border-emerald-500 shadow-lg bg-slate-200 overflow-hidden mb-2">
+            <img src="${img}" class="w-full h-full object-cover pt-1" onerror="this.onerror=null; this.src='${avatar}';">
+          </div>
+          <div class="text-[10px] font-mono uppercase tracking-widest text-emerald-600 font-extrabold mb-0.5">CHAMPION COMSER</div>
+          <h3 class="text-xl font-extrabold text-slate-900 mb-0.5 line-clamp-1">${name}</h3>
+          <div class="text-xs font-semibold text-slate-600 mb-2">NIP: <span class="font-mono text-emerald-600 font-bold">${nip}</span></div>
+          <div class="w-full bg-emerald-50 border border-emerald-200 rounded-xl p-2.5 shadow-inner">
+            <div class="text-[10px] font-bold text-emerald-800 uppercase">TOTAL MTD COMSER</div>
+            <div class="text-xl font-extrabold font-mono text-emerald-600 mt-0.5">Rp ${total.toLocaleString('id-ID')}</div>
+          </div>
+        </div>
+      `;
+      lucide.createIcons();
+    }
+
+    async function fetchRunningText() {
+      const container = document.getElementById('runningTextContainer');
+      if (!container) return;
+      const { data } = await supabaseClient.from('running_text').select('run_text');
+      let texts = data && data.length > 0 ? data.map(i => i.run_text).filter(Boolean) : ["SELAMAT DATANG DI INFORMA MOG MALANG (J382)"];
+      container.innerHTML = `<span>${texts.join('    •    ')}</span>`;
+    }
+
+    function startCarouselTimer() {
+      setInterval(() => {
+        const track = document.getElementById('mtdSliderTrack');
+        const headerTitle = document.getElementById('sliderHeaderTitle');
+        const headerIcon = document.getElementById('sliderHeaderIcon');
+        const rightContainer = document.getElementById('rightCardContainer');
+        const sliderHeader = document.getElementById('sliderHeader');
+        
+        currentSlide = (currentSlide + 1) % 3;
+        if (currentSlide === 0) {
+          track.style.transform = 'translateX(0%)';
+          headerTitle.innerText = 'BEST SALES';
+          headerIcon.className = 'w-6 h-6 text-yellow-400';
+          rightContainer.className = 'mtd-top1-container gold-glow-container flex flex-col relative z-10 overflow-hidden';
+          sliderHeader.style.backgroundColor = '#0f172a';
+        } else if (currentSlide === 1) {
+          track.style.transform = 'translateX(-33.333%)';
+          headerTitle.innerText = 'BEST FURNIPRO';
+          headerIcon.className = 'w-6 h-6 text-blue-400';
+          rightContainer.className = 'mtd-top1-container cyan-glow-container flex flex-col relative z-10 overflow-hidden';
+          sliderHeader.style.backgroundColor = '#1e3a8a';
+        } else if (currentSlide === 2) {
+          track.style.transform = 'translateX(-66.666%)';
+          headerTitle.innerText = 'BEST COMSER';
+          headerIcon.className = 'w-6 h-6 text-emerald-400';
+          rightContainer.className = 'mtd-top1-container emerald-glow-container flex flex-col relative z-10 overflow-hidden';
+          sliderHeader.style.backgroundColor = '#065f46';
+        }
+      }, 5000);
     }
 
     async function updateGaugeData() {
@@ -652,8 +916,19 @@
       await fetchKaryawanData();
       setupPopupAndSoundRealtime();
       playBacksound();
+      
+      // Load seluruh data dengan lengkap
       fetchSalesData();
+      fetchDeptData();
+      fetchMtdSalesData();
+      fetchMtdFurniproData();
+      fetchMtdComserData();
+      fetchTop1MtdSales();
+      fetchTop1MtdFurnipro();
+      fetchTop1MtdComser();
+      fetchRunningText();
       updateGaugeData();
+      startCarouselTimer();
     });
   </script>
 </body>
