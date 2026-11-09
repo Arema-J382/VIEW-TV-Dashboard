@@ -6,6 +6,7 @@
   <title>TV Dashboard - Laporan Sales, Gauge, Departemen & MTD Tables</title>
   
   <!-- Tailwind CSS -->
+  <script src="https://cdn.jsdelivr.net/npm/tailwindcss-cdn@3.4.10/tailwindcss.min.js"></script>
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Supabase JS SDK v2 -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -71,19 +72,6 @@
       align-items: flex-start;
       gap: 1.25rem;
       width: 100%;
-    }
-
-    .gauge-section-container {
-      width: 500px;
-      height: 380px;
-      background: #ffffff;
-      border-radius: 0.85rem;
-      box-shadow: 0 8px 20px -4px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-      border: 1px solid #bfdbfe;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-      position: relative;
     }
 
     .custom-table-container {
@@ -192,22 +180,6 @@
       animation: confettiFall 3s linear infinite;
       z-index: 100000;
     }
-
-    /* ANIMASI & EFEK MODERN POP-UP SURPRISE */
-    @keyframes popupEntrance {
-      0% { transform: scale(0.8) translateY(20px); opacity: 0; }
-      100% { transform: scale(1) translateY(0); opacity: 1; }
-    }
-    .popup-modal-animate {
-      animation: popupEntrance 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-    }
-    @keyframes pulseGlow {
-      0%, 100% { box-shadow: 0 0 25px rgba(234, 179, 8, 0.6), 0 0 50px rgba(168, 85, 247, 0.4); }
-      50% { box-shadow: 0 0 45px rgba(234, 179, 8, 0.9), 0 0 80px rgba(59, 130, 246, 0.7); }
-    }
-    .surprise-glow {
-      animation: pulseGlow 2.5s infinite ease-in-out;
-    }
   </style>
 </head>
 <body class="bg-slate-950 text-slate-800 select-none overflow-hidden m-0 p-0">
@@ -221,93 +193,35 @@
     </div>
   </div>
 
-  <!-- FULL SCREEN POP UP OVERLAY (WEB 2) - DIPERBESAR & LEBIH MERIAH -->
-  <div id="salesPopupOverlay" class="fixed inset-0 z-[999999] bg-gradient-to-br from-slate-950/90 via-indigo-950/90 to-purple-950/90 backdrop-blur-xl flex items-center justify-center opacity-0 pointer-events-none transition-all duration-500">
+  <!-- FULL SCREEN POP UP OVERLAY (WEB 2) -->
+  <div id="salesPopupOverlay" class="fixed inset-0 z-[999999] bg-gradient-to-br from-indigo-900/95 via-purple-900/95 to-slate-950/95 backdrop-blur-md flex items-center justify-center opacity-0 pointer-events-none transition-all duration-500 scale-95">
     <div id="confettiContainer" class="absolute inset-0 overflow-hidden pointer-events-none"></div>
-    
-    <div class="relative bg-gradient-to-br from-slate-900/95 via-indigo-950/95 to-slate-900/95 rounded-[2.5rem] shadow-2xl border-4 border-yellow-400 p-10 max-w-5xl w-full mx-6 flex flex-col md:flex-row items-center gap-8 surprise-glow popup-modal-animate">
+    <div class="relative bg-white/95 rounded-3xl shadow-2xl border-4 border-yellow-400 p-8 max-w-2xl w-full mx-4 flex flex-col items-center text-center">
+      <div class="absolute -top-6 bg-gradient-to-r from-yellow-500 to-amber-600 text-white font-extrabold text-xs px-6 py-2 rounded-full shadow-lg border-2 border-yellow-200 uppercase tracking-widest flex items-center gap-2">
+        <i data-lucide="award" class="w-4 h-4 text-yellow-200"></i> TWIBBON SALES CHAMPION <i data-lucide="award" class="w-4 h-4 text-yellow-200"></i>
+      </div>
+      <div class="relative w-36 h-36 rounded-2xl border-4 border-blue-600 shadow-xl bg-slate-200 overflow-hidden mt-4 mb-4">
+        <img id="popupFoto" src="" alt="Foto Karyawan" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name=Sales&background=0D8ABC&color=fff&size=200';">
+      </div>
+      <h2 id="popupNama" class="text-3xl font-black text-slate-900 mb-1 tracking-tight">-</h2>
+      <div id="popupNip" class="text-xs font-mono font-bold text-blue-600 bg-blue-50 px-3 py-1 rounded-full border border-blue-200 mb-6">NIP: -</div>
       
-      <!-- BADGE ATAS (SURPRISE / CHAMPION) -->
-      <div class="absolute -top-7 left-1/2 -translate-x-1/2 bg-gradient-to-r from-yellow-400 via-amber-500 to-yellow-600 text-slate-950 font-black text-sm px-8 py-3 rounded-full shadow-2xl border-2 border-yellow-200 uppercase tracking-widest flex items-center gap-3 animate-bounce z-30">
-        <i data-lucide="sparkles" class="w-5 h-5 text-slate-950"></i> 
-        <span>SURPRISE! SALES CHAMPION UPDATE</span>
-        <i data-lucide="sparkles" class="w-5 h-5 text-slate-950"></i>
-      </div>
-
-      <!-- SEBELAH KIRI: FOTO BESAR & MAHKOTA -->
-      <div class="flex flex-col items-center shrink-0">
-        <div class="relative w-64 h-64 md:w-72 md:h-72 rounded-3xl border-4 border-yellow-400 shadow-2xl bg-gradient-to-b from-blue-600 to-indigo-800 overflow-hidden group">
-          <div class="absolute -top-4 left-1/2 -translate-x-1/2 z-20 text-yellow-300 filter drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)] animate-pulse">
-            <i data-lucide="crown" class="w-14 h-14 fill-yellow-400 text-amber-600"></i>
-          </div>
-          <img id="popupFoto" src="" alt="Foto Karyawan" class="w-full h-full object-cover pt-4 group-hover:scale-105 transition-transform duration-500" onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name=Sales&background=0D8ABC&color=fff&size=300';">
-          <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-60"></div>
-          <div class="absolute bottom-3 left-0 right-0 text-center">
-            <span class="bg-yellow-400/95 text-slate-950 text-xs font-black px-4 py-1.5 rounded-full uppercase tracking-wider shadow-md">TOP PERFORMER</span>
-          </div>
+      <div id="popupDataGrid" class="grid grid-cols-1 sm:grid-cols-3 gap-4 w-full">
+        <div id="boxValueSales" class="bg-emerald-50 border border-emerald-200 p-4 rounded-2xl shadow-inner flex flex-col items-center">
+          <div class="flex items-center gap-1.5 text-emerald-700 text-xs font-bold uppercase mb-1"><i data-lucide="badge-dollar-sign" class="w-4 h-4"></i> Value Sales</div>
+          <div id="popupValueSales" class="text-lg font-black font-mono text-emerald-800">-</div>
+        </div>
+        <div id="boxQtyFp" class="bg-blue-50 border border-blue-200 p-4 rounded-2xl shadow-inner flex flex-col items-center">
+          <div class="flex items-center gap-1.5 text-blue-700 text-xs font-bold uppercase mb-1"><i data-lucide="package" class="w-4 h-4"></i> Qty FP</div>
+          <div id="popupQtyFp" class="text-lg font-black font-mono text-blue-800">-</div>
+        </div>
+        <div id="boxValueComser" class="bg-purple-50 border border-purple-200 p-4 rounded-2xl shadow-inner flex flex-col items-center">
+          <div class="flex items-center gap-1.5 text-purple-700 text-xs font-bold uppercase mb-1"><i data-lucide="headphones" class="w-4 h-4"></i> Value Comser</div>
+          <div id="popupValueComser" class="text-lg font-black font-mono text-purple-800">-</div>
         </div>
       </div>
-
-      <!-- SEBELAH KANAN: KETERANGAN TEKS BERJAJAR RAPI DARI ATAS KE BAWAH -->
-      <div class="flex-1 flex flex-col justify-center text-left w-full">
-        <div class="flex items-center gap-2 mb-1.5">
-          <div id="popupNip" class="text-xs font-mono font-bold text-blue-300 bg-blue-950/80 px-4 py-1.5 rounded-full border border-blue-500/50 flex items-center gap-2 shadow-inner">
-            <i data-lucide="badge-check" class="w-4 h-4 text-blue-400"></i> NIP: -
-          </div>
-        </div>
-        
-        <h2 id="popupNama" class="text-3xl md:text-5xl font-black text-white mb-5 tracking-tight drop-shadow-md">-</h2>
-
-        <!-- KARTU STATISTIK BERJAJAR RAPI DARI ATAS KE BAWAH -->
-        <div id="popupDataGrid" class="flex flex-col gap-3 w-full">
-          <div id="boxValueSales" class="bg-gradient-to-r from-emerald-950/80 via-slate-900 to-emerald-950/80 border-2 border-emerald-500/60 p-4 rounded-2xl shadow-xl flex items-center justify-between hover:border-emerald-400 transition-all">
-            <div class="flex items-center gap-3 text-emerald-300 font-bold text-sm uppercase">
-              <div class="bg-emerald-500/20 p-2.5 rounded-xl border border-emerald-500/40 text-emerald-400">
-                <i data-lucide="badge-dollar-sign" class="w-6 h-6"></i>
-              </div>
-              <div>
-                <div class="text-[11px] text-emerald-400/80 font-semibold uppercase tracking-wider">Value Sales</div>
-                <div class="text-[10px] text-slate-400 font-medium">Realisasi Penjualan Hari Ini</div>
-              </div>
-            </div>
-            <div id="popupValueSales" class="text-2xl md:text-3xl font-black font-mono text-emerald-300 drop-shadow">-</div>
-          </div>
-
-          <div id="boxQtyFp" class="bg-gradient-to-r from-blue-950/80 via-slate-900 to-blue-950/80 border-2 border-blue-500/60 p-4 rounded-2xl shadow-xl flex items-center justify-between hover:border-blue-400 transition-all">
-            <div class="flex items-center gap-3 text-blue-300 font-bold text-sm uppercase">
-              <div class="bg-blue-500/20 p-2.5 rounded-xl border border-blue-500/40 text-blue-400">
-                <i data-lucide="package" class="w-6 h-6"></i>
-              </div>
-              <div>
-                <div class="text-[11px] text-blue-400/80 font-semibold uppercase tracking-wider">Qty Furnipro (FP)</div>
-                <div class="text-[10px] text-slate-400 font-medium">Jumlah Unit Produk</div>
-              </div>
-            </div>
-            <div id="popupQtyFp" class="text-2xl md:text-3xl font-black font-mono text-blue-300 drop-shadow">-</div>
-          </div>
-
-          <div id="boxValueComser" class="bg-gradient-to-r from-purple-950/80 via-slate-900 to-purple-950/80 border-2 border-purple-500/60 p-4 rounded-2xl shadow-xl flex items-center justify-between hover:border-purple-400 transition-all">
-            <div class="flex items-center gap-3 text-purple-300 font-bold text-sm uppercase">
-              <div class="bg-purple-500/20 p-2.5 rounded-xl border border-purple-500/40 text-purple-400">
-                <i data-lucide="headphones" class="w-6 h-6"></i>
-              </div>
-              <div>
-                <div class="text-[11px] text-purple-400/80 font-semibold uppercase tracking-wider">Value Comser (CNC)</div>
-                <div class="text-[10px] text-slate-400 font-medium">Layanan Komersil & Jasa</div>
-              </div>
-            </div>
-            <div id="popupValueComser" class="text-2xl md:text-3xl font-black font-mono text-purple-300 drop-shadow">-</div>
-          </div>
-        </div>
-
-        <div class="mt-5 flex items-center justify-between text-xs text-slate-400 font-medium px-1">
-          <div class="flex items-center gap-2">
-            <span class="w-2.5 h-2.5 rounded-full bg-yellow-400 animate-ping"></span>
-            <span class="text-slate-300">Live Surprise Notification Active</span>
-          </div>
-          <div>Otomatis tertutup dalam <span id="popupCountdown" class="font-bold text-yellow-400 text-sm">5</span> detik...</div>
-        </div>
-
+      <div class="mt-6 text-[11px] text-slate-400 font-medium animate-pulse">
+        Pop-up akan tertutup otomatis dalam <span id="popupCountdown" class="font-bold text-blue-600">5</span> detik...
       </div>
     </div>
   </div>
@@ -348,36 +262,60 @@
 
             <!-- BARIS ATAS -->
             <div class="top-row">
-              <!-- GAUGE CHART -->
-              <div id="gaugeContainer" class="gauge-section-container">
-                <div class="bg-slate-900 text-white font-extrabold text-center text-lg py-1.5 border-b border-slate-800 shadow-md tracking-wider">TARGET TODAY</div>
-                <div class="flex-1 flex flex-col items-center justify-center px-3 py-1 relative bg-gradient-to-b from-slate-50 to-white">
-                  <div class="relative w-150 h-60 flex items-center justify-center">
-                    <svg class="w-full h-full overflow-visible" viewBox="0 0 200 100">
-                      <defs><path id="textArcAchieved" d="M 20 90 A 80 80 0 0 1 180 90" /></defs>
-                      <path d="M 20 90 A 80 80 0 0 1 180 90" fill="none" stroke="#cbd5e1" stroke-width="22" stroke-linecap="round"/>
-                      <path id="gaugeProgressArc" d="M 20 90 A 80 80 0 0 1 180 90" fill="none" stroke="#3b82f6" stroke-width="22" stroke-linecap="round" stroke-dasharray="251.2" stroke-dashoffset="251.2" style="transition: stroke-dashoffset 1s ease-in-out;"/>
-                      <text dy="4.5" fill="#ffffff" font-size="9.5" font-weight="900" font-family="monospace">
-                        <textPath id="gaugeTextAchieved" href="#textArcAchieved" startOffset="0%" text-anchor="start">0.0%</textPath>
-                      </text>
-                      <g id="gaugeNeedle" style="transform-origin: 100px 90px; transition: transform 1s cubic-bezier(0.4, 0, 0.2, 1); transform: rotate(-90deg);">
-                        <line x1="100" y1="90" x2="100" y2="30" stroke="#0f172a" stroke-width="4" stroke-linecap="round"/>
-                        <circle cx="100" cy="90" r="6.5" fill="#0f172a"/>
-                        <circle cx="100" cy="90" r="2.5" fill="#ffffff"/>
-                      </g>
-                    </svg>
+              <!-- 3 CARD KIRI (TARGET TODAY, FP, COMSER) -->
+              <div id="leftCardsContainer" class="w-[500px] h-[380px] flex flex-col justify-between">
+                
+                <!-- CARD 1: REALISASI & TARGET TODAY -->
+                <div class="bg-white border-2 border-blue-400 rounded-xl p-2.5 shadow-md flex flex-col justify-between h-[120px] relative overflow-hidden">
+                  <div class="bg-blue-900 text-white font-extrabold text-center text-xs py-1 rounded-lg shadow-sm tracking-wider uppercase mb-1">
+                    TARGET TODAY
                   </div>
-                  <div class="w-full flex flex-col gap-1.5 mt-1">
-                    <div class="text-center bg-slate-100 py-1 px-3 rounded-lg border border-slate-200 shadow-inner flex justify-between items-center">
-                      <span class="text-2xl text-slate-500 font-bold uppercase">Realisasi</span>
-                      <span id="gaugeRealtimeValue" class="text-2xl font-extrabold font-mono text-emerald-600">Rp 0</span>
+                  <div class="grid grid-cols-2 gap-2">
+                    <div class="bg-slate-50 p-1.5 rounded-lg border border-slate-200 flex flex-col items-center">
+                      <span class="text-[10px] font-bold text-slate-500 uppercase">Realisasi</span>
+                      <span id="gaugeRealtimeValue" class="text-base font-extrabold font-mono text-emerald-600">Rp 0</span>
                     </div>
-                    <div class="text-center bg-slate-100 py-1 px-3 rounded-lg border border-slate-200 shadow-inner flex justify-between items-center">
-                      <span class="text-2xl text-slate-500 font-bold uppercase">Target Today</span>
-                      <span id="gaugeTargetValue" class="text-2xl font-extrabold font-mono text-red-600">Rp 0</span>
+                    <div class="bg-slate-50 p-1.5 rounded-lg border border-slate-200 flex flex-col items-center">
+                      <span class="text-[10px] font-bold text-slate-500 uppercase">Target Today</span>
+                      <span id="gaugeTargetValue" class="text-base font-extrabold font-mono text-red-600">Rp 0</span>
                     </div>
                   </div>
                 </div>
+
+                <!-- CARD 2: REALISASI FP & TARGET FP -->
+                <div class="bg-gradient-to-r from-cyan-50 to-blue-50 border-2 border-cyan-400 rounded-xl p-2.5 shadow-md flex flex-col justify-between h-[120px] relative overflow-hidden">
+                  <div class="bg-cyan-900 text-white font-extrabold text-center text-xs py-1 rounded-lg shadow-sm tracking-wider uppercase mb-1 flex items-center justify-center gap-1">
+                    <i data-lucide="package" class="w-3.5 h-3.5 text-cyan-300"></i> REALISASI FP & TARGET FP
+                  </div>
+                  <div class="grid grid-cols-2 gap-2">
+                    <div class="bg-white/90 p-1.5 rounded-lg border border-cyan-200 flex flex-col items-center">
+                      <span class="text-[10px] font-bold text-cyan-700 uppercase">Realisasi FP</span>
+                      <span id="realtimeFpValue" class="text-base font-extrabold font-mono text-blue-700">0 PCS</span>
+                    </div>
+                    <div class="bg-white/90 p-1.5 rounded-lg border border-cyan-200 flex flex-col items-center">
+                      <span class="text-[10px] font-bold text-cyan-700 uppercase">Target FP</span>
+                      <span id="targetFpValue" class="text-base font-extrabold font-mono text-red-600">0 PCS</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- CARD 3: REALISASI COMSER & TARGET COMSER -->
+                <div class="bg-gradient-to-r from-emerald-50 to-teal-50 border-2 border-emerald-400 rounded-xl p-2.5 shadow-md flex flex-col justify-between h-[120px] relative overflow-hidden">
+                  <div class="bg-emerald-900 text-white font-extrabold text-center text-xs py-1 rounded-lg shadow-sm tracking-wider uppercase mb-1 flex items-center justify-center gap-1">
+                    <i data-lucide="headphones" class="w-3.5 h-3.5 text-emerald-300"></i> REALISASI & TARGET COMSER
+                  </div>
+                  <div class="grid grid-cols-2 gap-2">
+                    <div class="bg-white/90 p-1.5 rounded-lg border border-emerald-200 flex flex-col items-center">
+                      <span class="text-[10px] font-bold text-emerald-700 uppercase">Realisasi Comser</span>
+                      <span id="realtimeComserValue" class="text-base font-extrabold font-mono text-emerald-700">Rp 0</span>
+                    </div>
+                    <div class="bg-white/90 p-1.5 rounded-lg border border-emerald-200 flex flex-col items-center">
+                      <span class="text-[10px] font-bold text-emerald-700 uppercase">Target Comser</span>
+                      <span id="targetComserValue" class="text-base font-extrabold font-mono text-red-600">Rp 0</span>
+                    </div>
+                  </div>
+                </div>
+
               </div>
 
               <!-- LIVE TOP SALES TODAY -->
@@ -562,7 +500,7 @@
 
       document.getElementById('popupFoto').src = `${SUPABASE_URL}/storage/v1/object/public/FOTO SALES/${nip}.jpg`;
       document.getElementById('popupNama').innerText = nama;
-      document.getElementById('popupNip').innerHTML = `<i data-lucide="badge-check" class="w-4 h-4 text-blue-400"></i> NIP: ${nip}`;
+      document.getElementById('popupNip').innerText = `NIP: ${nip}`;
 
       const boxSales = document.getElementById('boxValueSales');
       const boxFp = document.getElementById('boxQtyFp');
@@ -590,8 +528,8 @@
         }
       }
 
-      overlay.classList.remove('opacity-0', 'pointer-events-none');
-      overlay.classList.add('opacity-100');
+      overlay.classList.remove('opacity-0', 'pointer-events-none', 'scale-95');
+      overlay.classList.add('opacity-100', 'scale-100');
 
       let countdown = 5;
       document.getElementById('popupCountdown').innerText = countdown;
@@ -604,8 +542,8 @@
 
       popupTimer = setTimeout(async () => {
         clearInterval(countInterval);
-        overlay.classList.remove('opacity-100');
-        overlay.classList.add('opacity-0', 'pointer-events-none');
+        overlay.classList.remove('opacity-100', 'scale-100');
+        overlay.classList.add('opacity-0', 'pointer-events-none', 'scale-95');
 
         audioSoundSales.pause();
         audioSoundSales.currentTime = 0;
@@ -613,15 +551,13 @@
 
         await supabaseClient.from('popup_twibbon').delete().eq('nip', nip);
       }, 5000);
-
-      lucide.createIcons();
     }
 
     function generateConfetti() {
       const container = document.getElementById('confettiContainer');
       container.innerHTML = '';
       const colors = ['#eab308', '#3b82f6', '#10b981', '#ec4899', '#8b5cf6', '#f97316'];
-      for (let i = 0; i < 60; i++) {
+      for (let i = 0; i < 50; i++) {
         const div = document.createElement('div');
         div.className = 'confetti-piece';
         div.style.left = Math.random() * 100 + '%';
@@ -986,18 +922,33 @@
     async function updateGaugeData() {
       const { data: targetData } = await supabaseClient.from('target_today').select('*');
       let target = targetData && targetData.length > 0 ? Number(targetData[0].target || targetData[0].nilai || 250000000) : 250000000;
+      let targetFp = targetData && targetData.length > 0 ? Number(targetData[0].target_fp || 0) : 0;
+      let targetComser = targetData && targetData.length > 0 ? Number(targetData[0].target_comser || 0) : 0;
       
       const { data: deptData } = await supabaseClient.from('laporan_departemen').select('*');
       let realtime = 0;
       if (deptData) { deptData.forEach(d => { realtime += Number(d.exclude_ppn || 0); }); }
 
-      const pct = target > 0 ? (realtime / target) * 100 : 0;
-      const clamped = Math.min(Math.max(pct, 0), 100);
-      document.getElementById('gaugeProgressArc').style.strokeDashoffset = 251.2 - (clamped / 100) * 251.2;
-      document.getElementById('gaugeNeedle').style.transform = `rotate(${-90 + (clamped / 100) * 180}deg)`;
-      document.getElementById('gaugeTextAchieved').textContent = pct.toFixed(1) + '%';
       document.getElementById('gaugeRealtimeValue').innerText = 'Rp ' + realtime.toLocaleString('id-ID');
       document.getElementById('gaugeTargetValue').innerText = 'Rp ' + target.toLocaleString('id-ID');
+
+      // Fetch Realisasi FP from daily_furnipro (sum qty_fp)
+      const { data: furniproData } = await supabaseClient.from('daily_furnipro').select('qty_fp');
+      let realtimeFp = 0;
+      if (furniproData) {
+        furniproData.forEach(item => { realtimeFp += Number(item.qty_fp || 0); });
+      }
+      document.getElementById('realtimeFpValue').innerText = realtimeFp.toLocaleString('id-ID') + ' PCS';
+      document.getElementById('targetFpValue').innerText = targetFp.toLocaleString('id-ID') + ' PCS';
+
+      // Fetch Realisasi Comser from daily_comser (sum total_cnc)
+      const { data: comserData } = await supabaseClient.from('daily_comser').select('total_cnc');
+      let realtimeComser = 0;
+      if (comserData) {
+        comserData.forEach(item => { realtimeComser += Number(item.total_cnc || 0); });
+      }
+      document.getElementById('realtimeComserValue').innerText = 'Rp ' + realtimeComser.toLocaleString('id-ID');
+      document.getElementById('targetComserValue').innerText = 'Rp ' + targetComser.toLocaleString('id-ID');
     }
 
     document.addEventListener("DOMContentLoaded", async () => {
