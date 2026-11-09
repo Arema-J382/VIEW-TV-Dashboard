@@ -462,10 +462,6 @@
       const { data } = await supabaseClient.from('status_backsound').select('*').eq('bucket_name', 'BACKSOUND').maybeSingle();
 
       if (data && data.status_lagu === 'AKTIF' && data.nama_lagu) {
-        // Terapkan volume dari database (0-100% diubah ke 0.0 - 1.0)
-        const volVal = data.volume !== undefined && data.volume !== null ? Number(data.volume) / 100 : 1.0;
-        audioBacksound.volume = Math.min(Math.max(volVal, 0), 1);
-
         const { data: pub } = supabaseClient.storage.from('BACKSOUND').getPublicUrl(data.nama_lagu);
         if (pub?.publicUrl) {
           if (audioBacksound.src !== pub.publicUrl) {
@@ -513,10 +509,6 @@
         .maybeSingle();
 
       if (soundData && soundData.nama_lagutw) {
-        // Terapkan volume Sound Sales dari database (0-100% diubah ke 0.0 - 1.0)
-        const volValSales = soundData.volume !== undefined && soundData.volume !== null ? Number(soundData.volume) / 100 : 1.0;
-        audioSoundSales.volume = Math.min(Math.max(volValSales, 0), 1);
-
         const { data: pubSound } = supabaseClient.storage.from('SOUND SALES').getPublicUrl(soundData.nama_lagutw);
         if (pubSound?.publicUrl) {
           audioSoundSales.src = pubSound.publicUrl;
