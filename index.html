@@ -491,7 +491,7 @@
     let lastTopComserJson = '';
     let lastGaugeJson = '';
 
-    // Debounce timers untuk mencegah spam render / kedip layar akibat event beruntun
+    // Debounce timer untuk menghindari spam event realtime beruntun
     let debounceTimers = {};
     function debounceUpdate(key, fn, delay = 1500) {
       if (debounceTimers[key]) clearTimeout(debounceTimers[key]);
@@ -535,7 +535,6 @@
         })
         .subscribe();
 
-      // Menggunakan Debounce pada setiap perubahan Realtime agar tidak terjadi spam render yang bikin TV kedip
       supabaseClient.channel('public:all_dash_changes')
         .on('postgres_changes', { event: '*', schema: 'public', table: 'laporan_sales' }, () => debounceUpdate('sales', fetchSalesData))
         .on('postgres_changes', { event: '*', schema: 'public', table: 'laporan_departemen' }, () => debounceUpdate('dept', () => { fetchDeptData(); updateGaugeData(); }))
@@ -709,12 +708,49 @@
       }
     }
 
+    // SMART IN-PLACE RENDER UNTUK LIVE TOP SALES (MENCEGAH FOTO RELOAD & FLICKER)
     function renderDashboard() {
       const orig = document.getElementById('tableContentOriginal');
       const clone = document.getElementById('tableContentClone');
       const empty = document.getElementById('emptyStatus');
       if (!salesList || salesList.length === 0) { if(empty) empty.classList.remove('hidden'); return; }
       if(empty) empty.classList.add('hidden');
+
+      const existingRows = orig.children;
+      if (existingRows.length === salesList.length) {
+        salesList.forEach((item, index) => {
+          const rowOrig = orig.children[index];
+          const rowClone = clone.children[index];
+          if (rowOrig && rowClone) {
+            const rank = index + 1;
+            const name = getEmployeeName(item.nip, item.nama);
+            const nip = String(item.nip || '').trim();
+            const qtyFp = furniproMap[nip] || 0;
+            const comserVal = comserMap[nip] || 0;
+
+            if (rowOrig.querySelector('.rank-badge')) rowOrig.querySelector('.rank-badge').innerText = `${rank}.`;
+            if (rowClone.querySelector('.rank-badge')) rowClone.querySelector('.rank-badge').innerText = `${rank}.`;
+
+            if (rowOrig.querySelector('.employee-name')) rowOrig.querySelector('.employee-name').innerText = name;
+            if (rowClone.querySelector('.employee-name')) rowClone.querySelector('.employee-name').innerText = name;
+
+            if (rowOrig.querySelector('.fp-val')) rowOrig.querySelector('.fp-val').innerHTML = `<svg class="w-3.5 h-3.5 text-sky-600 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg> FP: ${qtyFp.toLocaleString('id-ID')}`;
+            if (rowClone.querySelector('.fp-val')) rowClone.querySelector('.fp-val').innerHTML = `<svg class="w-3.5 h-3.5 text-sky-600 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg> FP: ${qtyFp.toLocaleString('id-ID')}`;
+
+            if (rowOrig.querySelector('.comser-val')) rowOrig.querySelector('.comser-val').innerHTML = `<svg class="w-3.5 h-3.5 text-purple-600 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg> Comser: Rp ${comserVal.toLocaleString('id-ID')}`;
+            if (rowClone.querySelector('.comser-val')) rowClone.querySelector('.comser-val').innerHTML = `<svg class="w-3.5 h-3.5 text-purple-600 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg> Comser: Rp ${comserVal.toLocaleString('id-ID')}`;
+
+            const totalText = `Rp ${Number(item.total).toLocaleString('id-ID')}`;
+            if (rowOrig.querySelector('.total-sales-val')) rowOrig.querySelector('.total-sales-val').innerText = totalText;
+            if (rowClone.querySelector('.total-sales-val')) rowClone.querySelector('.total-sales-val').innerText = totalText;
+
+            let cls = rank === 1 ? 'fire-box-1' : rank === 2 ? 'fire-box-2' : rank === 3 ? 'fire-box-3' : 'bg-slate-50 border border-slate-200 rounded-xl';
+            rowOrig.className = `grid grid-cols-12 items-center px-2.5 py-2.5 transition shadow-sm ${cls}`;
+            rowClone.className = `grid grid-cols-12 items-center px-2.5 py-2.5 transition shadow-sm ${cls}`;
+          }
+        });
+        return;
+      }
 
       let html = '';
       salesList.forEach((item, index) => {
@@ -728,28 +764,27 @@
         const avatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=0D8ABC&color=fff&size=128`;
         let cls = rank === 1 ? 'fire-box-1' : rank === 2 ? 'fire-box-2' : rank === 3 ? 'fire-box-3' : 'bg-slate-50 border border-slate-200 rounded-xl';
 
-        // Menggunakan Inline SVG murni agar tidak memicu lucide.createIcons() ulang yang menyebabkan kedip
         html += `
           <div class="grid grid-cols-12 items-center px-2.5 py-2.5 transition shadow-sm ${cls}">
             <div class="col-span-4 flex items-center justify-center gap-3">
-              <span class="px-2.5 py-1 bg-amber-100 border border-amber-300 text-amber-800 rounded-lg font-bold text-base w-10 text-center shadow-xs">${rank}.</span>
+              <span class="rank-badge px-2.5 py-1 bg-amber-100 border border-amber-300 text-amber-800 rounded-lg font-bold text-base w-10 text-center shadow-xs">${rank}.</span>
               <div class="relative w-20 h-20 rounded-lg border-2 border-blue-500 bg-slate-200 overflow-hidden shadow-md">
                 <img src="${img}" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='${avatar}';">
               </div>
             </div>
             <div class="col-span-4 pl-2">
-              <div class="text-slate-900 font-bold text-2xl truncate">${name}</div>
+              <div class="employee-name text-slate-900 font-bold text-2xl truncate">${name}</div>
               <div class="flex items-center gap-2 mt-1.5 flex-wrap">
-                <div class="px-2 py-0.5 bg-sky-100 border border-sky-300 rounded text-xs font-mono font-bold text-sky-800 flex items-center gap-1 shadow-2xs">
+                <div class="fp-val px-2 py-0.5 bg-sky-100 border border-sky-300 rounded text-xs font-mono font-bold text-sky-800 flex items-center gap-1 shadow-2xs">
                   <svg class="w-3.5 h-3.5 text-sky-600 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg> FP: ${qtyFp.toLocaleString('id-ID')}
                 </div>
-                <div class="px-2 py-0.5 bg-purple-100 border border-purple-300 rounded text-xs font-mono font-bold text-purple-800 flex items-center gap-1 shadow-2xs">
+                <div class="comser-val px-2 py-0.5 bg-purple-100 border border-purple-300 rounded text-xs font-mono font-bold text-purple-800 flex items-center gap-1 shadow-2xs">
                   <svg class="w-3.5 h-3.5 text-purple-600 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg> Comser: Rp ${comserVal.toLocaleString('id-ID')}
                 </div>
               </div>
             </div>
             <div class="col-span-4 text-right">
-              <span class="inline-block px-3 py-1.5 bg-emerald-100 border border-emerald-300 rounded-lg font-mono font-bold text-emerald-700 text-lg shadow-xs">
+              <span class="total-sales-val inline-block px-3 py-1.5 bg-emerald-100 border border-emerald-300 rounded-lg font-mono font-bold text-emerald-700 text-lg shadow-xs">
                 Rp ${Number(item.total).toLocaleString('id-ID')}
               </span>
             </div>
@@ -772,10 +807,43 @@
       }
     }
 
+    // SMART IN-PLACE RENDER UNTUK SALES DEPARTEMEN
     function renderDeptDashboard() {
       const orig = document.getElementById('tableContentOriginalDept');
       const clone = document.getElementById('tableContentCloneDept');
       if (!orig || !clone || deptList.length === 0) return;
+
+      const existingRows = orig.children;
+      if (existingRows.length === deptList.length) {
+        deptList.forEach((item, index) => {
+          const rowOrig = orig.children[index];
+          const rowClone = clone.children[index];
+          if (rowOrig && rowClone) {
+            const rank = index + 1;
+            const kode = item.kode_dept || '';
+            const nama = item.nama_dept || 'DEPT';
+            const exclude = Number(item.exclude_ppn || 0);
+
+            if (rowOrig.querySelector('.dept-rank')) rowOrig.querySelector('.dept-rank').innerText = `${rank}.`;
+            if (rowClone.querySelector('.dept-rank')) rowClone.querySelector('.dept-rank').innerText = `${rank}.`;
+
+            if (rowOrig.querySelector('.dept-name')) rowOrig.querySelector('.dept-name').innerText = nama;
+            if (rowClone.querySelector('.dept-name')) rowClone.querySelector('.dept-name').innerText = nama;
+
+            if (rowOrig.querySelector('.dept-code')) rowOrig.querySelector('.dept-code').innerText = `CODE: ${kode}`;
+            if (rowClone.querySelector('.dept-code')) rowClone.querySelector('.dept-code').innerText = `CODE: ${kode}`;
+
+            const valText = `Rp ${exclude.toLocaleString('id-ID')}`;
+            if (rowOrig.querySelector('.dept-val')) rowOrig.querySelector('.dept-val').innerText = valText;
+            if (rowClone.querySelector('.dept-val')) rowClone.querySelector('.dept-val').innerText = valText;
+
+            let cls = rank === 1 ? 'fire-box-1' : rank === 2 ? 'fire-box-2' : rank === 3 ? 'fire-box-3' : 'bg-slate-50 border border-slate-200 rounded-lg';
+            rowOrig.className = `grid grid-cols-12 items-center px-3 py-1.5 transition shadow-sm ${cls}`;
+            rowClone.className = `grid grid-cols-12 items-center px-3 py-1.5 transition shadow-sm ${cls}`;
+          }
+        });
+        return;
+      }
 
       let html = '';
       deptList.forEach((item, index) => {
@@ -790,16 +858,16 @@
         html += `
           <div class="grid grid-cols-12 items-center px-3 py-1.5 transition shadow-sm ${cls}">
             <div class="col-span-4 flex items-center justify-center gap-2">
-              <span class="font-bold text-base w-5 text-right">${rank}.</span>
+              <span class="dept-rank font-bold text-base w-5 text-right">${rank}.</span>
               <div class="relative w-12 h-12 rounded-md border-2 border-blue-500 bg-slate-200 overflow-hidden shadow-sm">
                 <img src="${img}" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='${avatar}';">
               </div>
             </div>
             <div class="col-span-4 pl-1">
-              <div class="text-slate-900 text-base font-semibold truncate">${nama}</div>
-              <div class="text-xs font-mono text-blue-600 font-bold">CODE: ${kode}</div>
+              <div class="dept-name text-slate-900 text-base font-semibold truncate">${nama}</div>
+              <div class="dept-code text-xs font-mono text-blue-600 font-bold">CODE: ${kode}</div>
             </div>
-            <div class="col-span-4 text-right font-mono font-bold text-emerald-600 text-base">
+            <div class="dept-val col-span-4 text-right font-mono font-bold text-emerald-600 text-base">
               Rp ${exclude.toLocaleString('id-ID')}
             </div>
           </div>
@@ -815,40 +883,78 @@
         if (newJson !== lastMtdSalesJson) {
           lastMtdSalesJson = newJson;
           mtdSalesList = data;
-          const orig = document.getElementById('tableContentOriginalMtdSales');
-          const clone = document.getElementById('tableContentCloneMtdSales');
-          if (!orig || !clone || data.length === 0) return;
-          let html = '';
-          data.forEach((item, index) => {
+          renderMtdSales(data);
+        }
+      }
+    }
+
+    // SMART IN-PLACE RENDER UNTUK MTD SALES
+    function renderMtdSales(data) {
+      const orig = document.getElementById('tableContentOriginalMtdSales');
+      const clone = document.getElementById('tableContentCloneMtdSales');
+      if (!orig || !clone || data.length === 0) return;
+
+      const existingRows = orig.children;
+      if (existingRows.length === data.length) {
+        data.forEach((item, index) => {
+          const rowOrig = orig.children[index];
+          const rowClone = clone.children[index];
+          if (rowOrig && rowClone) {
             const rank = index + 1;
             const nip = item.mtd_nip || '';
             const name = getEmployeeName(nip, item.mtd_nama);
             const total = Number(item.mtd_total || 0);
-            const img = `${SUPABASE_URL}/storage/v1/object/public/FOTO SALES/${nip}.jpg`;
-            const avatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=3b82f6&color=fff&size=128`;
-            let cls = rank === 1 ? 'fire-box-1' : rank === 2 ? 'fire-box-2' : rank === 3 ? 'fire-box-3' : 'bg-slate-50 border border-slate-200 rounded-lg';
 
-            html += `
-              <div class="grid grid-cols-12 items-center px-3 py-1.5 transition shadow-sm ${cls}">
-                <div class="col-span-4 flex items-center justify-center gap-2">
-                  <span class="font-bold text-base w-5 text-right">${rank}.</span>
-                  <div class="relative w-12 h-12 rounded-md border-2 border-blue-500 bg-slate-200 overflow-hidden shadow-sm">
-                    <img src="${img}" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='${avatar}';">
-                  </div>
-                </div>
-                <div class="col-span-4 pl-1">
-                  <div class="text-slate-900 text-base font-semibold truncate">${name}</div>
-                  <div class="text-xs font-mono text-blue-600 font-bold">NIP: ${nip}</div>
-                </div>
-                <div class="col-span-4 text-right font-mono font-bold text-emerald-600 text-base">
-                  Rp ${total.toLocaleString('id-ID')}
-                </div>
-              </div>
-            `;
-          });
-          orig.innerHTML = html; clone.innerHTML = html;
-        }
+            if (rowOrig.querySelector('.mtd-sales-rank')) rowOrig.querySelector('.mtd-sales-rank').innerText = `${rank}.`;
+            if (rowClone.querySelector('.mtd-sales-rank')) rowClone.querySelector('.mtd-sales-rank').innerText = `${rank}.`;
+
+            if (rowOrig.querySelector('.mtd-sales-name')) rowOrig.querySelector('.mtd-sales-name').innerText = name;
+            if (rowClone.querySelector('.mtd-sales-name')) rowClone.querySelector('.mtd-sales-name').innerText = name;
+
+            if (rowOrig.querySelector('.mtd-sales-nip')) rowOrig.querySelector('.mtd-sales-nip').innerText = `NIP: ${nip}`;
+            if (rowClone.querySelector('.mtd-sales-nip')) rowClone.querySelector('.mtd-sales-nip').innerText = `NIP: ${nip}`;
+
+            const valText = `Rp ${total.toLocaleString('id-ID')}`;
+            if (rowOrig.querySelector('.mtd-sales-val')) rowOrig.querySelector('.mtd-sales-val').innerText = valText;
+            if (rowClone.querySelector('.mtd-sales-val')) rowClone.querySelector('.mtd-sales-val').innerText = valText;
+
+            let cls = rank === 1 ? 'fire-box-1' : rank === 2 ? 'fire-box-2' : rank === 3 ? 'fire-box-3' : 'bg-slate-50 border border-slate-200 rounded-lg';
+            rowOrig.className = `grid grid-cols-12 items-center px-3 py-1.5 transition shadow-sm ${cls}`;
+            rowClone.className = `grid grid-cols-12 items-center px-3 py-1.5 transition shadow-sm ${cls}`;
+          }
+        });
+        return;
       }
+
+      let html = '';
+      data.forEach((item, index) => {
+        const rank = index + 1;
+        const nip = item.mtd_nip || '';
+        const name = getEmployeeName(nip, item.mtd_nama);
+        const total = Number(item.mtd_total || 0);
+        const img = `${SUPABASE_URL}/storage/v1/object/public/FOTO SALES/${nip}.jpg`;
+        const avatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=3b82f6&color=fff&size=128`;
+        let cls = rank === 1 ? 'fire-box-1' : rank === 2 ? 'fire-box-2' : rank === 3 ? 'fire-box-3' : 'bg-slate-50 border border-slate-200 rounded-lg';
+
+        html += `
+          <div class="grid grid-cols-12 items-center px-3 py-1.5 transition shadow-sm ${cls}">
+            <div class="col-span-4 flex items-center justify-center gap-2">
+              <span class="mtd-sales-rank font-bold text-base w-5 text-right">${rank}.</span>
+              <div class="relative w-12 h-12 rounded-md border-2 border-blue-500 bg-slate-200 overflow-hidden shadow-sm">
+                <img src="${img}" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='${avatar}';">
+              </div>
+            </div>
+            <div class="col-span-4 pl-1">
+              <div class="mtd-sales-name text-slate-900 text-base font-semibold truncate">${name}</div>
+              <div class="mtd-sales-nip text-xs font-mono text-blue-600 font-bold">NIP: ${nip}</div>
+            </div>
+            <div class="mtd-sales-val col-span-4 text-right font-mono font-bold text-emerald-600 text-base">
+              Rp ${total.toLocaleString('id-ID')}
+            </div>
+          </div>
+        `;
+      });
+      orig.innerHTML = html; clone.innerHTML = html;
     }
 
     async function fetchMtdFurniproData() {
@@ -857,40 +963,78 @@
         const newJson = JSON.stringify(data);
         if (newJson !== lastMtdFpJson) {
           lastMtdFpJson = newJson;
-          const orig = document.getElementById('tableContentOriginalMtdFurnipro');
-          const clone = document.getElementById('tableContentCloneMtdFurnipro');
-          if (!orig || !clone || data.length === 0) return;
-          let html = '';
-          data.forEach((item, index) => {
+          renderMtdFurnipro(data);
+        }
+      }
+    }
+
+    // SMART IN-PLACE RENDER UNTUK MTD FURNIPRO
+    function renderMtdFurnipro(data) {
+      const orig = document.getElementById('tableContentOriginalMtdFurnipro');
+      const clone = document.getElementById('tableContentCloneMtdFurnipro');
+      if (!orig || !clone || data.length === 0) return;
+
+      const existingRows = orig.children;
+      if (existingRows.length === data.length) {
+        data.forEach((item, index) => {
+          const rowOrig = orig.children[index];
+          const rowClone = clone.children[index];
+          if (rowOrig && rowClone) {
             const rank = index + 1;
             const nip = item.nip_mtdfp || '';
             const name = getEmployeeName(nip, item.nama_mtdfp || item.nama);
             const qty = Number(item.qty_mtdfp || 0);
-            const img = `${SUPABASE_URL}/storage/v1/object/public/FOTO SALES/${nip}.jpg`;
-            const avatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=2563eb&color=fff&size=128`;
-            let cls = rank === 1 ? 'fire-box-1' : rank === 2 ? 'fire-box-2' : rank === 3 ? 'fire-box-3' : 'bg-slate-50 border border-slate-200 rounded-lg';
 
-            html += `
-              <div class="grid grid-cols-12 items-center px-3 py-1.5 transition shadow-sm ${cls}">
-                <div class="col-span-4 flex items-center justify-center gap-2">
-                  <span class="font-bold text-base w-5 text-right">${rank}.</span>
-                  <div class="relative w-12 h-12 rounded-md border-2 border-blue-500 bg-slate-200 overflow-hidden shadow-sm">
-                    <img src="${img}" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='${avatar}';">
-                  </div>
-                </div>
-                <div class="col-span-4 pl-1">
-                  <div class="text-slate-900 text-base font-semibold truncate">${name}</div>
-                  <div class="text-xs font-mono text-blue-600 font-bold">NIP: ${nip}</div>
-                </div>
-                <div class="col-span-4 text-right font-mono font-bold text-blue-600 text-base">
-                  ${qty.toLocaleString('id-ID')} PCS
-                </div>
-              </div>
-            `;
-          });
-          orig.innerHTML = html; clone.innerHTML = html;
-        }
+            if (rowOrig.querySelector('.mtd-fp-rank')) rowOrig.querySelector('.mtd-fp-rank').innerText = `${rank}.`;
+            if (rowClone.querySelector('.mtd-fp-rank')) rowClone.querySelector('.mtd-fp-rank').innerText = `${rank}.`;
+
+            if (rowOrig.querySelector('.mtd-fp-name')) rowOrig.querySelector('.mtd-fp-name').innerText = name;
+            if (rowClone.querySelector('.mtd-fp-name')) rowClone.querySelector('.mtd-fp-name').innerText = name;
+
+            if (rowOrig.querySelector('.mtd-fp-nip')) rowOrig.querySelector('.mtd-fp-nip').innerText = `NIP: ${nip}`;
+            if (rowClone.querySelector('.mtd-fp-nip')) rowClone.querySelector('.mtd-fp-nip').innerText = `NIP: ${nip}`;
+
+            const valText = `${qty.toLocaleString('id-ID')} PCS`;
+            if (rowOrig.querySelector('.mtd-fp-val')) rowOrig.querySelector('.mtd-fp-val').innerText = valText;
+            if (rowClone.querySelector('.mtd-fp-val')) rowClone.querySelector('.mtd-fp-val').innerText = valText;
+
+            let cls = rank === 1 ? 'fire-box-1' : rank === 2 ? 'fire-box-2' : rank === 3 ? 'fire-box-3' : 'bg-slate-50 border border-slate-200 rounded-lg';
+            rowOrig.className = `grid grid-cols-12 items-center px-3 py-1.5 transition shadow-sm ${cls}`;
+            rowClone.className = `grid grid-cols-12 items-center px-3 py-1.5 transition shadow-sm ${cls}`;
+          }
+        });
+        return;
       }
+
+      let html = '';
+      data.forEach((item, index) => {
+        const rank = index + 1;
+        const nip = item.nip_mtdfp || '';
+        const name = getEmployeeName(nip, item.nama_mtdfp || item.nama);
+        const qty = Number(item.qty_mtdfp || 0);
+        const img = `${SUPABASE_URL}/storage/v1/object/public/FOTO SALES/${nip}.jpg`;
+        const avatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=2563eb&color=fff&size=128`;
+        let cls = rank === 1 ? 'fire-box-1' : rank === 2 ? 'fire-box-2' : rank === 3 ? 'fire-box-3' : 'bg-slate-50 border border-slate-200 rounded-lg';
+
+        html += `
+          <div class="grid grid-cols-12 items-center px-3 py-1.5 transition shadow-sm ${cls}">
+            <div class="col-span-4 flex items-center justify-center gap-2">
+              <span class="mtd-fp-rank font-bold text-base w-5 text-right">${rank}.</span>
+              <div class="relative w-12 h-12 rounded-md border-2 border-blue-500 bg-slate-200 overflow-hidden shadow-sm">
+                <img src="${img}" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='${avatar}';">
+              </div>
+            </div>
+            <div class="col-span-4 pl-1">
+              <div class="mtd-fp-name text-slate-900 text-base font-semibold truncate">${name}</div>
+              <div class="mtd-fp-nip text-xs font-mono text-blue-600 font-bold">NIP: ${nip}</div>
+            </div>
+            <div class="mtd-fp-val col-span-4 text-right font-mono font-bold text-blue-600 text-base">
+              ${qty.toLocaleString('id-ID')} PCS
+            </div>
+          </div>
+        `;
+      });
+      orig.innerHTML = html; clone.innerHTML = html;
     }
 
     async function fetchMtdComserData() {
@@ -899,40 +1043,78 @@
         const newJson = JSON.stringify(data);
         if (newJson !== lastMtdComserJson) {
           lastMtdComserJson = newJson;
-          const orig = document.getElementById('tableContentOriginalMtdComser');
-          const clone = document.getElementById('tableContentCloneMtdComser');
-          if (!orig || !clone || data.length === 0) return;
-          let html = '';
-          data.forEach((item, index) => {
+          renderMtdComser(data);
+        }
+      }
+    }
+
+    // SMART IN-PLACE RENDER UNTUK MTD COMSER
+    function renderMtdComser(data) {
+      const orig = document.getElementById('tableContentOriginalMtdComser');
+      const clone = document.getElementById('tableContentCloneMtdComser');
+      if (!orig || !clone || data.length === 0) return;
+
+      const existingRows = orig.children;
+      if (existingRows.length === data.length) {
+        data.forEach((item, index) => {
+          const rowOrig = orig.children[index];
+          const rowClone = clone.children[index];
+          if (rowOrig && rowClone) {
             const rank = index + 1;
             const nip = item.nip_mtdcnc || '';
             const name = getEmployeeName(nip, item.nama_mtdcnc);
             const total = Number(item.total_mtdcnc || 0);
-            const img = `${SUPABASE_URL}/storage/v1/object/public/FOTO SALES/${nip}.jpg`;
-            const avatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=10b981&color=fff&size=128`;
-            let cls = rank === 1 ? 'fire-box-1' : rank === 2 ? 'fire-box-2' : rank === 3 ? 'fire-box-3' : 'bg-slate-50 border border-slate-200 rounded-lg';
 
-            html += `
-              <div class="grid grid-cols-12 items-center px-3 py-1.5 transition shadow-sm ${cls}">
-                <div class="col-span-4 flex items-center justify-center gap-2">
-                  <span class="font-bold text-base w-5 text-right">${rank}.</span>
-                  <div class="relative w-12 h-12 rounded-md border-2 border-blue-500 bg-slate-200 overflow-hidden shadow-sm">
-                    <img src="${img}" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='${avatar}';">
-                  </div>
-                </div>
-                <div class="col-span-4 pl-1">
-                  <div class="text-slate-900 text-base font-semibold truncate">${name}</div>
-                  <div class="text-xs font-mono text-emerald-600 font-bold">NIP: ${nip}</div>
-                </div>
-                <div class="col-span-4 text-right font-mono font-bold text-emerald-600 text-base">
-                  Rp ${total.toLocaleString('id-ID')}
-                </div>
-              </div>
-            `;
-          });
-          orig.innerHTML = html; clone.innerHTML = html;
-        }
+            if (rowOrig.querySelector('.mtd-comser-rank')) rowOrig.querySelector('.mtd-comser-rank').innerText = `${rank}.`;
+            if (rowClone.querySelector('.mtd-comser-rank')) rowClone.querySelector('.mtd-comser-rank').innerText = `${rank}.`;
+
+            if (rowOrig.querySelector('.mtd-comser-name')) rowOrig.querySelector('.mtd-comser-name').innerText = name;
+            if (rowClone.querySelector('.mtd-comser-name')) rowClone.querySelector('.mtd-comser-name').innerText = name;
+
+            if (rowOrig.querySelector('.mtd-comser-nip')) rowOrig.querySelector('.mtd-comser-nip').innerText = `NIP: ${nip}`;
+            if (rowClone.querySelector('.mtd-comser-nip')) rowClone.querySelector('.mtd-comser-nip').innerText = `NIP: ${nip}`;
+
+            const valText = `Rp ${total.toLocaleString('id-ID')}`;
+            if (rowOrig.querySelector('.mtd-comser-val')) rowOrig.querySelector('.mtd-comser-val').innerText = valText;
+            if (rowClone.querySelector('.mtd-comser-val')) rowClone.querySelector('.mtd-comser-val').innerText = valText;
+
+            let cls = rank === 1 ? 'fire-box-1' : rank === 2 ? 'fire-box-2' : rank === 3 ? 'fire-box-3' : 'bg-slate-50 border border-slate-200 rounded-lg';
+            rowOrig.className = `grid grid-cols-12 items-center px-3 py-1.5 transition shadow-sm ${cls}`;
+            rowClone.className = `grid grid-cols-12 items-center px-3 py-1.5 transition shadow-sm ${cls}`;
+          }
+        });
+        return;
       }
+
+      let html = '';
+      data.forEach((item, index) => {
+        const rank = index + 1;
+        const nip = item.nip_mtdcnc || '';
+        const name = getEmployeeName(nip, item.nama_mtdcnc);
+        const total = Number(item.total_mtdcnc || 0);
+        const img = `${SUPABASE_URL}/storage/v1/object/public/FOTO SALES/${nip}.jpg`;
+        const avatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=10b981&color=fff&size=128`;
+        let cls = rank === 1 ? 'fire-box-1' : rank === 2 ? 'fire-box-2' : rank === 3 ? 'fire-box-3' : 'bg-slate-50 border border-slate-200 rounded-lg';
+
+        html += `
+          <div class="grid grid-cols-12 items-center px-3 py-1.5 transition shadow-sm ${cls}">
+            <div class="col-span-4 flex items-center justify-center gap-2">
+              <span class="mtd-comser-rank font-bold text-base w-5 text-right">${rank}.</span>
+              <div class="relative w-12 h-12 rounded-md border-2 border-blue-500 bg-slate-200 overflow-hidden shadow-sm">
+                <img src="${img}" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='${avatar}';">
+              </div>
+            </div>
+            <div class="col-span-4 pl-1">
+              <div class="mtd-comser-name text-slate-900 text-base font-semibold truncate">${name}</div>
+              <div class="mtd-comser-nip text-xs font-mono text-emerald-600 font-bold">NIP: ${nip}</div>
+            </div>
+            <div class="mtd-comser-val col-span-4 text-right font-mono font-bold text-emerald-600 text-base">
+              Rp ${total.toLocaleString('id-ID')}
+            </div>
+          </div>
+        `;
+      });
+      orig.innerHTML = html; clone.innerHTML = html;
     }
 
     async function fetchTop1MtdSales() {
