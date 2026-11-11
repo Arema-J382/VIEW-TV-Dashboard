@@ -2,11 +2,10 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>TV Dashboard - Laporan Sales, Gauge, Departemen & MTD Tables</title>
   
   <!-- Tailwind CSS -->
-  <script src="https://cdn.jsdelivr.net/npm/tailwindcss-cdn@3.4.10/tailwindcss.min.js"></script>
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Supabase JS SDK v2 -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -17,14 +16,22 @@
     * {
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
-      text-rendering: optimizeLegibility;
     }
 
-    body {
+    html, body {
       margin: 0;
       padding: 0;
-      width: 100vw;
-      height: 100vh;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background-color: #020617;
+    }
+
+    /* Wadah layar penuh: kanvas 1920x1080 di-scale otomatis agar PAS di layar TV */
+    #tvAspectRatioBox {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      width: 100%; height: 100%;
       overflow: hidden;
       background-color: #020617;
     }
@@ -42,8 +49,6 @@
       background-color: #eff6ff;
       overflow: hidden;
       box-sizing: border-box;
-      will-change: transform;
-      backface-visibility: hidden;
     }
 
     .dashboard-layout {
@@ -51,7 +56,7 @@
       flex-direction: column;
       justify-content: flex-start;
       align-items: center;
-      gap: 1rem;
+      gap: 1.25rem;
       width: 100%;
       height: 100%;
     }
@@ -61,7 +66,7 @@
       flex-direction: row;
       justify-content: center;
       align-items: flex-start;
-      gap: 1.5rem;
+      gap: 1.25rem;
       width: 100%;
     }
 
@@ -75,7 +80,7 @@
     }
 
     .custom-table-container {
-      width: 600px;
+      width: 780px;
       height: 380px;
       margin: 0;         
       display: flex;
@@ -100,7 +105,7 @@
 
     .bottom-card-container {
       width: 440px;
-      height: 340px;
+      height: 480px;
       background: #ffffff;
       border-radius: 0.85rem;
       box-shadow: 0 8px 20px -4px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
@@ -111,24 +116,35 @@
       position: relative;
     }
 
-    @keyframes goldGlow {
-      0%, 100% { box-shadow: 0 0 10px rgba(234, 179, 8, 0.5), 0 0 20px rgba(245, 158, 11, 0.3); }
-      50% { box-shadow: 0 0 22px rgba(234, 179, 8, 0.9), 0 0 32px rgba(239, 68, 68, 0.6); }
+    /* Glow memakai pseudo-element + animasi opacity (tanpa repaint, anti-kedip di TV) */
+    @keyframes glowFade {
+      0%, 100% { opacity: 0.4; }
+      50% { opacity: 1; }
     }
 
-    @keyframes cyanGlow {
-      0%, 100% { box-shadow: 0 0 10px rgba(59, 130, 246, 0.6), 0 0 20px rgba(14, 165, 233, 0.4); }
-      50% { box-shadow: 0 0 22px rgba(59, 130, 246, 1), 0 0 35px rgba(6, 182, 212, 0.8); }
-    }
+    .gold-glow-container, .cyan-glow-container, .emerald-glow-container { position: relative; overflow: visible !important; }
+    .gold-glow-container { border: 2px solid #eab308; }
+    .cyan-glow-container { border: 2px solid #3b82f6; }
+    .emerald-glow-container { border: 2px solid #10b981; }
 
-    @keyframes emeraldGlow {
-      0%, 100% { box-shadow: 0 0 10px rgba(16, 185, 129, 0.6), 0 0 20px rgba(5, 150, 105, 0.4); }
-      50% { box-shadow: 0 0 22px rgba(16, 185, 129, 1), 0 0 35px rgba(4, 120, 87, 0.8); }
+    .gold-glow-container::after, .cyan-glow-container::after, .emerald-glow-container::after,
+    .fire-box-1::after, .fire-box-2::after, .fire-box-3::after {
+      content: "";
+      position: absolute;
+      top: -2px; left: -2px; right: -2px; bottom: -2px;
+      border-radius: inherit;
+      pointer-events: none;
+      opacity: 0.4;
+      animation: glowFade 2s infinite ease-in-out;
+      will-change: opacity;
     }
+    .gold-glow-container::after { box-shadow: 0 0 22px rgba(234, 179, 8, 0.9), 0 0 32px rgba(239, 68, 68, 0.6); }
+    .cyan-glow-container::after { box-shadow: 0 0 22px rgba(59, 130, 246, 1), 0 0 35px rgba(6, 182, 212, 0.8); }
+    .emerald-glow-container::after { box-shadow: 0 0 22px rgba(16, 185, 129, 1), 0 0 35px rgba(4, 120, 87, 0.8); }
 
-    .gold-glow-container { border: 2px solid #eab308; animation: goldGlow 2s infinite ease-in-out; }
-    .cyan-glow-container { border: 2px solid #3b82f6; animation: cyanGlow 2s infinite ease-in-out; }
-    .emerald-glow-container { border: 2px solid #10b981; animation: emeraldGlow 2s infinite ease-in-out; }
+    /* Karena overflow container glow dibuka, sudut header & isi dibulatkan manual */
+    #rightCardContainer > #sliderHeader { border-radius: calc(1rem - 2px) calc(1rem - 2px) 0 0; }
+    #rightCardContainer > .flex-1 { border-radius: 0 0 calc(1rem - 2px) calc(1rem - 2px); }
 
     @keyframes scrollUp {
       0% { transform: translate3d(0, 0, 0); }
@@ -144,19 +160,12 @@
       animation-play-state: paused;
     }
 
-    @keyframes silverGlow {
-      0%, 100% { box-shadow: 0 0 8px rgba(148, 163, 184, 0.5), 0 0 16px rgba(56, 189, 248, 0.3); }
-      50% { box-shadow: 0 0 16px rgba(148, 163, 184, 0.9), 0 0 24px rgba(56, 189, 248, 0.6); }
-    }
-
-    @keyframes bronzeGlow {
-      0%, 100% { box-shadow: 0 0 8px rgba(217, 119, 6, 0.5), 0 0 16px rgba(234, 88, 12, 0.3); }
-      50% { box-shadow: 0 0 16px rgba(217, 119, 6, 0.9), 0 0 22px rgba(220, 38, 38, 0.6); }
-    }
-
-    .fire-box-1 { background-color: #fefce8; border: 2px solid #eab308; border-radius: 0.75rem; animation: goldGlow 1.8s infinite ease-in-out; }
-    .fire-box-2 { background-color: #f8fafc; border: 2px solid #94a3b8; border-radius: 0.75rem; animation: silverGlow 2.2s infinite ease-in-out; }
-    .fire-box-3 { background-color: #fff7ed; border: 2px solid #d97706; border-radius: 0.75rem; animation: bronzeGlow 2s infinite ease-in-out; }
+    .fire-box-1 { position: relative; background-color: #fefce8; border: 2px solid #eab308; border-radius: 0.75rem; }
+    .fire-box-2 { position: relative; background-color: #f8fafc; border: 2px solid #94a3b8; border-radius: 0.75rem; }
+    .fire-box-3 { position: relative; background-color: #fff7ed; border: 2px solid #d97706; border-radius: 0.75rem; }
+    .fire-box-1::after { box-shadow: 0 0 22px rgba(234, 179, 8, 0.9), 0 0 32px rgba(239, 68, 68, 0.6); animation-duration: 1.8s; }
+    .fire-box-2::after { box-shadow: 0 0 16px rgba(148, 163, 184, 0.9), 0 0 24px rgba(56, 189, 248, 0.6); animation-duration: 2.2s; }
+    .fire-box-3::after { box-shadow: 0 0 16px rgba(217, 119, 6, 0.9), 0 0 22px rgba(220, 38, 38, 0.6); animation-duration: 2s; }
 
     .slider-track { display: flex; width: 300%; height: 100%; transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1); will-change: transform; }
 
@@ -181,6 +190,7 @@
       z-index: 100000;
     }
 
+    /* CUSTOM ANIMATION UNTUK POP-UP MODERN */
     @keyframes gradientBG {
       0% { background-position: 0% 50%; }
       50% { background-position: 100% 50%; }
@@ -201,6 +211,16 @@
     .popup-card-glow {
       animation: pulseGlow 3s infinite ease-in-out;
     }
+
+    /* Saat pop-up tersembunyi: benar-benar tidak digambar & semua animasi dijeda (anti-kedip) */
+    #salesPopupOverlay { transition: opacity 0.5s ease, transform 0.5s ease, visibility 0s linear 0s; }
+    #salesPopupOverlay.opacity-0 {
+      visibility: hidden;
+      transition: opacity 0.5s ease, transform 0.5s ease, visibility 0s linear 0.5s;
+    }
+    #salesPopupOverlay.opacity-0, #salesPopupOverlay.opacity-0 * { animation-play-state: paused !important; }
+    #salesPopupOverlay, #salesPopupOverlay > div { -webkit-backdrop-filter: none !important; backdrop-filter: none !important; }
+    #popupCard { transform: scale(var(--tv-scale, 1)); transform-origin: center center; }
   </style>
 </head>
 <body class="bg-slate-950 text-slate-800 select-none overflow-hidden m-0 p-0">
@@ -214,37 +234,46 @@
     </div>
   </div>
 
-  <!-- FULL SCREEN POP UP OVERLAY -->
-  <div id="salesPopupOverlay" class="fixed inset-0 z-[99999] popup-animated-bg backdrop-blur-xl flex items-center justify-center opacity-0 pointer-events-none transition-all duration-500 scale-95 p-6">
+  <!-- FULL SCREEN POP UP OVERLAY - MODERN & ENHANCED DESIGN -->
+  <div id="salesPopupOverlay" class="fixed inset-0 z-[999999] popup-animated-bg backdrop-blur-xl flex items-center justify-center opacity-0 pointer-events-none transition-all duration-500 scale-95 p-6">
     <div id="confettiContainer" class="absolute inset-0 overflow-hidden pointer-events-none"></div>
     
-    <div class="relative bg-white/95 backdrop-blur-2xl rounded-[2.5rem] shadow-[0_25px_60px_-15px_rgba(0,0,0,0.5)] border-4 border-yellow-400/80 p-10 max-w-5xl w-full mx-auto popup-card-glow flex flex-col items-center">
+    <!-- DESAIN POP UP UTAMA (DI PERBESAR & MODERN) -->
+    <div id="popupCard" class="relative bg-white/95 rounded-[2.5rem] shadow-[0_25px_60px_-15px_rgba(0,0,0,0.5)] border-4 border-yellow-400/80 p-10 max-w-5xl w-full mx-auto popup-card-glow flex flex-col items-center">
       
+      <!-- LENCANA ATAS -->
       <div class="absolute -top-7 bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-600 text-slate-950 font-black text-sm px-8 py-2.5 rounded-full shadow-2xl border-2 border-white uppercase tracking-widest flex items-center gap-2">
         <i data-lucide="award" class="w-5 h-5 text-slate-950"></i> TWIBBON SALES CHAMPION <i data-lucide="award" class="w-5 h-5 text-slate-950"></i>
       </div>
 
+      <!-- LAYOUT BARIS 2 KOLOM (FOTO KIRI, TEKS & DATA KANAN) -->
       <div class="grid grid-cols-1 md:grid-cols-12 gap-8 w-full items-center mt-4">
         
+        <!-- SIS KIRI: FOTO KARYAWAN (DIPERBESAR & TANPA MAH KOTA) -->
         <div class="md:col-span-5 flex justify-center items-center">
           <div class="relative w-64 h-64 md:w-80 md:h-80 rounded-3xl border-4 border-blue-500 shadow-2xl bg-slate-100 overflow-hidden group">
             <img id="popupFoto" src="" alt="Foto Karyawan" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name=Sales&background=0D8ABC&color=fff&size=400';">
           </div>
         </div>
 
+        <!-- SISI KANAN: KETERANGAN TEKS & DATA SALES BERURUTAN -->
         <div class="md:col-span-7 flex flex-col justify-center items-start text-left">
           
+          <!-- NAMA SALES + IKON VERIFIKASI BIRU -->
           <div class="flex items-center gap-3 mb-2 flex-wrap">
             <h2 id="popupNama" class="text-4xl md:text-5xl font-black text-slate-900 tracking-tight">-</h2>
+            <!-- IKON CENTANG VERIFIKASI BIRU (FACEBOOK / TWITTER VERIFIED BADGE) -->
             <svg class="w-9 h-9 text-blue-500 shrink-0 fill-current" viewBox="0 0 24 24">
               <path d="M22.5 12.5c0-1.58-.875-2.95-2.148-3.6.154-.435.238-.905.238-1.4 0-2.21-1.79-4-4-4-.495 0-.965.084-1.4.238C14.55 2.475 13.18 1.6 11.6 1.6c-1.58 0-2.95.875-3.6 2.148-.435-.154-.905-.238-1.4-.238-2.21 0-4 1.79-4 4 0 .495.084.965.238 1.4C1.575 9.55.7 10.92.7 12.5c0 1.58.875 2.95 2.148 3.6-.154.435-.238.905-.238 1.4 0 2.21 1.79 4 4 4 .495 0 .965-.084 1.4-.238 1.55 1.273 2.92 2.148 4.5 2.148 1.58 0 2.95-.875 3.6-2.148.435.154.905.238 1.4.238 2.21 0 4-1.79 4-4 0-.495-.084-.965-.238-1.4 1.273-.65 2.148-2.02 2.148-3.6zm-12.21 4.51l-4.5-4.5 1.41-1.41 3.09 3.09 7.09-7.09 1.41 1.41-8.5 8.5z"/>
             </svg>
           </div>
 
+          <!-- NIP SALES -->
           <div id="popupNip" class="text-sm font-mono font-bold text-blue-700 bg-blue-100/80 px-4 py-1.5 rounded-full border border-blue-300 mb-6 shadow-sm inline-block">
             NIP: -
           </div>
 
+          <!-- DATA SALES (VALUE SALES, QTY FP, VALUE COMSER) -->
           <div id="popupDataGrid" class="grid grid-cols-1 sm:grid-cols-3 gap-4 w-full">
             
             <div id="boxValueSales" class="bg-emerald-50/90 border-2 border-emerald-300 p-4 rounded-2xl shadow-sm flex flex-col items-center md:items-start transition-all hover:scale-105">
@@ -255,14 +284,14 @@
             </div>
 
             <div id="boxQtyFp" class="bg-blue-50/90 border-2 border-blue-300 p-4 rounded-2xl shadow-sm flex flex-col items-center md:items-start transition-all hover:scale-105">
-              <div class="flex items-center gap-1.5 text-blue-800 text-xl font-black uppercase mb-1">
+              <div class="flex items-center gap-1.5 text-blue-800 text-xs font-black uppercase mb-1">
                 <i data-lucide="shield-check" class="w-4 h-4 text-blue-600"></i> Qty FP
               </div>
               <div id="popupQtyFp" class="text-xl md:text-2xl font-black font-mono text-blue-700">-</div>
             </div>
 
             <div id="boxValueComser" class="bg-purple-50/90 border-2 border-purple-300 p-4 rounded-2xl shadow-sm flex flex-col items-center md:items-start transition-all hover:scale-105">
-              <div class="flex items-center gap-1.5 text-purple-800 text-xl font-black uppercase mb-1">
+              <div class="flex items-center gap-1.5 text-purple-800 text-xs font-black uppercase mb-1">
                 <i data-lucide="air-vent" class="w-4 h-4 text-purple-600"></i> Value Comser
               </div>
               <div id="popupValueComser" class="text-xl md:text-2xl font-black font-mono text-purple-700">-</div>
@@ -273,6 +302,7 @@
 
       </div>
 
+      <!-- COUNTDOWN TIMER -->
       <div class="mt-8 text-xs text-slate-500 font-semibold animate-pulse tracking-wide">
         Pop-up akan tertutup otomatis dalam <span id="popupCountdown" class="font-extrabold text-blue-600 text-sm">5</span> detik...
       </div>
@@ -285,9 +315,9 @@
   <audio id="audioSoundSales" preload="auto" loop></audio>
 
   <!-- SAFE-AREA CONTAINER -->
-  <div class="w-full h-full p-[2.5%] box-border flex items-center justify-center overflow-hidden">
-    <div id="tvAspectRatioBox" class="w-full max-h-full flex items-center justify-center relative overflow-hidden" style="aspect-ratio: 70 / 39;">
-      <div id="tvScaleCanvas" class="tv-canvas rounded-2xl shadow-2xl">
+  <div class="w-full h-full box-border overflow-hidden">
+    <div id="tvAspectRatioBox">
+      <div id="tvScaleCanvas" class="tv-canvas">
 
         <!-- HEADER -->
         <header class="bg-slate-900 border-b border-slate-800 px-10 py-3 flex justify-between items-center shadow-md z-20 shrink-0 h-[80px]">
@@ -316,12 +346,13 @@
 
             <!-- BARIS ATAS -->
             <div class="top-row">
-              <!-- 3 CARD KIRI -->
+              <!-- 3 CARD KIRI (TARGET TODAY, FP, COMSER) -->
               <div id="leftCardsContainer" class="w-[500px] h-[380px] flex flex-col justify-between">
                 
+                <!-- CARD 1: REALISASI & TARGET TODAY -->
                 <div class="bg-gradient-to-r from-emerald-50 to-teal-50 border-2 border-emerald-400 rounded-xl p-2.5 shadow-md flex flex-col justify-between h-[120px] relative overflow-hidden">
                   <div class="bg-emerald-900 text-white font-extrabold text-center text-xl py-1 rounded-lg shadow-sm tracking-wider uppercase mb-1 flex items-center justify-center gap-1">
-                    <i data-lucide="circle-dollar-sign" class="w-4.5 h-4.5 text-cyan-300"></i> SALES TODAY
+                    <i data-lucide="circle-dollar-sign" class="w-5 h-5 text-cyan-300"></i> SALES TODAY
                   </div>
                   <div class="grid grid-cols-2 gap-2">
                     <div class="bg-slate-50 p-1.5 rounded-lg border border-slate-200 flex flex-col items-center">
@@ -335,9 +366,10 @@
                   </div>
                 </div>
 
+                <!-- CARD 2: REALISASI FP & TARGET FP -->
                 <div class="bg-gradient-to-r from-cyan-50 to-blue-50 border-2 border-cyan-400 rounded-xl p-2.5 shadow-md flex flex-col justify-between h-[120px] relative overflow-hidden">
                   <div class="bg-cyan-900 text-white font-extrabold text-center text-xl py-1 rounded-lg shadow-sm tracking-wider uppercase mb-1 flex items-center justify-center gap-1">
-                    <i data-lucide="shield-check" class="w-4.5 h-4.5 text-cyan-300"></i> FURNIPRO TODAY
+                    <i data-lucide="shield-check" class="w-5 h-5 text-cyan-300"></i> FURNIPRO TODAY
                   </div>
                   <div class="grid grid-cols-2 gap-2">
                     <div class="bg-white/90 p-1.5 rounded-lg border border-cyan-200 flex flex-col items-center">
@@ -351,9 +383,10 @@
                   </div>
                 </div>
 
-                <div class="bg-gradient-to-r from-purple-50 to-purple-100 border-2 border-purple-400 rounded-xl p-2.5 shadow-md flex flex-col justify-between h-[120px] relative overflow-hidden">
+                <!-- CARD 3: REALISASI COMSER & TARGET COMSER -->
+               <div class="bg-gradient-to-r from-purple-50 to-purple-100 border-2 border-purple-400 rounded-xl p-2.5 shadow-md flex flex-col justify-between h-[120px] relative overflow-hidden">
                   <div class="bg-purple-900 text-white font-extrabold text-center text-xl py-1 rounded-lg shadow-sm tracking-wider uppercase mb-1 flex items-center justify-center gap-1">
-                    <i data-lucide="air-vent" class="w-4.5 h-4.5 text-emerald-300"></i> COMSER TODAY
+                    <i data-lucide="air-vent" class="w-5 h-5 text-emerald-300"></i> COMSER TODAY
                   </div>
                   <div class="grid grid-cols-2 gap-2">
                     <div class="bg-white/90 p-1.5 rounded-lg border border-emerald-200 flex flex-col items-center">
@@ -436,7 +469,7 @@
                 </div>
               </div>
               <div class="bottom-card-container">
-                <div class="bg-slate-900 text-white font-extrabold text-center text-sm py-1.5 border-b border-slate-800">MTD BY COMSER</div>
+                <div class="bg-slate-900 text-white font-extrabold text-center text-xl py-1.5 border-b border-slate-800">MTD BY COMSER</div>
                 <div class="flex-1 overflow-hidden relative bg-white scroll-container">
                   <div id="scrollWrapperMtdComser" class="absolute w-full animate-scroll-infinite">
                     <div id="tableContentOriginalMtdComser" class="space-y-1.5 p-2"></div>
@@ -481,31 +514,23 @@
     let currentSlide = 0; 
     let popupTimer = null;
 
-    let lastSalesJson = '';
-    let lastDeptJson = '';
-    let lastMtdSalesJson = '';
-    let lastMtdFpJson = '';
-    let lastMtdComserJson = '';
-    let lastTopSalesJson = '';
-    let lastTopFpJson = '';
-    let lastTopComserJson = '';
-    let lastGaugeJson = '';
-
-    // Debounce timer untuk menghindari spam event realtime beruntun
-    let debounceTimers = {};
-    function debounceUpdate(key, fn, delay = 1500) {
-      if (debounceTimers[key]) clearTimeout(debounceTimers[key]);
-      debounceTimers[key] = setTimeout(fn, delay);
-    }
-
+    // Skala otomatis: kanvas 1920x1080 dipaskan ke layar TV apa pun (tanpa terpotong).
+    // SAFE_MARGIN = jarak aman tepi layar (1% per sisi) untuk TV yang memiliki overscan.
+    const SAFE_MARGIN = 0.01;
     function scaleDashboard() {
-      const box = document.getElementById('tvAspectRatioBox');
       const canvas = document.getElementById('tvScaleCanvas');
-      if (!box || !canvas) return;
-      const scale = Math.min(box.clientWidth / 1920, box.clientHeight / 1080);
+      if (!canvas) return;
+      const vw = window.innerWidth || document.documentElement.clientWidth;
+      const vh = window.innerHeight || document.documentElement.clientHeight;
+      const raw = Math.min((vw * (1 - SAFE_MARGIN * 2)) / 1920, (vh * (1 - SAFE_MARGIN * 2)) / 1080);
+      const scale = Math.round(raw * 10000) / 10000;
       canvas.style.transform = `translate(-50%, -50%) scale(${scale})`;
+      document.documentElement.style.setProperty('--tv-scale', scale);
     }
     window.addEventListener('resize', scaleDashboard);
+    window.addEventListener('orientationchange', scaleDashboard);
+    document.addEventListener('fullscreenchange', scaleDashboard);
+    window.addEventListener('load', scaleDashboard);
 
     function unlockAndPlayAudio() {
       const overlay = document.getElementById('audioUnlockOverlay');
@@ -513,6 +538,7 @@
       syncBacksoundState();
     }
 
+    // REALTIME MONITORING UNTUK CARD 1 (BACKSOUND) & CARD 2 (SOUND SALES / POPUP)
     function setupRealtimeListeners() {
       supabaseClient
         .channel('public:status_backsound')
@@ -523,7 +549,9 @@
 
       supabaseClient
         .channel('public:status_soundtwibbon')
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'status_soundtwibbon' }, () => {})
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'status_soundtwibbon' }, () => {
+          // Sinkronisasi status Sound Sales secara real-time
+        })
         .subscribe();
 
       supabaseClient
@@ -533,18 +561,6 @@
             triggerSalesPopup(payload.new);
           }
         })
-        .subscribe();
-
-      supabaseClient.channel('public:all_dash_changes')
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'laporan_sales' }, () => debounceUpdate('sales', fetchSalesData))
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'laporan_departemen' }, () => debounceUpdate('dept', () => { fetchDeptData(); updateGaugeData(); }))
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'mtd_sales' }, () => debounceUpdate('mtdSales', () => { fetchMtdSalesData(); fetchTop1MtdSales(); }))
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'mtd_fp' }, () => debounceUpdate('mtdFp', () => { fetchMtdFurniproData(); fetchTop1MtdFurnipro(); }))
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'mtd_comser' }, () => debounceUpdate('mtdComser', () => { fetchMtdComserData(); fetchTop1MtdComser(); }))
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'daily_furnipro' }, () => debounceUpdate('dailyFp', () => { fetchSalesData(); updateGaugeData(); }))
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'daily_comser' }, () => debounceUpdate('dailyComser', () => { fetchSalesData(); updateGaugeData(); }))
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'target_today' }, () => debounceUpdate('target', updateGaugeData))
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'running_text' }, () => debounceUpdate('running', fetchRunningText))
         .subscribe();
     }
 
@@ -698,59 +714,15 @@
     async function fetchSalesData() {
       await fetchDailyExtras();
       const { data } = await supabaseClient.from('laporan_sales').select('*').order('total', { ascending: false });
-      if (data) {
-        const newJson = JSON.stringify(data);
-        if (newJson !== lastSalesJson) {
-          lastSalesJson = newJson;
-          salesList = data;
-          renderDashboard();
-        }
-      }
+      if (data) { salesList = data; renderDashboard(); }
     }
 
-    // SMART IN-PLACE RENDER UNTUK LIVE TOP SALES (MENCEGAH FOTO RELOAD & FLICKER)
     function renderDashboard() {
       const orig = document.getElementById('tableContentOriginal');
       const clone = document.getElementById('tableContentClone');
       const empty = document.getElementById('emptyStatus');
       if (!salesList || salesList.length === 0) { if(empty) empty.classList.remove('hidden'); return; }
       if(empty) empty.classList.add('hidden');
-
-      const existingRows = orig.children;
-      if (existingRows.length === salesList.length) {
-        salesList.forEach((item, index) => {
-          const rowOrig = orig.children[index];
-          const rowClone = clone.children[index];
-          if (rowOrig && rowClone) {
-            const rank = index + 1;
-            const name = getEmployeeName(item.nip, item.nama);
-            const nip = String(item.nip || '').trim();
-            const qtyFp = furniproMap[nip] || 0;
-            const comserVal = comserMap[nip] || 0;
-
-            if (rowOrig.querySelector('.rank-badge')) rowOrig.querySelector('.rank-badge').innerText = `${rank}.`;
-            if (rowClone.querySelector('.rank-badge')) rowClone.querySelector('.rank-badge').innerText = `${rank}.`;
-
-            if (rowOrig.querySelector('.employee-name')) rowOrig.querySelector('.employee-name').innerText = name;
-            if (rowClone.querySelector('.employee-name')) rowClone.querySelector('.employee-name').innerText = name;
-
-            if (rowOrig.querySelector('.fp-val')) rowOrig.querySelector('.fp-val').innerHTML = `<svg class="w-3.5 h-3.5 text-sky-600 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg> FP: ${qtyFp.toLocaleString('id-ID')}`;
-            if (rowClone.querySelector('.fp-val')) rowClone.querySelector('.fp-val').innerHTML = `<svg class="w-3.5 h-3.5 text-sky-600 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg> FP: ${qtyFp.toLocaleString('id-ID')}`;
-
-            if (rowOrig.querySelector('.comser-val')) rowOrig.querySelector('.comser-val').innerHTML = `<svg class="w-3.5 h-3.5 text-purple-600 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg> Comser: Rp ${comserVal.toLocaleString('id-ID')}`;
-            if (rowClone.querySelector('.comser-val')) rowClone.querySelector('.comser-val').innerHTML = `<svg class="w-3.5 h-3.5 text-purple-600 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg> Comser: Rp ${comserVal.toLocaleString('id-ID')}`;
-
-            const totalText = `Rp ${Number(item.total).toLocaleString('id-ID')}`;
-            if (rowOrig.querySelector('.total-sales-val')) rowOrig.querySelector('.total-sales-val').innerText = totalText;
-            if (rowClone.querySelector('.total-sales-val')) rowClone.querySelector('.total-sales-val').innerText = totalText;
-
-            let cls = rank === 1 ? 'fire-box-1' : rank === 2 ? 'fire-box-2' : rank === 3 ? 'fire-box-3' : 'bg-slate-50 border border-slate-200 rounded-xl';
-            rowOrig.className = `grid grid-cols-12 items-center px-2.5 py-2.5 transition shadow-sm ${cls}`;
-            rowClone.className = `grid grid-cols-12 items-center px-2.5 py-2.5 transition shadow-sm ${cls}`;
-          }
-        });
-        return;
-      }
 
       let html = '';
       salesList.forEach((item, index) => {
@@ -767,24 +739,24 @@
         html += `
           <div class="grid grid-cols-12 items-center px-2.5 py-2.5 transition shadow-sm ${cls}">
             <div class="col-span-4 flex items-center justify-center gap-3">
-              <span class="rank-badge px-2.5 py-1 bg-amber-100 border border-amber-300 text-amber-800 rounded-lg font-bold text-base w-10 text-center shadow-xs">${rank}.</span>
+              <span class="px-2.5 py-1 bg-amber-100 border border-amber-300 text-amber-800 rounded-lg font-bold text-base w-10 text-center shadow-xs">${rank}.</span>
               <div class="relative w-20 h-20 rounded-lg border-2 border-blue-500 bg-slate-200 overflow-hidden shadow-md">
                 <img src="${img}" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='${avatar}';">
               </div>
             </div>
             <div class="col-span-4 pl-2">
-              <div class="employee-name text-slate-900 font-bold text-2xl truncate">${name}</div>
+              <div class="text-slate-900 font-bold text-2xl truncate">${name}</div>
               <div class="flex items-center gap-2 mt-1.5 flex-wrap">
-                <div class="fp-val px-2 py-0.5 bg-sky-100 border border-sky-300 rounded text-xs font-mono font-bold text-sky-800 flex items-center gap-1 shadow-2xs">
-                  <svg class="w-3.5 h-3.5 text-sky-600 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg> FP: ${qtyFp.toLocaleString('id-ID')}
+                <div class="px-2 py-0.5 bg-sky-100 border border-sky-300 rounded text-sm font-mono font-bold text-sky-800 flex items-center gap-1 shadow-2xs">
+                  <i data-lucide="shield-check" class="w-3.5 h-3.5 text-sky-600"></i> FP: ${qtyFp.toLocaleString('id-ID')}
                 </div>
-                <div class="comser-val px-2 py-0.5 bg-purple-100 border border-purple-300 rounded text-xs font-mono font-bold text-purple-800 flex items-center gap-1 shadow-2xs">
-                  <svg class="w-3.5 h-3.5 text-purple-600 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg> Comser: Rp ${comserVal.toLocaleString('id-ID')}
+                <div class="px-2 py-0.5 bg-purple-100 border border-purple-300 rounded text-sm font-mono font-bold text-purple-800 flex items-center gap-1 shadow-2xs">
+                  <i data-lucide="air-vent" class="w-3.5 h-3.5 text-purple-600"></i> Comser: Rp ${comserVal.toLocaleString('id-ID')}
                 </div>
               </div>
             </div>
             <div class="col-span-4 text-right">
-              <span class="total-sales-val inline-block px-3 py-1.5 bg-emerald-100 border border-emerald-300 rounded-lg font-mono font-bold text-emerald-700 text-lg shadow-xs">
+              <span class="inline-block px-3 py-1.5 bg-emerald-100 border border-emerald-300 rounded-lg font-mono font-bold text-emerald-700 text-lg shadow-xs">
                 Rp ${Number(item.total).toLocaleString('id-ID')}
               </span>
             </div>
@@ -793,57 +765,18 @@
       });
       if(orig) orig.innerHTML = html;
       if(clone) clone.innerHTML = html;
+      lucide.createIcons();
     }
 
     async function fetchDeptData() {
       const { data } = await supabaseClient.from('laporan_departemen').select('*').order('exclude_ppn', { ascending: false });
-      if (data) {
-        const newJson = JSON.stringify(data);
-        if (newJson !== lastDeptJson) {
-          lastDeptJson = newJson;
-          deptList = data;
-          renderDeptDashboard();
-        }
-      }
+      if (data) { deptList = data; renderDeptDashboard(); }
     }
 
-    // SMART IN-PLACE RENDER UNTUK SALES DEPARTEMEN
     function renderDeptDashboard() {
       const orig = document.getElementById('tableContentOriginalDept');
       const clone = document.getElementById('tableContentCloneDept');
       if (!orig || !clone || deptList.length === 0) return;
-
-      const existingRows = orig.children;
-      if (existingRows.length === deptList.length) {
-        deptList.forEach((item, index) => {
-          const rowOrig = orig.children[index];
-          const rowClone = clone.children[index];
-          if (rowOrig && rowClone) {
-            const rank = index + 1;
-            const kode = item.kode_dept || '';
-            const nama = item.nama_dept || 'DEPT';
-            const exclude = Number(item.exclude_ppn || 0);
-
-            if (rowOrig.querySelector('.dept-rank')) rowOrig.querySelector('.dept-rank').innerText = `${rank}.`;
-            if (rowClone.querySelector('.dept-rank')) rowClone.querySelector('.dept-rank').innerText = `${rank}.`;
-
-            if (rowOrig.querySelector('.dept-name')) rowOrig.querySelector('.dept-name').innerText = nama;
-            if (rowClone.querySelector('.dept-name')) rowClone.querySelector('.dept-name').innerText = nama;
-
-            if (rowOrig.querySelector('.dept-code')) rowOrig.querySelector('.dept-code').innerText = `CODE: ${kode}`;
-            if (rowClone.querySelector('.dept-code')) rowClone.querySelector('.dept-code').innerText = `CODE: ${kode}`;
-
-            const valText = `Rp ${exclude.toLocaleString('id-ID')}`;
-            if (rowOrig.querySelector('.dept-val')) rowOrig.querySelector('.dept-val').innerText = valText;
-            if (rowClone.querySelector('.dept-val')) rowClone.querySelector('.dept-val').innerText = valText;
-
-            let cls = rank === 1 ? 'fire-box-1' : rank === 2 ? 'fire-box-2' : rank === 3 ? 'fire-box-3' : 'bg-slate-50 border border-slate-200 rounded-lg';
-            rowOrig.className = `grid grid-cols-12 items-center px-3 py-1.5 transition shadow-sm ${cls}`;
-            rowClone.className = `grid grid-cols-12 items-center px-3 py-1.5 transition shadow-sm ${cls}`;
-          }
-        });
-        return;
-      }
 
       let html = '';
       deptList.forEach((item, index) => {
@@ -858,356 +791,223 @@
         html += `
           <div class="grid grid-cols-12 items-center px-3 py-1.5 transition shadow-sm ${cls}">
             <div class="col-span-4 flex items-center justify-center gap-2">
-              <span class="dept-rank font-bold text-base w-5 text-right">${rank}.</span>
+              <span class="font-bold text-base w-5 text-right">${rank}.</span>
               <div class="relative w-12 h-12 rounded-md border-2 border-blue-500 bg-slate-200 overflow-hidden shadow-sm">
                 <img src="${img}" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='${avatar}';">
               </div>
             </div>
             <div class="col-span-4 pl-1">
-              <div class="dept-name text-slate-900 text-base font-semibold truncate">${nama}</div>
-              <div class="dept-code text-xs font-mono text-blue-600 font-bold">CODE: ${kode}</div>
+              <div class="text-slate-900 text-base font-semibold truncate">${nama}</div>
+              <div class="text-sm font-mono text-blue-600 font-bold">CODE: ${kode}</div>
             </div>
-            <div class="dept-val col-span-4 text-right font-mono font-bold text-emerald-600 text-base">
+            <div class="col-span-4 text-right font-mono font-bold text-emerald-600 text-base">
               Rp ${exclude.toLocaleString('id-ID')}
             </div>
           </div>
         `;
       });
       orig.innerHTML = html; clone.innerHTML = html;
+      lucide.createIcons();
     }
 
     async function fetchMtdSalesData() {
       const { data } = await supabaseClient.from('mtd_sales').select('*').order('mtd_total', { ascending: false });
       if (data) {
-        const newJson = JSON.stringify(data);
-        if (newJson !== lastMtdSalesJson) {
-          lastMtdSalesJson = newJson;
-          mtdSalesList = data;
-          renderMtdSales(data);
-        }
-      }
-    }
-
-    // SMART IN-PLACE RENDER UNTUK MTD SALES
-    function renderMtdSales(data) {
-      const orig = document.getElementById('tableContentOriginalMtdSales');
-      const clone = document.getElementById('tableContentCloneMtdSales');
-      if (!orig || !clone || data.length === 0) return;
-
-      const existingRows = orig.children;
-      if (existingRows.length === data.length) {
+        mtdSalesList = data;
+        const orig = document.getElementById('tableContentOriginalMtdSales');
+        const clone = document.getElementById('tableContentCloneMtdSales');
+        if (!orig || !clone || data.length === 0) return;
+        let html = '';
         data.forEach((item, index) => {
-          const rowOrig = orig.children[index];
-          const rowClone = clone.children[index];
-          if (rowOrig && rowClone) {
-            const rank = index + 1;
-            const nip = item.mtd_nip || '';
-            const name = getEmployeeName(nip, item.mtd_nama);
-            const total = Number(item.mtd_total || 0);
+          const rank = index + 1;
+          const nip = item.mtd_nip || '';
+          const name = getEmployeeName(nip, item.mtd_nama);
+          const total = Number(item.mtd_total || 0);
+          const img = `${SUPABASE_URL}/storage/v1/object/public/FOTO SALES/${nip}.jpg`;
+          const avatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=3b82f6&color=fff&size=128`;
+          let cls = rank === 1 ? 'fire-box-1' : rank === 2 ? 'fire-box-2' : rank === 3 ? 'fire-box-3' : 'bg-slate-50 border border-slate-200 rounded-lg';
 
-            if (rowOrig.querySelector('.mtd-sales-rank')) rowOrig.querySelector('.mtd-sales-rank').innerText = `${rank}.`;
-            if (rowClone.querySelector('.mtd-sales-rank')) rowClone.querySelector('.mtd-sales-rank').innerText = `${rank}.`;
-
-            if (rowOrig.querySelector('.mtd-sales-name')) rowOrig.querySelector('.mtd-sales-name').innerText = name;
-            if (rowClone.querySelector('.mtd-sales-name')) rowClone.querySelector('.mtd-sales-name').innerText = name;
-
-            if (rowOrig.querySelector('.mtd-sales-nip')) rowOrig.querySelector('.mtd-sales-nip').innerText = `NIP: ${nip}`;
-            if (rowClone.querySelector('.mtd-sales-nip')) rowClone.querySelector('.mtd-sales-nip').innerText = `NIP: ${nip}`;
-
-            const valText = `Rp ${total.toLocaleString('id-ID')}`;
-            if (rowOrig.querySelector('.mtd-sales-val')) rowOrig.querySelector('.mtd-sales-val').innerText = valText;
-            if (rowClone.querySelector('.mtd-sales-val')) rowClone.querySelector('.mtd-sales-val').innerText = valText;
-
-            let cls = rank === 1 ? 'fire-box-1' : rank === 2 ? 'fire-box-2' : rank === 3 ? 'fire-box-3' : 'bg-slate-50 border border-slate-200 rounded-lg';
-            rowOrig.className = `grid grid-cols-12 items-center px-3 py-1.5 transition shadow-sm ${cls}`;
-            rowClone.className = `grid grid-cols-12 items-center px-3 py-1.5 transition shadow-sm ${cls}`;
-          }
-        });
-        return;
-      }
-
-      let html = '';
-      data.forEach((item, index) => {
-        const rank = index + 1;
-        const nip = item.mtd_nip || '';
-        const name = getEmployeeName(nip, item.mtd_nama);
-        const total = Number(item.mtd_total || 0);
-        const img = `${SUPABASE_URL}/storage/v1/object/public/FOTO SALES/${nip}.jpg`;
-        const avatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=3b82f6&color=fff&size=128`;
-        let cls = rank === 1 ? 'fire-box-1' : rank === 2 ? 'fire-box-2' : rank === 3 ? 'fire-box-3' : 'bg-slate-50 border border-slate-200 rounded-lg';
-
-        html += `
-          <div class="grid grid-cols-12 items-center px-3 py-1.5 transition shadow-sm ${cls}">
-            <div class="col-span-4 flex items-center justify-center gap-2">
-              <span class="mtd-sales-rank font-bold text-base w-5 text-right">${rank}.</span>
-              <div class="relative w-12 h-12 rounded-md border-2 border-blue-500 bg-slate-200 overflow-hidden shadow-sm">
-                <img src="${img}" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='${avatar}';">
+          html += `
+            <div class="grid grid-cols-12 items-center px-3 py-1.5 transition shadow-sm ${cls}">
+              <div class="col-span-4 flex items-center justify-center gap-2">
+                <span class="font-bold text-base w-5 text-right">${rank}.</span>
+                <div class="relative w-12 h-12 rounded-md border-2 border-blue-500 bg-slate-200 overflow-hidden shadow-sm">
+                  <img src="${img}" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='${avatar}';">
+                </div>
+              </div>
+              <div class="col-span-4 pl-1">
+                <div class="text-slate-900 text-base font-semibold truncate">${name}</div>
+                <div class="text-sm font-mono text-blue-600 font-bold">NIP: ${nip}</div>
+              </div>
+              <div class="col-span-4 text-right font-mono font-bold text-emerald-600 text-base">
+                Rp ${total.toLocaleString('id-ID')}
               </div>
             </div>
-            <div class="col-span-4 pl-1">
-              <div class="mtd-sales-name text-slate-900 text-base font-semibold truncate">${name}</div>
-              <div class="mtd-sales-nip text-xs font-mono text-blue-600 font-bold">NIP: ${nip}</div>
-            </div>
-            <div class="mtd-sales-val col-span-4 text-right font-mono font-bold text-emerald-600 text-base">
-              Rp ${total.toLocaleString('id-ID')}
-            </div>
-          </div>
-        `;
-      });
-      orig.innerHTML = html; clone.innerHTML = html;
+          `;
+        });
+        orig.innerHTML = html; clone.innerHTML = html;
+        lucide.createIcons();
+      }
     }
 
     async function fetchMtdFurniproData() {
       const { data } = await supabaseClient.from('mtd_fp').select('*').order('qty_mtdfp', { ascending: false });
       if (data) {
-        const newJson = JSON.stringify(data);
-        if (newJson !== lastMtdFpJson) {
-          lastMtdFpJson = newJson;
-          renderMtdFurnipro(data);
-        }
-      }
-    }
-
-    // SMART IN-PLACE RENDER UNTUK MTD FURNIPRO
-    function renderMtdFurnipro(data) {
-      const orig = document.getElementById('tableContentOriginalMtdFurnipro');
-      const clone = document.getElementById('tableContentCloneMtdFurnipro');
-      if (!orig || !clone || data.length === 0) return;
-
-      const existingRows = orig.children;
-      if (existingRows.length === data.length) {
+        const orig = document.getElementById('tableContentOriginalMtdFurnipro');
+        const clone = document.getElementById('tableContentCloneMtdFurnipro');
+        if (!orig || !clone || data.length === 0) return;
+        let html = '';
         data.forEach((item, index) => {
-          const rowOrig = orig.children[index];
-          const rowClone = clone.children[index];
-          if (rowOrig && rowClone) {
-            const rank = index + 1;
-            const nip = item.nip_mtdfp || '';
-            const name = getEmployeeName(nip, item.nama_mtdfp || item.nama);
-            const qty = Number(item.qty_mtdfp || 0);
+          const rank = index + 1;
+          const nip = item.nip_mtdfp || '';
+          const name = getEmployeeName(nip, item.nama_mtdfp || item.nama);
+          const qty = Number(item.qty_mtdfp || 0);
+          const img = `${SUPABASE_URL}/storage/v1/object/public/FOTO SALES/${nip}.jpg`;
+          const avatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=2563eb&color=fff&size=128`;
+          let cls = rank === 1 ? 'fire-box-1' : rank === 2 ? 'fire-box-2' : rank === 3 ? 'fire-box-3' : 'bg-slate-50 border border-slate-200 rounded-lg';
 
-            if (rowOrig.querySelector('.mtd-fp-rank')) rowOrig.querySelector('.mtd-fp-rank').innerText = `${rank}.`;
-            if (rowClone.querySelector('.mtd-fp-rank')) rowClone.querySelector('.mtd-fp-rank').innerText = `${rank}.`;
-
-            if (rowOrig.querySelector('.mtd-fp-name')) rowOrig.querySelector('.mtd-fp-name').innerText = name;
-            if (rowClone.querySelector('.mtd-fp-name')) rowClone.querySelector('.mtd-fp-name').innerText = name;
-
-            if (rowOrig.querySelector('.mtd-fp-nip')) rowOrig.querySelector('.mtd-fp-nip').innerText = `NIP: ${nip}`;
-            if (rowClone.querySelector('.mtd-fp-nip')) rowClone.querySelector('.mtd-fp-nip').innerText = `NIP: ${nip}`;
-
-            const valText = `${qty.toLocaleString('id-ID')} PCS`;
-            if (rowOrig.querySelector('.mtd-fp-val')) rowOrig.querySelector('.mtd-fp-val').innerText = valText;
-            if (rowClone.querySelector('.mtd-fp-val')) rowClone.querySelector('.mtd-fp-val').innerText = valText;
-
-            let cls = rank === 1 ? 'fire-box-1' : rank === 2 ? 'fire-box-2' : rank === 3 ? 'fire-box-3' : 'bg-slate-50 border border-slate-200 rounded-lg';
-            rowOrig.className = `grid grid-cols-12 items-center px-3 py-1.5 transition shadow-sm ${cls}`;
-            rowClone.className = `grid grid-cols-12 items-center px-3 py-1.5 transition shadow-sm ${cls}`;
-          }
-        });
-        return;
-      }
-
-      let html = '';
-      data.forEach((item, index) => {
-        const rank = index + 1;
-        const nip = item.nip_mtdfp || '';
-        const name = getEmployeeName(nip, item.nama_mtdfp || item.nama);
-        const qty = Number(item.qty_mtdfp || 0);
-        const img = `${SUPABASE_URL}/storage/v1/object/public/FOTO SALES/${nip}.jpg`;
-        const avatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=2563eb&color=fff&size=128`;
-        let cls = rank === 1 ? 'fire-box-1' : rank === 2 ? 'fire-box-2' : rank === 3 ? 'fire-box-3' : 'bg-slate-50 border border-slate-200 rounded-lg';
-
-        html += `
-          <div class="grid grid-cols-12 items-center px-3 py-1.5 transition shadow-sm ${cls}">
-            <div class="col-span-4 flex items-center justify-center gap-2">
-              <span class="mtd-fp-rank font-bold text-base w-5 text-right">${rank}.</span>
-              <div class="relative w-12 h-12 rounded-md border-2 border-blue-500 bg-slate-200 overflow-hidden shadow-sm">
-                <img src="${img}" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='${avatar}';">
+          html += `
+            <div class="grid grid-cols-12 items-center px-3 py-1.5 transition shadow-sm ${cls}">
+              <div class="col-span-4 flex items-center justify-center gap-2">
+                <span class="font-bold text-base w-5 text-right">${rank}.</span>
+                <div class="relative w-12 h-12 rounded-md border-2 border-blue-500 bg-slate-200 overflow-hidden shadow-sm">
+                  <img src="${img}" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='${avatar}';">
+                </div>
+              </div>
+              <div class="col-span-4 pl-1">
+                <div class="text-slate-900 text-base font-semibold truncate">${name}</div>
+                <div class="text-sm font-mono text-blue-600 font-bold">NIP: ${nip}</div>
+              </div>
+              <div class="col-span-4 text-right font-mono font-bold text-blue-600 text-base">
+                ${qty.toLocaleString('id-ID')} PCS
               </div>
             </div>
-            <div class="col-span-4 pl-1">
-              <div class="mtd-fp-name text-slate-900 text-base font-semibold truncate">${name}</div>
-              <div class="mtd-fp-nip text-xs font-mono text-blue-600 font-bold">NIP: ${nip}</div>
-            </div>
-            <div class="mtd-fp-val col-span-4 text-right font-mono font-bold text-blue-600 text-base">
-              ${qty.toLocaleString('id-ID')} PCS
-            </div>
-          </div>
-        `;
-      });
-      orig.innerHTML = html; clone.innerHTML = html;
+          `;
+        });
+        orig.innerHTML = html; clone.innerHTML = html;
+        lucide.createIcons();
+      }
     }
 
     async function fetchMtdComserData() {
       const { data } = await supabaseClient.from('mtd_comser').select('*').order('total_mtdcnc', { ascending: false });
       if (data) {
-        const newJson = JSON.stringify(data);
-        if (newJson !== lastMtdComserJson) {
-          lastMtdComserJson = newJson;
-          renderMtdComser(data);
-        }
-      }
-    }
-
-    // SMART IN-PLACE RENDER UNTUK MTD COMSER
-    function renderMtdComser(data) {
-      const orig = document.getElementById('tableContentOriginalMtdComser');
-      const clone = document.getElementById('tableContentCloneMtdComser');
-      if (!orig || !clone || data.length === 0) return;
-
-      const existingRows = orig.children;
-      if (existingRows.length === data.length) {
+        const orig = document.getElementById('tableContentOriginalMtdComser');
+        const clone = document.getElementById('tableContentCloneMtdComser');
+        if (!orig || !clone || data.length === 0) return;
+        let html = '';
         data.forEach((item, index) => {
-          const rowOrig = orig.children[index];
-          const rowClone = clone.children[index];
-          if (rowOrig && rowClone) {
-            const rank = index + 1;
-            const nip = item.nip_mtdcnc || '';
-            const name = getEmployeeName(nip, item.nama_mtdcnc);
-            const total = Number(item.total_mtdcnc || 0);
+          const rank = index + 1;
+          const nip = item.nip_mtdcnc || '';
+          const name = getEmployeeName(nip, item.nama_mtdcnc);
+          const total = Number(item.total_mtdcnc || 0);
+          const img = `${SUPABASE_URL}/storage/v1/object/public/FOTO SALES/${nip}.jpg`;
+          const avatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=10b981&color=fff&size=128`;
+          let cls = rank === 1 ? 'fire-box-1' : rank === 2 ? 'fire-box-2' : rank === 3 ? 'fire-box-3' : 'bg-slate-50 border border-slate-200 rounded-lg';
 
-            if (rowOrig.querySelector('.mtd-comser-rank')) rowOrig.querySelector('.mtd-comser-rank').innerText = `${rank}.`;
-            if (rowClone.querySelector('.mtd-comser-rank')) rowClone.querySelector('.mtd-comser-rank').innerText = `${rank}.`;
-
-            if (rowOrig.querySelector('.mtd-comser-name')) rowOrig.querySelector('.mtd-comser-name').innerText = name;
-            if (rowClone.querySelector('.mtd-comser-name')) rowClone.querySelector('.mtd-comser-name').innerText = name;
-
-            if (rowOrig.querySelector('.mtd-comser-nip')) rowOrig.querySelector('.mtd-comser-nip').innerText = `NIP: ${nip}`;
-            if (rowClone.querySelector('.mtd-comser-nip')) rowClone.querySelector('.mtd-comser-nip').innerText = `NIP: ${nip}`;
-
-            const valText = `Rp ${total.toLocaleString('id-ID')}`;
-            if (rowOrig.querySelector('.mtd-comser-val')) rowOrig.querySelector('.mtd-comser-val').innerText = valText;
-            if (rowClone.querySelector('.mtd-comser-val')) rowClone.querySelector('.mtd-comser-val').innerText = valText;
-
-            let cls = rank === 1 ? 'fire-box-1' : rank === 2 ? 'fire-box-2' : rank === 3 ? 'fire-box-3' : 'bg-slate-50 border border-slate-200 rounded-lg';
-            rowOrig.className = `grid grid-cols-12 items-center px-3 py-1.5 transition shadow-sm ${cls}`;
-            rowClone.className = `grid grid-cols-12 items-center px-3 py-1.5 transition shadow-sm ${cls}`;
-          }
-        });
-        return;
-      }
-
-      let html = '';
-      data.forEach((item, index) => {
-        const rank = index + 1;
-        const nip = item.nip_mtdcnc || '';
-        const name = getEmployeeName(nip, item.nama_mtdcnc);
-        const total = Number(item.total_mtdcnc || 0);
-        const img = `${SUPABASE_URL}/storage/v1/object/public/FOTO SALES/${nip}.jpg`;
-        const avatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=10b981&color=fff&size=128`;
-        let cls = rank === 1 ? 'fire-box-1' : rank === 2 ? 'fire-box-2' : rank === 3 ? 'fire-box-3' : 'bg-slate-50 border border-slate-200 rounded-lg';
-
-        html += `
-          <div class="grid grid-cols-12 items-center px-3 py-1.5 transition shadow-sm ${cls}">
-            <div class="col-span-4 flex items-center justify-center gap-2">
-              <span class="mtd-comser-rank font-bold text-base w-5 text-right">${rank}.</span>
-              <div class="relative w-12 h-12 rounded-md border-2 border-blue-500 bg-slate-200 overflow-hidden shadow-sm">
-                <img src="${img}" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='${avatar}';">
+          html += `
+            <div class="grid grid-cols-12 items-center px-3 py-1.5 transition shadow-sm ${cls}">
+              <div class="col-span-4 flex items-center justify-center gap-2">
+                <span class="font-bold text-base w-5 text-right">${rank}.</span>
+                <div class="relative w-12 h-12 rounded-md border-2 border-blue-500 bg-slate-200 overflow-hidden shadow-sm">
+                  <img src="${img}" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='${avatar}';">
+                </div>
+              </div>
+              <div class="col-span-4 pl-1">
+                <div class="text-slate-900 text-base font-semibold truncate">${name}</div>
+                <div class="text-sm font-mono text-emerald-600 font-bold">NIP: ${nip}</div>
+              </div>
+              <div class="col-span-4 text-right font-mono font-bold text-emerald-600 text-base">
+                Rp ${total.toLocaleString('id-ID')}
               </div>
             </div>
-            <div class="col-span-4 pl-1">
-              <div class="mtd-comser-name text-slate-900 text-base font-semibold truncate">${name}</div>
-              <div class="mtd-comser-nip text-xs font-mono text-emerald-600 font-bold">NIP: ${nip}</div>
-            </div>
-            <div class="mtd-comser-val col-span-4 text-right font-mono font-bold text-emerald-600 text-base">
-              Rp ${total.toLocaleString('id-ID')}
-            </div>
-          </div>
-        `;
-      });
-      orig.innerHTML = html; clone.innerHTML = html;
+          `;
+        });
+        orig.innerHTML = html; clone.innerHTML = html;
+        lucide.createIcons();
+      }
     }
 
     async function fetchTop1MtdSales() {
       const { data } = await supabaseClient.from('mtd_sales').select('*').order('mtd_total', { ascending: false }).limit(1);
       const container = document.getElementById('mtdTop1Content');
       if (!container || !data || data.length === 0) return;
-      const newJson = JSON.stringify(data[0]);
-      if (newJson !== lastTopSalesJson) {
-        lastTopSalesJson = newJson;
-        const top = data[0];
-        const nip = top.mtd_nip || '-';
-        const name = getEmployeeName(nip, top.mtd_nama);
-        const total = Number(top.mtd_total || 0);
-        const img = `${SUPABASE_URL}/storage/v1/object/public/FOTO SALES/${nip}.jpg`;
-        const avatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=eab308&color=fff&size=128`;
+      const top = data[0];
+      const nip = top.mtd_nip || '-';
+      const name = getEmployeeName(nip, top.mtd_nama);
+      const total = Number(top.mtd_total || 0);
+      const img = `${SUPABASE_URL}/storage/v1/object/public/FOTO SALES/${nip}.jpg`;
+      const avatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=eab308&color=fff&size=128`;
 
-        container.innerHTML = `
-          <div class="flex flex-col items-center justify-center text-center w-full relative px-2">
-            <div class="relative w-40 h-40 rounded-2xl border-4 border-yellow-500 shadow-lg bg-slate-200 overflow-hidden mb-2">
-              <div class="absolute -top-3 left-1/2 -translate-x-1/2 z-20 text-yellow-500">
-                <svg class="w-8 h-8 fill-yellow-400 inline" viewBox="0 0 24 24"><path d="M5 16L3 5l5.5 5L12 4l3.5 6L21 5l-2 11H5zm14 3c0 .6-.4 1-1 1H6c-.6 0-1-.4-1-1v-1h14v1z"/></svg>
-              </div>
-              <img src="${img}" class="w-full h-full object-cover pt-1" onerror="this.onerror=null; this.src='${avatar}';">
-            </div>
-            <div class="text-base font-mono uppercase tracking-widest text-amber-600 font-extrabold mb-0.5">CHAMPION OF THE MONTH</div>
-            <h3 class="text-3xl font-extrabold text-slate-900 mb-0.5 line-clamp-1">${name}</h3>
-            <div class="w-full bg-amber-50 border border-amber-200 rounded-xl p-2.5 shadow-inner">
-              <div class="text-base font-bold text-amber-800 uppercase">TOTAL MTD SALES</div>
-              <div class="text-3xl font-extrabold font-mono text-emerald-600 mt-0.5">Rp ${total.toLocaleString('id-ID')}</div>
-            </div>
+      container.innerHTML = `
+        <div class="flex flex-col items-center justify-center text-center w-full relative px-2">
+          <div class="relative w-40 h-40 rounded-2xl border-4 border-yellow-500 shadow-lg bg-slate-200 overflow-hidden mb-2">
+            <div class="absolute -top-3 left-1/2 -translate-x-1/2 z-20 text-yellow-500"><i data-lucide="crown" class="w-8 h-8 fill-yellow-400"></i></div>
+            <img src="${img}" class="w-full h-full object-cover pt-1" onerror="this.onerror=null; this.src='${avatar}';">
           </div>
-        `;
-      }
+          <div class="text-base font-mono uppercase tracking-widest text-amber-600 font-extrabold mb-0.5">CHAMPION OF THE MONTH</div>
+          <h3 class="text-3xl font-extrabold text-slate-900 mb-0.5 line-clamp-1">${name}</h3>
+          <div class="w-full bg-amber-50 border border-amber-200 rounded-xl p-2.5 shadow-inner">
+            <div class="text-base font-bold text-amber-800 uppercase">TOTAL MTD SALES</div>
+            <div class="text-3xl font-extrabold font-mono text-emerald-600 mt-0.5">Rp ${total.toLocaleString('id-ID')}</div>
+          </div>
+        </div>
+      `;
+      lucide.createIcons();
     }
 
     async function fetchTop1MtdFurnipro() {
       const { data } = await supabaseClient.from('mtd_fp').select('*').order('qty_mtdfp', { ascending: false }).limit(1);
       const container = document.getElementById('furniproTop1Content');
       if (!container || !data || data.length === 0) return;
-      const newJson = JSON.stringify(data[0]);
-      if (newJson !== lastTopFpJson) {
-        lastTopFpJson = newJson;
-        const top = data[0];
-        const nip = top.nip_mtdfp || '-';
-        const name = getEmployeeName(nip, top.nama_mtdfp || top.nama);
-        const qty = Number(top.qty_mtdfp || 0);
-        const img = `${SUPABASE_URL}/storage/v1/object/public/FOTO SALES/${nip}.jpg`;
-        const avatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=2563eb&color=fff&size=128`;
+      const top = data[0];
+      const nip = top.nip_mtdfp || '-';
+      const name = getEmployeeName(nip, top.nama_mtdfp || top.nama);
+      const qty = Number(top.qty_mtdfp || 0);
+      const img = `${SUPABASE_URL}/storage/v1/object/public/FOTO SALES/${nip}.jpg`;
+      const avatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=2563eb&color=fff&size=128`;
 
-        container.innerHTML = `
-          <div class="flex flex-col items-center justify-center text-center w-full relative px-2">
-            <div class="relative w-40 h-40 rounded-2xl border-4 border-blue-500 shadow-lg bg-slate-200 overflow-hidden mb-2">
-              <img src="${img}" class="w-full h-full object-cover pt-1" onerror="this.onerror=null; this.src='${avatar}';">
-            </div>
-            <div class="text-base font-mono uppercase tracking-widest text-blue-600 font-extrabold mb-0.5">CHAMPION FURNIPRO</div>
-            <h3 class="text-3xl font-extrabold text-slate-900 mb-0.5 line-clamp-1">${name}</h3>
-            <div class="w-full bg-blue-50 border border-blue-200 rounded-xl p-2.5 shadow-inner">
-              <div class="text-base font-bold text-blue-800 uppercase">TOTAL MTD FURNIPRO</div>
-              <div class="text-3xl font-extrabold font-mono text-blue-600 mt-0.5">${qty.toLocaleString('id-ID')} PCS</div>
-            </div>
+      container.innerHTML = `
+        <div class="flex flex-col items-center justify-center text-center w-full relative px-2">
+          <div class="relative w-40 h-40 rounded-2xl border-4 border-blue-500 shadow-lg bg-slate-200 overflow-hidden mb-2">
+            <img src="${img}" class="w-full h-full object-cover pt-1" onerror="this.onerror=null; this.src='${avatar}';">
           </div>
-        `;
-      }
+          <div class="text-base font-mono uppercase tracking-widest text-blue-600 font-extrabold mb-0.5">CHAMPION FURNIPRO</div>
+          <h3 class="text-3xl font-extrabold text-slate-900 mb-0.5 line-clamp-1">${name}</h3>
+          <div class="w-full bg-blue-50 border border-blue-200 rounded-xl p-2.5 shadow-inner">
+            <div class="text-base font-bold text-blue-800 uppercase">TOTAL MTD FURNIPRO</div>
+            <div class="text-3xl font-extrabold font-mono text-blue-600 mt-0.5">${qty.toLocaleString('id-ID')} PCS</div>
+          </div>
+        </div>
+      `;
+      lucide.createIcons();
     }
 
     async function fetchTop1MtdComser() {
       const { data } = await supabaseClient.from('mtd_comser').select('*').order('total_mtdcnc', { ascending: false }).limit(1);
       const container = document.getElementById('comserTop1Content');
       if (!container || !data || data.length === 0) return;
-      const newJson = JSON.stringify(data[0]);
-      if (newJson !== lastTopComserJson) {
-        lastTopComserJson = newJson;
-        const top = data[0];
-        const nip = top.nip_mtdcnc || '-';
-        const name = getEmployeeName(nip, top.nama_mtdcnc);
-        const total = Number(top.total_mtdcnc || 0);
-        const img = `${SUPABASE_URL}/storage/v1/object/public/FOTO SALES/${nip}.jpg`;
-        const avatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=10b981&color=fff&size=128`;
+      const top = data[0];
+      const nip = top.nip_mtdcnc || '-';
+      const name = getEmployeeName(nip, top.nama_mtdcnc);
+      const total = Number(top.total_mtdcnc || 0);
+      const img = `${SUPABASE_URL}/storage/v1/object/public/FOTO SALES/${nip}.jpg`;
+      const avatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=10b981&color=fff&size=128`;
 
-        container.innerHTML = `
-          <div class="flex flex-col items-center justify-center text-center w-full relative px-2">
-            <div class="relative w-40 h-40 rounded-2xl border-4 border-emerald-500 shadow-lg bg-slate-200 overflow-hidden mb-2">
-              <img src="${img}" class="w-full h-full object-cover pt-1" onerror="this.onerror=null; this.src='${avatar}';">
-            </div>
-            <div class="text-base font-mono uppercase tracking-widest text-emerald-600 font-extrabold mb-0.5">CHAMPION COMSER</div>
-            <h3 class="text-3xl font-extrabold text-slate-900 mb-0.5 line-clamp-1">${name}</h3>
-            <div class="w-full bg-emerald-50 border border-emerald-200 rounded-xl p-2.5 shadow-inner">
-              <div class="text-base font-bold text-emerald-800 uppercase">TOTAL MTD COMSER</div>
-              <div class="text-3xl font-extrabold font-mono text-emerald-600 mt-0.5">Rp ${total.toLocaleString('id-ID')}</div>
-            </div>
+      container.innerHTML = `
+        <div class="flex flex-col items-center justify-center text-center w-full relative px-2">
+          <div class="relative w-40 h-40 rounded-2xl border-4 border-emerald-500 shadow-lg bg-slate-200 overflow-hidden mb-2">
+            <img src="${img}" class="w-full h-full object-cover pt-1" onerror="this.onerror=null; this.src='${avatar}';">
           </div>
-        `;
-      }
+          <div class="text-base font-mono uppercase tracking-widest text-emerald-600 font-extrabold mb-0.5">CHAMPION COMSER</div>
+          <h3 class="text-3xl font-extrabold text-slate-900 mb-0.5 line-clamp-1">${name}</h3>
+          <div class="w-full bg-emerald-50 border border-emerald-200 rounded-xl p-2.5 shadow-inner">
+            <div class="text-base font-bold text-emerald-800 uppercase">TOTAL MTD COMSER</div>
+            <div class="text-3xl font-extrabold font-mono text-emerald-600 mt-0.5">Rp ${total.toLocaleString('id-ID')}</div>
+          </div>
+        </div>
+      `;
+      lucide.createIcons();
     }
 
     async function fetchRunningText() {
@@ -1215,10 +1015,7 @@
       if (!container) return;
       const { data } = await supabaseClient.from('running_text').select('run_text');
       let texts = data && data.length > 0 ? data.map(i => i.run_text).filter(Boolean) : ["SELAMAT DATANG DI INFORMA MOG MALANG (J382)"];
-      const newTextString = texts.join('    •    ');
-      if (container.innerText !== newTextString) {
-        container.innerHTML = `<span>${newTextString}</span>`;
-      }
+      container.innerHTML = `<span>${texts.join('    •    ')}</span>`;
     }
 
     function startCarouselTimer() {
@@ -1262,28 +1059,26 @@
       let realtime = 0;
       if (deptData) { deptData.forEach(d => { realtime += Number(d.exclude_ppn || 0); }); }
 
+      document.getElementById('gaugeRealtimeValue').innerText = 'Rp ' + realtime.toLocaleString('id-ID');
+      document.getElementById('gaugeTargetValue').innerText = 'Rp ' + target.toLocaleString('id-ID');
+
+      // Fetch Realisasi FP from daily_furnipro (sum qty_fp)
       const { data: furniproData } = await supabaseClient.from('daily_furnipro').select('qty_fp');
       let realtimeFp = 0;
       if (furniproData) {
         furniproData.forEach(item => { realtimeFp += Number(item.qty_fp || 0); });
       }
+      document.getElementById('realtimeFpValue').innerText = realtimeFp.toLocaleString('id-ID') + ' PCS';
+      document.getElementById('targetFpValue').innerText = targetFp.toLocaleString('id-ID') + ' PCS';
 
+      // Fetch Realisasi Comser from daily_comser (sum total_cnc)
       const { data: comserData } = await supabaseClient.from('daily_comser').select('total_cnc');
       let realtimeComser = 0;
       if (comserData) {
         comserData.forEach(item => { realtimeComser += Number(item.total_cnc || 0); });
       }
-
-      const gaugeJson = JSON.stringify({ target, targetFp, targetComser, realtime, realtimeFp, realtimeComser });
-      if (gaugeJson !== lastGaugeJson) {
-        lastGaugeJson = gaugeJson;
-        document.getElementById('gaugeRealtimeValue').innerText = 'Rp ' + realtime.toLocaleString('id-ID');
-        document.getElementById('gaugeTargetValue').innerText = 'Rp ' + target.toLocaleString('id-ID');
-        document.getElementById('realtimeFpValue').innerText = realtimeFp.toLocaleString('id-ID') + ' PCS';
-        document.getElementById('targetFpValue').innerText = targetFp.toLocaleString('id-ID') + ' PCS';
-        document.getElementById('realtimeComserValue').innerText = 'Rp ' + realtimeComser.toLocaleString('id-ID');
-        document.getElementById('targetComserValue').innerText = 'Rp ' + targetComser.toLocaleString('id-ID');
-      }
+      document.getElementById('realtimeComserValue').innerText = 'Rp ' + realtimeComser.toLocaleString('id-ID');
+      document.getElementById('targetComserValue').innerText = 'Rp ' + targetComser.toLocaleString('id-ID');
     }
 
     document.addEventListener("DOMContentLoaded", async () => {
@@ -1292,7 +1087,7 @@
       await fetchKaryawanData();
       setupRealtimeListeners();
       
-      // Load seluruh data awal
+      // Load seluruh data dengan lengkap
       fetchSalesData();
       fetchDeptData();
       fetchMtdSalesData();
