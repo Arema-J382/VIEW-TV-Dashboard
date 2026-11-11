@@ -214,7 +214,7 @@
     </div>
   </div>
 
-  <!-- FULL SCREEN POP UP OVERLAY - MODERN & ENHANCED DESIGN -->
+  <!-- FULL SCREEN POP UP OVERLAY -->
   <div id="salesPopupOverlay" class="fixed inset-0 z-[99999] popup-animated-bg backdrop-blur-xl flex items-center justify-center opacity-0 pointer-events-none transition-all duration-500 scale-95 p-6">
     <div id="confettiContainer" class="absolute inset-0 overflow-hidden pointer-events-none"></div>
     
@@ -481,7 +481,6 @@
     let currentSlide = 0; 
     let popupTimer = null;
 
-    // Cache variable untuk mencegah render ulang/kedipan jika data sama
     let lastSalesJson = '';
     let lastDeptJson = '';
     let lastMtdSalesJson = '';
@@ -491,6 +490,13 @@
     let lastTopFpJson = '';
     let lastTopComserJson = '';
     let lastGaugeJson = '';
+
+    // Debounce timers untuk mencegah spam render / kedip layar akibat event beruntun
+    let debounceTimers = {};
+    function debounceUpdate(key, fn, delay = 1500) {
+      if (debounceTimers[key]) clearTimeout(debounceTimers[key]);
+      debounceTimers[key] = setTimeout(fn, delay);
+    }
 
     function scaleDashboard() {
       const box = document.getElementById('tvAspectRatioBox');
@@ -517,9 +523,7 @@
 
       supabaseClient
         .channel('public:status_soundtwibbon')
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'status_soundtwibbon' }, () => {
-          // Sinkronisasi status Sound Sales secara real-time
-        })
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'status_soundtwibbon' }, () => {})
         .subscribe();
 
       supabaseClient
@@ -531,17 +535,17 @@
         })
         .subscribe();
 
-      // Realtime listener otomatis memperbarui data utama tanpa reload halaman
+      // Menggunakan Debounce pada setiap perubahan Realtime agar tidak terjadi spam render yang bikin TV kedip
       supabaseClient.channel('public:all_dash_changes')
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'laporan_sales' }, () => fetchSalesData())
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'laporan_departemen' }, () => { fetchDeptData(); updateGaugeData(); })
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'mtd_sales' }, () => { fetchMtdSalesData(); fetchTop1MtdSales(); })
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'mtd_fp' }, () => { fetchMtdFurniproData(); fetchTop1MtdFurnipro(); })
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'mtd_comser' }, () => { fetchMtdComserData(); fetchTop1MtdComser(); })
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'daily_furnipro' }, () => { fetchSalesData(); updateGaugeData(); })
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'daily_comser' }, () => { fetchSalesData(); updateGaugeData(); })
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'target_today' }, () => updateGaugeData())
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'running_text' }, () => fetchRunningText())
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'laporan_sales' }, () => debounceUpdate('sales', fetchSalesData))
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'laporan_departemen' }, () => debounceUpdate('dept', () => { fetchDeptData(); updateGaugeData(); }))
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'mtd_sales' }, () => debounceUpdate('mtdSales', () => { fetchMtdSalesData(); fetchTop1MtdSales(); }))
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'mtd_fp' }, () => debounceUpdate('mtdFp', () => { fetchMtdFurniproData(); fetchTop1MtdFurnipro(); }))
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'mtd_comser' }, () => debounceUpdate('mtdComser', () => { fetchMtdComserData(); fetchTop1MtdComser(); }))
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'daily_furnipro' }, () => debounceUpdate('dailyFp', () => { fetchSalesData(); updateGaugeData(); }))
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'daily_comser' }, () => debounceUpdate('dailyComser', () => { fetchSalesData(); updateGaugeData(); }))
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'target_today' }, () => debounceUpdate('target', updateGaugeData))
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'running_text' }, () => debounceUpdate('running', fetchRunningText))
         .subscribe();
     }
 
@@ -724,6 +728,7 @@
         const avatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=0D8ABC&color=fff&size=128`;
         let cls = rank === 1 ? 'fire-box-1' : rank === 2 ? 'fire-box-2' : rank === 3 ? 'fire-box-3' : 'bg-slate-50 border border-slate-200 rounded-xl';
 
+        // Menggunakan Inline SVG murni agar tidak memicu lucide.createIcons() ulang yang menyebabkan kedip
         html += `
           <div class="grid grid-cols-12 items-center px-2.5 py-2.5 transition shadow-sm ${cls}">
             <div class="col-span-4 flex items-center justify-center gap-3">
@@ -736,10 +741,10 @@
               <div class="text-slate-900 font-bold text-2xl truncate">${name}</div>
               <div class="flex items-center gap-2 mt-1.5 flex-wrap">
                 <div class="px-2 py-0.5 bg-sky-100 border border-sky-300 rounded text-xs font-mono font-bold text-sky-800 flex items-center gap-1 shadow-2xs">
-                  <i data-lucide="shield-check" class="w-3.5 h-3.5 text-sky-600"></i> FP: ${qtyFp.toLocaleString('id-ID')}
+                  <svg class="w-3.5 h-3.5 text-sky-600 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg> FP: ${qtyFp.toLocaleString('id-ID')}
                 </div>
                 <div class="px-2 py-0.5 bg-purple-100 border border-purple-300 rounded text-xs font-mono font-bold text-purple-800 flex items-center gap-1 shadow-2xs">
-                  <i data-lucide="air-vent" class="w-3.5 h-3.5 text-purple-600"></i> Comser: Rp ${comserVal.toLocaleString('id-ID')}
+                  <svg class="w-3.5 h-3.5 text-purple-600 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg> Comser: Rp ${comserVal.toLocaleString('id-ID')}
                 </div>
               </div>
             </div>
@@ -753,7 +758,6 @@
       });
       if(orig) orig.innerHTML = html;
       if(clone) clone.innerHTML = html;
-      lucide.createIcons();
     }
 
     async function fetchDeptData() {
@@ -802,7 +806,6 @@
         `;
       });
       orig.innerHTML = html; clone.innerHTML = html;
-      lucide.createIcons();
     }
 
     async function fetchMtdSalesData() {
@@ -844,7 +847,6 @@
             `;
           });
           orig.innerHTML = html; clone.innerHTML = html;
-          lucide.createIcons();
         }
       }
     }
@@ -887,7 +889,6 @@
             `;
           });
           orig.innerHTML = html; clone.innerHTML = html;
-          lucide.createIcons();
         }
       }
     }
@@ -930,7 +931,6 @@
             `;
           });
           orig.innerHTML = html; clone.innerHTML = html;
-          lucide.createIcons();
         }
       }
     }
@@ -952,7 +952,9 @@
         container.innerHTML = `
           <div class="flex flex-col items-center justify-center text-center w-full relative px-2">
             <div class="relative w-40 h-40 rounded-2xl border-4 border-yellow-500 shadow-lg bg-slate-200 overflow-hidden mb-2">
-              <div class="absolute -top-3 left-1/2 -translate-x-1/2 z-20 text-yellow-500"><i data-lucide="crown" class="w-8 h-8 fill-yellow-400"></i></div>
+              <div class="absolute -top-3 left-1/2 -translate-x-1/2 z-20 text-yellow-500">
+                <svg class="w-8 h-8 fill-yellow-400 inline" viewBox="0 0 24 24"><path d="M5 16L3 5l5.5 5L12 4l3.5 6L21 5l-2 11H5zm14 3c0 .6-.4 1-1 1H6c-.6 0-1-.4-1-1v-1h14v1z"/></svg>
+              </div>
               <img src="${img}" class="w-full h-full object-cover pt-1" onerror="this.onerror=null; this.src='${avatar}';">
             </div>
             <div class="text-base font-mono uppercase tracking-widest text-amber-600 font-extrabold mb-0.5">CHAMPION OF THE MONTH</div>
@@ -963,7 +965,6 @@
             </div>
           </div>
         `;
-        lucide.createIcons();
       }
     }
 
@@ -994,7 +995,6 @@
             </div>
           </div>
         `;
-        lucide.createIcons();
       }
     }
 
@@ -1025,7 +1025,6 @@
             </div>
           </div>
         `;
-        lucide.createIcons();
       }
     }
 
@@ -1111,7 +1110,7 @@
       await fetchKaryawanData();
       setupRealtimeListeners();
       
-      // Load seluruh data dengan lengkap
+      // Load seluruh data awal
       fetchSalesData();
       fetchDeptData();
       fetchMtdSalesData();
