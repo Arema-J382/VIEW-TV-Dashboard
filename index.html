@@ -200,7 +200,7 @@
     }
     @keyframes raysSpin { to { transform: translate(-50%, -50%) rotate(360deg); } }
     .popup-rays {
-      position: absolute; top: 50%; left: 50%; width: 2600px; height: 2600px; pointer-events: none;
+      position: absolute; top: 50%; left: 50%; width: 2200px; height: 2200px; pointer-events: none;
       transform: translate(-50%, -50%);
       background: repeating-conic-gradient(from 0deg, rgba(250,204,21,0.10) 0deg 6deg, transparent 6deg 18deg);
       -webkit-mask-image: radial-gradient(circle, #000 0%, transparent 62%);
@@ -287,26 +287,32 @@
     @keyframes popZoom { from { opacity: 0; transform: scale(0.6) rotate(-6deg); } to { opacity: 1; transform: none; } }
     @keyframes popUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: none; } }
     @keyframes popRight { from { opacity: 0; transform: translateX(90px); } to { opacity: 1; transform: none; } }
-    #salesPopupOverlay.popup-live #popupCard { animation: popCardIn 0.8s cubic-bezier(.16,1,.3,1) both; }
-    #salesPopupOverlay.popup-live .popup-badge { animation: popDrop 0.7s cubic-bezier(.16,1,.3,1) 0.35s both; }
-    #salesPopupOverlay.popup-live .popup-photo-wrap { animation: popZoom 0.9s cubic-bezier(.16,1,.3,1) 0.25s both; }
-    #salesPopupOverlay.popup-live .popup-congrats { animation: popUp 0.6s ease-out 0.45s both; }
-    #salesPopupOverlay.popup-live .popup-name-row { animation: popUp 0.7s ease-out 0.55s both; }
-    #salesPopupOverlay.popup-live .popup-chip { animation: popUp 0.7s ease-out 0.65s both; }
-    #salesPopupOverlay.popup-live .popup-row:nth-child(1) { animation: popRight 0.7s cubic-bezier(.16,1,.3,1) 0.8s both; }
-    #salesPopupOverlay.popup-live .popup-row:nth-child(2) { animation: popRight 0.7s cubic-bezier(.16,1,.3,1) 0.95s both; }
-    #salesPopupOverlay.popup-live .popup-row:nth-child(3) { animation: popRight 0.7s cubic-bezier(.16,1,.3,1) 1.1s both; }
-    #salesPopupOverlay.popup-live .popup-footer { animation: popUp 0.7s ease-out 1.2s both; }
+    #salesPopupOverlay.popup-live #popupCard { animation: popCardIn 0.35s cubic-bezier(.16,1,.3,1) both; }
+    #salesPopupOverlay.popup-live .popup-badge { animation: popDrop 0.4s cubic-bezier(.16,1,.3,1) 0.1s both; }
+    #salesPopupOverlay.popup-live .popup-photo-wrap { animation: popZoom 0.45s cubic-bezier(.16,1,.3,1) 0.05s both; }
+    #salesPopupOverlay.popup-live .popup-congrats { animation: popUp 0.35s ease-out 0.1s both; }
+    #salesPopupOverlay.popup-live .popup-name-row { animation: popUp 0.35s ease-out 0.15s both; }
+    #salesPopupOverlay.popup-live .popup-chip { animation: popUp 0.35s ease-out 0.2s both; }
+    #salesPopupOverlay.popup-live .popup-row:nth-child(1) { animation: popRight 0.4s cubic-bezier(.16,1,.3,1) 0.25s both; }
+    #salesPopupOverlay.popup-live .popup-row:nth-child(2) { animation: popRight 0.4s cubic-bezier(.16,1,.3,1) 0.32s both; }
+    #salesPopupOverlay.popup-live .popup-row:nth-child(3) { animation: popRight 0.4s cubic-bezier(.16,1,.3,1) 0.39s both; }
+    #salesPopupOverlay.popup-live .popup-footer { animation: popUp 0.35s ease-out 0.45s both; }
     #salesPopupOverlay.popup-live .popup-progress-fill { animation: progressDrain 10s linear forwards; }
 
     /* Saat pop-up tersembunyi: benar-benar tidak digambar & semua animasi dijeda (anti-kedip) */
-    #salesPopupOverlay { transition: opacity 0.5s ease, transform 0.5s ease, visibility 0s linear 0s; }
+    #salesPopupOverlay { transition: opacity 0.25s ease, transform 0.25s ease, visibility 0s linear 0s; }
     #salesPopupOverlay.opacity-0 {
       visibility: hidden;
-      transition: opacity 0.5s ease, transform 0.5s ease, visibility 0s linear 0.5s;
+      transition: opacity 0.25s ease, transform 0.25s ease, visibility 0s linear 0.25s;
     }
     #salesPopupOverlay.opacity-0, #salesPopupOverlay.opacity-0 * { animation-play-state: paused !important; }
     #salesPopupOverlay, #salesPopupOverlay > div { -webkit-backdrop-filter: none !important; backdrop-filter: none !important; }
+
+    /* PERFORMA TV: saat pop-up tampil, animasi dashboard di belakangnya dijeda agar CPU/GPU TV fokus ke pop-up */
+    body.popup-open #tvAspectRatioBox, body.popup-open #tvAspectRatioBox * { animation-play-state: paused !important; }
+
+    /* Foto pop-up muncul halus setelah siap (tanpa kedip foto lama / foto kosong) */
+    #popupFoto { transition: opacity 0.2s ease; }
   </style>
 </head>
 <body class="bg-slate-950 text-slate-800 select-none overflow-hidden m-0 p-0">
@@ -597,6 +603,9 @@
     let popupTimer = null;
     let popupActive = false;
     let popupCountInterval = null;
+    let popupToken = 0;              // penanda pop-up terbaru (mencegah foto/suara pop-up lama menimpa yang baru)
+    let soundSalesUrl = '';          // URL sound sales aktif (di-cache agar pop-up tidak menunggu query database)
+    let soundSalesLoaded = false;    // true bila konfigurasi sound sales sudah pernah dimuat
 
     // Skala otomatis: kanvas 1920x1080 dipaskan ke layar TV apa pun (tanpa terpotong).
     // SAFE_MARGIN = jarak aman tepi layar (1% per sisi) untuk TV yang memiliki overscan.
@@ -711,6 +720,7 @@
       const overlay = document.getElementById('audioUnlockOverlay');
       if (overlay) { overlay.style.opacity = '0'; overlay.style.pointerEvents = 'none'; setTimeout(() => { overlay.style.display = 'none'; }, 500); }
       syncBacksoundState();
+      preloadSoundSales();
     }
 
     // Klik mouse, sentuh layar, maupun tombol apa pun pada remote akan membuka kunci audio
@@ -738,7 +748,8 @@
       supabaseClient
         .channel('public:status_soundtwibbon')
         .on('postgres_changes', { event: '*', schema: 'public', table: 'status_soundtwibbon' }, () => {
-          // Sinkronisasi status Sound Sales secara real-time
+          // Sinkronisasi status Sound Sales secara real-time (cache diperbarui di latar belakang)
+          loadSoundSalesConfig();
         })
         .subscribe();
 
@@ -776,11 +787,57 @@
       } catch (e) { console.warn('Gagal sinkron backsound:', e); }
     }
 
+    // ===== SOUND SALES: konfigurasi di-cache & di-preload agar pop-up TIDAK menunggu query database =====
+    async function loadSoundSalesConfig() {
+      try {
+        const { data: soundData } = await supabaseClient
+          .from('status_soundtwibbon')
+          .select('*')
+          .eq('bucket_nametw', 'SOUND SALES')
+          .eq('status_lagutw', 'AKTIF')
+          .maybeSingle();
+
+        let url = '';
+        if (soundData && soundData.nama_lagutw) {
+          const { data: pubSound } = supabaseClient.storage.from('SOUND SALES').getPublicUrl(soundData.nama_lagutw);
+          if (pubSound && pubSound.publicUrl) url = pubSound.publicUrl;
+        }
+        soundSalesUrl = url;
+        soundSalesLoaded = true;
+        preloadSoundSales();
+      } catch (e) { console.warn('Gagal memuat sound sales:', e); }
+    }
+
+    function applySoundSalesSrc() {
+      const a = document.getElementById('audioSoundSales');
+      if (!a || !soundSalesUrl) return false;
+      if (a.getAttribute('data-url') !== soundSalesUrl) {
+        a.setAttribute('data-url', soundSalesUrl);
+        a.src = soundSalesUrl;
+        a.load();
+      }
+      return true;
+    }
+
+    // Preload file suara di latar belakang (hanya setelah audio di-unlock, agar tidak ada suara bocor saat unlock)
+    function preloadSoundSales() {
+      if (audioUnlocked) applySoundSalesSrc();
+    }
+
+    function playSoundSales() {
+      const a = document.getElementById('audioSoundSales');
+      if (!a || !applySoundSalesSrc()) return;
+      try { a.currentTime = 0; } catch (e) {}
+      a.dataset.want = '1';
+      playSafe(a);
+    }
+
     async function triggerSalesPopup(data) {
       if (!data) return;
       const overlay = document.getElementById('salesPopupOverlay');
       const audioBacksound = document.getElementById('audioBacksound');
       const audioSoundSales = document.getElementById('audioSoundSales');
+      const myToken = ++popupToken;
 
       const nip = data.nip || '';
       const nama = getEmployeeName(nip, data.nama);
@@ -788,10 +845,18 @@
       const qtyFp = data.qtyfp || '';
       const valComser = data.valuecnc || '';
 
+      // FOTO: dimuat di latar belakang, pop-up TIDAK menunggu foto selesai diunduh
       const fotoEl = document.getElementById('popupFoto');
       const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(nama)}&background=0D8ABC&color=fff&size=400`;
-      fotoEl.onerror = function () { this.onerror = null; this.src = avatarUrl; };
-      fotoEl.src = `${SUPABASE_URL}/storage/v1/object/public/FOTO SALES/${nip}.jpg`;
+      const fotoUrl = `${SUPABASE_URL}/storage/v1/object/public/FOTO SALES/${nip}.jpg`;
+      fotoEl.onerror = function () { this.onerror = null; this.src = avatarUrl; this.style.opacity = '1'; };
+      fotoEl.style.opacity = '0';
+      const preFoto = new Image();
+      preFoto.onload = () => { if (myToken !== popupToken) return; fotoEl.src = fotoUrl; fotoEl.style.opacity = '1'; };
+      preFoto.onerror = () => { if (myToken !== popupToken) return; fotoEl.src = avatarUrl; fotoEl.style.opacity = '1'; };
+      preFoto.src = fotoUrl;
+      setTimeout(() => { if (myToken === popupToken) fotoEl.style.opacity = '1'; }, 1500);
+
       document.getElementById('popupNama').innerText = nama;
       document.getElementById('popupNip').innerText = `NIP: ${nip}`;
 
@@ -803,41 +868,28 @@
       if (qtyFp) { document.getElementById('popupQtyFp').innerText = qtyFp; boxFp.classList.remove('hidden'); } else { boxFp.classList.add('hidden'); }
       if (valComser) { document.getElementById('popupValueComser').innerText = valComser; boxComser.classList.remove('hidden'); } else { boxComser.classList.add('hidden'); }
 
-      generateConfetti();
       popupActive = true;
       audioBacksound.dataset.want = '0';
       audioBacksound.pause();
 
-      try {
-        const { data: soundData } = await supabaseClient
-          .from('status_soundtwibbon')
-          .select('*')
-          .eq('bucket_nametw', 'SOUND SALES')
-          .eq('status_lagutw', 'AKTIF')
-          .maybeSingle();
-
-        if (soundData && soundData.nama_lagutw) {
-          const { data: pubSound } = supabaseClient.storage.from('SOUND SALES').getPublicUrl(soundData.nama_lagutw);
-          if (pubSound && pubSound.publicUrl) {
-            if (audioSoundSales.getAttribute('data-url') !== pubSound.publicUrl) {
-              audioSoundSales.setAttribute('data-url', pubSound.publicUrl);
-              audioSoundSales.src = pubSound.publicUrl;
-              audioSoundSales.load();
-            } else {
-              try { audioSoundSales.currentTime = 0; } catch (e) {}
-            }
-            audioSoundSales.dataset.want = '1';
-            playSafe(audioSoundSales);
-          }
-        }
-      } catch (e) { console.warn('Gagal memuat sound sales:', e); }
-
+      // TAMPILKAN POP-UP SEKARANG JUGA (tidak lagi menunggu query sound ke database)
+      document.body.classList.add('popup-open');
       overlay.classList.remove('opacity-0', 'pointer-events-none', 'scale-95');
       overlay.classList.add('opacity-100', 'scale-100');
       // Mulai ulang animasi masuk pop-up setiap kali muncul
       overlay.classList.remove('popup-live');
       void overlay.offsetWidth;
       overlay.classList.add('popup-live');
+
+      // Confetti dibuat setelah pop-up tampil agar tidak menahan render pertama
+      setTimeout(() => { if (myToken === popupToken && popupActive) generateConfetti(); }, 60);
+
+      // SOUND: pakai cache (instan). Bila belum ada cache, muat di latar belakang lalu putar.
+      if (soundSalesLoaded) {
+        playSoundSales();
+      } else {
+        loadSoundSalesConfig().then(() => { if (popupActive && myToken === popupToken) playSoundSales(); });
+      }
 
       let countdown = 10;
       document.getElementById('popupCountdown').innerText = countdown;
@@ -854,12 +906,14 @@
         overlay.classList.remove('opacity-100', 'scale-100');
         overlay.classList.add('opacity-0', 'pointer-events-none', 'scale-95');
         popupActive = false;
+        document.body.classList.remove('popup-open');
         setTimeout(() => { if (!popupActive) overlay.classList.remove('popup-live'); }, 700);
 
         audioSoundSales.dataset.want = '0';
         audioSoundSales.pause();
         try { audioSoundSales.currentTime = 0; } catch (e) {}
         syncBacksoundState();
+        loadSoundSalesConfig(); // segarkan cache sound di latar belakang untuk pop-up berikutnya
 
         try { await supabaseClient.from('popup_twibbon').delete().eq('nip', nip); } catch (e) {}
       }, 10000);
@@ -869,7 +923,7 @@
       const container = document.getElementById('confettiContainer');
       container.innerHTML = '';
       const colors = ['#eab308', '#3b82f6', '#10b981', '#ec4899', '#8b5cf6', '#f97316', '#fde047', '#ffffff'];
-      for (let i = 0; i < 70; i++) {
+      for (let i = 0; i < 45; i++) {
         const div = document.createElement('div');
         div.className = 'confetti-piece';
         const size = 8 + Math.random() * 10;
@@ -1306,8 +1360,9 @@
       lucide.createIcons();
       scaleDashboard();
       { const ov = document.getElementById('audioUnlockOverlay'); if (ov && ov.focus) ov.focus(); }
-      await fetchKaryawanData();
       setupRealtimeListeners();
+      loadSoundSalesConfig();
+      await fetchKaryawanData();
       
       // Load seluruh data dengan lengkap
       fetchSalesData();
