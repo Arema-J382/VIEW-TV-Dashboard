@@ -514,6 +514,65 @@
     let currentSlide = 0; 
     let popupTimer = null;
 
+    // Ganti isi elemen HANYA jika berubah -> tidak ada kedip/reload foto saat data sama
+    function setHtmlIfChanged(el, html) {
+      if (!el) return;
+      if (el.__lastHtml === html) return;
+      el.__lastHtml = html;
+      el.innerHTML = html;
+    }
+
+    // ===== REALTIME SEMUA TABEL =====
+    const _debounceTimers = {};
+    function debounced(key, fn, ms = 400) {
+      clearTimeout(_debounceTimers[key]);
+      _debounceTimers[key] = setTimeout(async () => {
+        try { await fn(); } catch (e) { console.warn('Refresh gagal:', key, e); }
+      }, ms);
+    }
+
+    function refreshAllData() {
+      fetchSalesData();
+      fetchDeptData();
+      fetchMtdSalesData();
+      fetchMtdFurniproData();
+      fetchMtdComserData();
+      fetchTop1MtdSales();
+      fetchTop1MtdFurnipro();
+      fetchTop1MtdComser();
+      fetchRunningText();
+      updateGaugeData();
+    }
+
+    function subscribeTable(table, handler) {
+      supabaseClient
+        .channel('rt_data_' + table)
+        .on('postgres_changes', { event: '*', schema: 'public', table: table }, () => handler())
+        .subscribe(status => {
+          if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+            console.warn('Realtime bermasalah pada tabel', table, status);
+          }
+        });
+    }
+
+    function setupDataRealtime() {
+      subscribeTable('laporan_sales', () => debounced('sales', fetchSalesData));
+      subscribeTable('daily_furnipro', () => { debounced('sales', fetchSalesData); debounced('gauge', updateGaugeData); });
+      subscribeTable('daily_comser', () => { debounced('sales', fetchSalesData); debounced('gauge', updateGaugeData); });
+      subscribeTable('laporan_departemen', () => { debounced('dept', fetchDeptData); debounced('gauge', updateGaugeData); });
+      subscribeTable('target_today', () => debounced('gauge', updateGaugeData));
+      subscribeTable('mtd_sales', () => { debounced('mtdSales', fetchMtdSalesData); debounced('top1Sales', fetchTop1MtdSales); });
+      subscribeTable('mtd_fp', () => { debounced('mtdFp', fetchMtdFurniproData); debounced('top1Fp', fetchTop1MtdFurnipro); });
+      subscribeTable('mtd_comser', () => { debounced('mtdCnc', fetchMtdComserData); debounced('top1Cnc', fetchTop1MtdComser); });
+      subscribeTable('running_text', () => debounced('runText', fetchRunningText));
+      subscribeTable('data_karyawan', () => debounced('karyawan', async () => { await fetchKaryawanData(); refreshAllData(); }));
+
+      // Cadangan: sinkron ulang berkala (aman, tanpa kedip) bila koneksi realtime sempat terputus
+      setInterval(refreshAllData, 60000);
+      // Sinkron ulang saat koneksi internet kembali
+      window.addEventListener('online', () => debounced('online', refreshAllData, 1000));
+    }
+
     // Skala otomatis: kanvas 1920x1080 dipaskan ke layar TV apa pun (tanpa terpotong).
     // SAFE_MARGIN = jarak aman tepi layar (1% per sisi) untuk TV yang memiliki overscan.
     const SAFE_MARGIN = 0.01;
@@ -763,8 +822,8 @@
           </div>
         `;
       });
-      if(orig) orig.innerHTML = html;
-      if(clone) clone.innerHTML = html;
+      if(orig) setHtmlIfChanged(orig, html);
+      if(clone) setHtmlIfChanged(clone, html);
       lucide.createIcons();
     }
 
@@ -806,7 +865,7 @@
           </div>
         `;
       });
-      orig.innerHTML = html; clone.innerHTML = html;
+      setHtmlIfChanged(orig, html); setHtmlIfChanged(clone, html);
       lucide.createIcons();
     }
 
@@ -845,7 +904,7 @@
             </div>
           `;
         });
-        orig.innerHTML = html; clone.innerHTML = html;
+        setHtmlIfChanged(orig, html); setHtmlIfChanged(clone, html);
         lucide.createIcons();
       }
     }
@@ -884,7 +943,7 @@
             </div>
           `;
         });
-        orig.innerHTML = html; clone.innerHTML = html;
+        setHtmlIfChanged(orig, html); setHtmlIfChanged(clone, html);
         lucide.createIcons();
       }
     }
@@ -923,7 +982,7 @@
             </div>
           `;
         });
-        orig.innerHTML = html; clone.innerHTML = html;
+        setHtmlIfChanged(orig, html); setHtmlIfChanged(clone, html);
         lucide.createIcons();
       }
     }
@@ -939,7 +998,7 @@
       const img = `${SUPABASE_URL}/storage/v1/object/public/FOTO SALES/${nip}.jpg`;
       const avatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=eab308&color=fff&size=128`;
 
-      container.innerHTML = `
+      setHtmlIfChanged(container, `
         <div class="flex flex-col items-center justify-center text-center w-full relative px-2">
           <div class="relative w-40 h-40 rounded-2xl border-4 border-yellow-500 shadow-lg bg-slate-200 overflow-hidden mb-2">
             <div class="absolute -top-3 left-1/2 -translate-x-1/2 z-20 text-yellow-500"><i data-lucide="crown" class="w-8 h-8 fill-yellow-400"></i></div>
@@ -952,7 +1011,7 @@
             <div class="text-3xl font-extrabold font-mono text-emerald-600 mt-0.5">Rp ${total.toLocaleString('id-ID')}</div>
           </div>
         </div>
-      `;
+      `);
       lucide.createIcons();
     }
 
@@ -967,7 +1026,7 @@
       const img = `${SUPABASE_URL}/storage/v1/object/public/FOTO SALES/${nip}.jpg`;
       const avatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=2563eb&color=fff&size=128`;
 
-      container.innerHTML = `
+      setHtmlIfChanged(container, `
         <div class="flex flex-col items-center justify-center text-center w-full relative px-2">
           <div class="relative w-40 h-40 rounded-2xl border-4 border-blue-500 shadow-lg bg-slate-200 overflow-hidden mb-2">
             <img src="${img}" class="w-full h-full object-cover pt-1" onerror="this.onerror=null; this.src='${avatar}';">
@@ -979,7 +1038,7 @@
             <div class="text-3xl font-extrabold font-mono text-blue-600 mt-0.5">${qty.toLocaleString('id-ID')} PCS</div>
           </div>
         </div>
-      `;
+      `);
       lucide.createIcons();
     }
 
@@ -994,7 +1053,7 @@
       const img = `${SUPABASE_URL}/storage/v1/object/public/FOTO SALES/${nip}.jpg`;
       const avatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=10b981&color=fff&size=128`;
 
-      container.innerHTML = `
+      setHtmlIfChanged(container, `
         <div class="flex flex-col items-center justify-center text-center w-full relative px-2">
           <div class="relative w-40 h-40 rounded-2xl border-4 border-emerald-500 shadow-lg bg-slate-200 overflow-hidden mb-2">
             <img src="${img}" class="w-full h-full object-cover pt-1" onerror="this.onerror=null; this.src='${avatar}';">
@@ -1006,7 +1065,7 @@
             <div class="text-3xl font-extrabold font-mono text-emerald-600 mt-0.5">Rp ${total.toLocaleString('id-ID')}</div>
           </div>
         </div>
-      `;
+      `);
       lucide.createIcons();
     }
 
@@ -1015,7 +1074,7 @@
       if (!container) return;
       const { data } = await supabaseClient.from('running_text').select('run_text');
       let texts = data && data.length > 0 ? data.map(i => i.run_text).filter(Boolean) : ["SELAMAT DATANG DI INFORMA MOG MALANG (J382)"];
-      container.innerHTML = `<span>${texts.join('    •    ')}</span>`;
+      setHtmlIfChanged(container, `<span>${texts.join('    •    ')}</span>`);
     }
 
     function startCarouselTimer() {
@@ -1086,6 +1145,7 @@
       scaleDashboard();
       await fetchKaryawanData();
       setupRealtimeListeners();
+      setupDataRealtime();
       
       // Load seluruh data dengan lengkap
       fetchSalesData();
