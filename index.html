@@ -190,27 +190,114 @@
       z-index: 100000;
     }
 
-    /* CUSTOM ANIMATION UNTUK POP-UP MODERN */
-    @keyframes gradientBG {
-      0% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
-      100% { background-position: 0% 50%; }
+    /* ===== POP-UP CHAMPION: MODERN, DINAMIS & ELEGAN (hanya transform/opacity agar ringan di TV) ===== */
+    .popup-modern-bg {
+      overflow: hidden;
+      background:
+        radial-gradient(ellipse at 18% 12%, rgba(59,130,246,0.35), transparent 55%),
+        radial-gradient(ellipse at 85% 88%, rgba(168,85,247,0.35), transparent 55%),
+        radial-gradient(ellipse at 50% 50%, #131a3d 0%, #070b1f 70%, #02030c 100%);
     }
+    @keyframes raysSpin { to { transform: translate(-50%, -50%) rotate(360deg); } }
+    .popup-rays {
+      position: absolute; top: 50%; left: 50%; width: 2600px; height: 2600px; pointer-events: none;
+      transform: translate(-50%, -50%);
+      background: repeating-conic-gradient(from 0deg, rgba(250,204,21,0.10) 0deg 6deg, transparent 6deg 18deg);
+      -webkit-mask-image: radial-gradient(circle, #000 0%, transparent 62%);
+      mask-image: radial-gradient(circle, #000 0%, transparent 62%);
+      animation: raysSpin 60s linear infinite; will-change: transform;
+    }
+    @keyframes orbFloat { 0%,100% { transform: translate3d(0,0,0) scale(1); } 50% { transform: translate3d(40px,-30px,0) scale(1.15); } }
+    .popup-orb { position: absolute; border-radius: 50%; pointer-events: none; will-change: transform; animation: orbFloat 8s ease-in-out infinite; }
+    .popup-orb-1 { width: 520px; height: 520px; left: -120px; top: -120px; background: radial-gradient(circle, rgba(59,130,246,0.45), transparent 70%); }
+    .popup-orb-2 { width: 620px; height: 620px; right: -160px; bottom: -180px; background: radial-gradient(circle, rgba(236,72,153,0.35), transparent 70%); animation-delay: -4s; }
 
-    .popup-animated-bg {
-      background: linear-gradient(-45deg, #0f172a, #1e1b4b, #311042, #1e3a8a);
-      background-size: 400% 400%;
-      animation: gradientBG 12s ease infinite;
+    /* Kartu utama (didesain pada kanvas 1920px, lalu di-scale otomatis oleh --tv-scale) */
+    #popupCard { transform: scale(var(--tv-scale, 1)); transform-origin: center center; }
+    .popup-card {
+      position: relative; flex-shrink: 0; width: 1560px; padding: 76px 64px 44px; box-sizing: border-box;
+      display: flex; flex-direction: column; align-items: center;
+      border-radius: 48px; border: 3px solid transparent;
+      background: linear-gradient(160deg, rgba(17,24,56,0.96), rgba(32,16,66,0.96)) padding-box,
+                  linear-gradient(135deg, #fde047, #f59e0b 30%, #3b82f6 65%, #a855f7) border-box;
+      box-shadow: 0 40px 90px -20px rgba(0,0,0,0.8);
     }
+    .popup-card::after {
+      content: ""; position: absolute; top: -3px; left: -3px; right: -3px; bottom: -3px; border-radius: inherit; pointer-events: none;
+      box-shadow: 0 0 50px rgba(250,204,21,0.55), 0 0 110px rgba(99,102,241,0.45);
+      opacity: 0.4; animation: glowFade 3s infinite ease-in-out; will-change: opacity;
+    }
+    .popup-sheen-clip { position: absolute; top: 0; left: 0; right: 0; bottom: 0; border-radius: inherit; overflow: hidden; pointer-events: none; }
+    @keyframes sheenSweep { 0% { transform: translateX(-150%) skewX(-20deg); } 60%, 100% { transform: translateX(520%) skewX(-20deg); } }
+    .popup-sheen { position: absolute; top: 0; bottom: 0; left: 0; width: 22%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.10), transparent); animation: sheenSweep 6s ease-in-out infinite; will-change: transform; }
 
-    @keyframes pulseGlow {
-      0%, 100% { box-shadow: 0 0 25px rgba(59, 130, 246, 0.4), 0 0 50px rgba(147, 51, 234, 0.2); }
-      50% { box-shadow: 0 0 45px rgba(59, 130, 246, 0.8), 0 0 80px rgba(147, 51, 234, 0.5); }
+    .popup-badge-wrap { position: absolute; top: -38px; left: 0; right: 0; display: flex; justify-content: center; z-index: 5; }
+    .popup-badge {
+      display: flex; align-items: center; gap: 16px; padding: 14px 48px; border-radius: 999px;
+      font-size: 28px; font-weight: 900; letter-spacing: 0.25em; text-transform: uppercase; color: #0f172a;
+      background: linear-gradient(90deg, #f59e0b, #fde047, #f59e0b); border: 3px solid #fff;
+      box-shadow: 0 12px 40px -6px rgba(250,204,21,0.7);
     }
+    .popup-badge svg { width: 32px; height: 32px; color: #0f172a; }
 
-    .popup-card-glow {
-      animation: pulseGlow 3s infinite ease-in-out;
-    }
+    .popup-main { display: flex; align-items: center; gap: 64px; width: 100%; }
+    .popup-photo-wrap { position: relative; width: 440px; height: 440px; flex-shrink: 0; }
+    .popup-photo-ring { position: absolute; top: 0; left: 0; right: 0; bottom: 0; border-radius: 44px; overflow: hidden; isolation: isolate; box-shadow: 0 25px 60px -15px rgba(250,204,21,0.5); }
+    @keyframes ringSpin { to { transform: rotate(360deg); } }
+    .popup-photo-ring::before { content: ""; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: conic-gradient(#fde047, #3b82f6, #a855f7, #ec4899, #fde047); animation: ringSpin 6s linear infinite; will-change: transform; }
+    .popup-photo-inner { position: absolute; top: 9px; left: 9px; right: 9px; bottom: 9px; border-radius: 36px; overflow: hidden; background: #0f172a; }
+    @keyframes crownBob { 0%,100% { transform: translateY(0) rotate(-6deg); } 50% { transform: translateY(-12px) rotate(6deg); } }
+    .popup-crown { position: absolute; top: -58px; left: 50%; margin-left: -40px; width: 80px; height: 80px; z-index: 6; animation: crownBob 2.4s ease-in-out infinite; filter: drop-shadow(0 6px 14px rgba(250,204,21,0.8)); }
+    .popup-crown svg { width: 80px; height: 80px; color: #fde047; fill: #facc15; }
+    @keyframes twinkle { 0%,100% { opacity: 0.2; transform: scale(0.6); } 50% { opacity: 1; transform: scale(1.2); } }
+    .popup-spark { position: absolute; z-index: 6; animation: twinkle 2s ease-in-out infinite; }
+    .popup-spark svg { width: 44px; height: 44px; color: #fde047; }
+
+    .popup-info { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: flex-start; text-align: left; }
+    .popup-congrats { display: flex; align-items: center; gap: 12px; font-size: 24px; font-weight: 800; letter-spacing: 0.22em; text-transform: uppercase; color: #fcd34d; margin-bottom: 10px; }
+    .popup-congrats svg { width: 30px; height: 30px; }
+    .popup-name-row { display: flex; align-items: center; gap: 18px; margin-bottom: 14px; }
+    .popup-name { font-size: 76px; line-height: 1.05; font-weight: 900; color: #fff; letter-spacing: -0.01em; text-shadow: 0 4px 30px rgba(250,204,21,0.35); word-break: break-word; }
+    .popup-verified { width: 60px; height: 60px; flex-shrink: 0; color: #38bdf8; filter: drop-shadow(0 0 12px rgba(56,189,248,0.7)); }
+    .popup-chip { display: inline-flex; align-items: center; gap: 12px; padding: 10px 28px; margin-bottom: 28px; border-radius: 999px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 28px; font-weight: 800; color: #bfdbfe; background: rgba(59,130,246,0.18); border: 2px solid rgba(96,165,250,0.55); }
+    .popup-chip svg { width: 28px; height: 28px; color: #60a5fa; }
+
+    #popupDataGrid { display: flex; flex-direction: column; gap: 16px; width: 100%; }
+    #popupDataGrid .hidden { display: none !important; }
+    .popup-row { position: relative; overflow: hidden; display: flex; align-items: center; gap: 24px; width: 100%; box-sizing: border-box; padding: 14px 30px 14px 16px; border-radius: 26px; background: rgba(255,255,255,0.06); border: 2px solid var(--c); }
+    .popup-row::after { content: ""; position: absolute; top: 0; bottom: 0; left: 0; width: 16%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.12), transparent); animation: sheenSweep 4.5s ease-in-out infinite; }
+    .popup-row-icon { width: 84px; height: 84px; flex-shrink: 0; border-radius: 22px; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, var(--c), var(--c2)); box-shadow: 0 10px 30px -8px var(--c); }
+    .popup-row-icon svg { width: 44px; height: 44px; color: #fff; }
+    .popup-row-label { font-size: 22px; font-weight: 800; letter-spacing: 0.2em; text-transform: uppercase; color: var(--cl); margin-bottom: 2px; }
+    .popup-row-value { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 52px; line-height: 1.1; font-weight: 900; color: #fff; text-shadow: 0 0 24px var(--c); }
+
+    .popup-footer { margin-top: 34px; width: 100%; display: flex; flex-direction: column; align-items: center; gap: 14px; }
+    .popup-progress { width: 560px; height: 8px; border-radius: 99px; background: rgba(255,255,255,0.12); overflow: hidden; }
+    .popup-progress-fill { height: 100%; width: 100%; border-radius: inherit; transform-origin: left center; background: linear-gradient(90deg, #fde047, #f59e0b, #ec4899); }
+    @keyframes progressDrain { from { transform: scaleX(1); } to { transform: scaleX(0); } }
+    .popup-countdown-text { display: flex; align-items: center; gap: 14px; font-size: 24px; font-weight: 600; color: #cbd5e1; }
+    .popup-countdown-text svg { width: 26px; height: 26px; color: #fde047; }
+    @keyframes eqBar { 0%,100% { transform: scaleY(0.3); } 50% { transform: scaleY(1); } }
+    .popup-eq { display: inline-flex; align-items: flex-end; height: 24px; }
+    .popup-eq span { display: inline-block; width: 5px; height: 24px; margin: 0 2px; border-radius: 3px; background: #fde047; transform-origin: bottom; animation: eqBar 0.9s ease-in-out infinite; }
+
+    /* Animasi masuk berurutan (diaktifkan lewat class .popup-live agar mulai ulang setiap pop-up muncul) */
+    @keyframes popCardIn { from { opacity: 0; transform: translateY(60px) scale(calc(var(--tv-scale, 1) * 0.88)); } to { opacity: 1; transform: translateY(0) scale(var(--tv-scale, 1)); } }
+    @keyframes popDrop { from { opacity: 0; transform: translateY(-40px) scale(0.9); } to { opacity: 1; transform: none; } }
+    @keyframes popZoom { from { opacity: 0; transform: scale(0.6) rotate(-6deg); } to { opacity: 1; transform: none; } }
+    @keyframes popUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: none; } }
+    @keyframes popRight { from { opacity: 0; transform: translateX(90px); } to { opacity: 1; transform: none; } }
+    #salesPopupOverlay.popup-live #popupCard { animation: popCardIn 0.8s cubic-bezier(.16,1,.3,1) both; }
+    #salesPopupOverlay.popup-live .popup-badge { animation: popDrop 0.7s cubic-bezier(.16,1,.3,1) 0.35s both; }
+    #salesPopupOverlay.popup-live .popup-photo-wrap { animation: popZoom 0.9s cubic-bezier(.16,1,.3,1) 0.25s both; }
+    #salesPopupOverlay.popup-live .popup-congrats { animation: popUp 0.6s ease-out 0.45s both; }
+    #salesPopupOverlay.popup-live .popup-name-row { animation: popUp 0.7s ease-out 0.55s both; }
+    #salesPopupOverlay.popup-live .popup-chip { animation: popUp 0.7s ease-out 0.65s both; }
+    #salesPopupOverlay.popup-live .popup-row:nth-child(1) { animation: popRight 0.7s cubic-bezier(.16,1,.3,1) 0.8s both; }
+    #salesPopupOverlay.popup-live .popup-row:nth-child(2) { animation: popRight 0.7s cubic-bezier(.16,1,.3,1) 0.95s both; }
+    #salesPopupOverlay.popup-live .popup-row:nth-child(3) { animation: popRight 0.7s cubic-bezier(.16,1,.3,1) 1.1s both; }
+    #salesPopupOverlay.popup-live .popup-footer { animation: popUp 0.7s ease-out 1.2s both; }
+    #salesPopupOverlay.popup-live .popup-progress-fill { animation: progressDrain 5s linear forwards; }
 
     /* Saat pop-up tersembunyi: benar-benar tidak digambar & semua animasi dijeda (anti-kedip) */
     #salesPopupOverlay { transition: opacity 0.5s ease, transform 0.5s ease, visibility 0s linear 0s; }
@@ -220,93 +307,88 @@
     }
     #salesPopupOverlay.opacity-0, #salesPopupOverlay.opacity-0 * { animation-play-state: paused !important; }
     #salesPopupOverlay, #salesPopupOverlay > div { -webkit-backdrop-filter: none !important; backdrop-filter: none !important; }
-    #popupCard { transform: scale(var(--tv-scale, 1)); transform-origin: center center; }
   </style>
 </head>
 <body class="bg-slate-950 text-slate-800 select-none overflow-hidden m-0 p-0">
 
-  <!-- OVERLAY UNTUK MENGAKTIFKAN AUDIO -->
-  <div id="audioUnlockOverlay" onclick="unlockAndPlayAudio()" class="fixed inset-0 bg-slate-950/90 z-[9999999] flex flex-col items-center justify-center text-white cursor-pointer transition-opacity duration-500">
+  <!-- OVERLAY UNTUK MENGAKTIFKAN AUDIO (bisa diklik mouse / ditekan OK-ENTER pada remote TV) -->
+  <div id="audioUnlockOverlay" tabindex="0" onclick="unlockAndPlayAudio()" class="fixed inset-0 bg-slate-950/90 z-[9999999] flex flex-col items-center justify-center text-white cursor-pointer transition-opacity duration-500" style="outline:none;">
     <div class="bg-blue-600 hover:bg-blue-700 p-8 rounded-3xl shadow-2xl flex flex-col items-center gap-4 border-2 border-blue-400 animate-bounce max-w-xl text-center mx-4">
       <i data-lucide="volume-2" class="w-16 h-16 text-yellow-300"></i>
       <h2 class="text-2xl font-black tracking-wide">KLIK DI SINI UNTUK AKTIFKAN AUDIO TV DASHBOARD</h2>
       <p class="text-xs text-blue-100 font-medium">Klik untuk memulai sistem pemutaran backsound & sound sales interaktif.</p>
+      <p id="audioUnlockHint" class="text-sm font-bold text-yellow-200">Pengguna TV: tekan tombol OK / ENTER pada remote.</p>
     </div>
   </div>
 
-  <!-- FULL SCREEN POP UP OVERLAY - MODERN & ENHANCED DESIGN -->
-  <div id="salesPopupOverlay" class="fixed inset-0 z-[999999] popup-animated-bg backdrop-blur-xl flex items-center justify-center opacity-0 pointer-events-none transition-all duration-500 scale-95 p-6">
+  <!-- FULL SCREEN POP UP OVERLAY - MODERN, DINAMIS & ELEGAN -->
+  <div id="salesPopupOverlay" class="fixed inset-0 z-[999999] popup-modern-bg flex items-center justify-center opacity-0 pointer-events-none transition-all duration-500 scale-95 p-6">
+    <div class="popup-rays"></div>
+    <div class="popup-orb popup-orb-1"></div>
+    <div class="popup-orb popup-orb-2"></div>
     <div id="confettiContainer" class="absolute inset-0 overflow-hidden pointer-events-none"></div>
-    
-    <!-- DESAIN POP UP UTAMA (DI PERBESAR & MODERN) -->
-    <div id="popupCard" class="relative bg-white/95 rounded-[2.5rem] shadow-[0_25px_60px_-15px_rgba(0,0,0,0.5)] border-4 border-yellow-400/80 p-10 max-w-5xl w-full mx-auto popup-card-glow flex flex-col items-center">
-      
+
+    <div id="popupCard" class="popup-card">
+      <div class="popup-sheen-clip"><div class="popup-sheen"></div></div>
+
       <!-- LENCANA ATAS -->
-      <div class="absolute -top-7 bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-600 text-slate-950 font-black text-sm px-8 py-2.5 rounded-full shadow-2xl border-2 border-white uppercase tracking-widest flex items-center gap-2">
-        <i data-lucide="award" class="w-5 h-5 text-slate-950"></i> TWIBBON SALES CHAMPION <i data-lucide="award" class="w-5 h-5 text-slate-950"></i>
+      <div class="popup-badge-wrap">
+        <div class="popup-badge">
+          <i data-lucide="trophy"></i> TWIBBON SALES CHAMPION <i data-lucide="trophy"></i>
+        </div>
       </div>
 
-      <!-- LAYOUT BARIS 2 KOLOM (FOTO KIRI, TEKS & DATA KANAN) -->
-      <div class="grid grid-cols-1 md:grid-cols-12 gap-8 w-full items-center mt-4">
-        
-        <!-- SIS KIRI: FOTO KARYAWAN (DIPERBESAR & TANPA MAH KOTA) -->
-        <div class="md:col-span-5 flex justify-center items-center">
-          <div class="relative w-64 h-64 md:w-80 md:h-80 rounded-3xl border-4 border-blue-500 shadow-2xl bg-slate-100 overflow-hidden group">
-            <img id="popupFoto" src="" alt="Foto Karyawan" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name=Sales&background=0D8ABC&color=fff&size=400';">
+      <div class="popup-main">
+        <!-- FOTO KARYAWAN -->
+        <div class="popup-photo-wrap">
+          <div class="popup-crown"><i data-lucide="crown"></i></div>
+          <div class="popup-spark" style="top:-14px; right:-22px;"><i data-lucide="sparkles"></i></div>
+          <div class="popup-spark" style="bottom:20px; left:-26px; animation-delay:0.7s;"><i data-lucide="sparkles"></i></div>
+          <div class="popup-spark" style="bottom:-20px; right:40px; animation-delay:1.3s;"><i data-lucide="star"></i></div>
+          <div class="popup-photo-ring">
+            <div class="popup-photo-inner">
+              <img id="popupFoto" src="" alt="Foto Karyawan" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name=Sales&background=0D8ABC&color=fff&size=400';">
+            </div>
           </div>
         </div>
 
-        <!-- SISI KANAN: KETERANGAN TEKS & DATA SALES BERURUTAN -->
-        <div class="md:col-span-7 flex flex-col justify-center items-start text-left">
-          
-          <!-- NAMA SALES + IKON VERIFIKASI BIRU -->
-          <div class="flex items-center gap-3 mb-2 flex-wrap">
-            <h2 id="popupNama" class="text-4xl md:text-5xl font-black text-slate-900 tracking-tight">-</h2>
-            <!-- IKON CENTANG VERIFIKASI BIRU (FACEBOOK / TWITTER VERIFIED BADGE) -->
-            <svg class="w-9 h-9 text-blue-500 shrink-0 fill-current" viewBox="0 0 24 24">
+        <!-- NAMA, NIP & DATA SALES -->
+        <div class="popup-info">
+          <div class="popup-congrats"><i data-lucide="party-popper"></i> Selamat atas pencapaiannya <i data-lucide="sparkles"></i></div>
+          <div class="popup-name-row">
+            <h2 id="popupNama" class="popup-name">-</h2>
+            <svg class="popup-verified fill-current" viewBox="0 0 24 24">
               <path d="M22.5 12.5c0-1.58-.875-2.95-2.148-3.6.154-.435.238-.905.238-1.4 0-2.21-1.79-4-4-4-.495 0-.965.084-1.4.238C14.55 2.475 13.18 1.6 11.6 1.6c-1.58 0-2.95.875-3.6 2.148-.435-.154-.905-.238-1.4-.238-2.21 0-4 1.79-4 4 0 .495.084.965.238 1.4C1.575 9.55.7 10.92.7 12.5c0 1.58.875 2.95 2.148 3.6-.154.435-.238.905-.238 1.4 0 2.21 1.79 4 4 4 .495 0 .965-.084 1.4-.238 1.55 1.273 2.92 2.148 4.5 2.148 1.58 0 2.95-.875 3.6-2.148.435.154.905.238 1.4.238 2.21 0 4-1.79 4-4 0-.495-.084-.965-.238-1.4 1.273-.65 2.148-2.02 2.148-3.6zm-12.21 4.51l-4.5-4.5 1.41-1.41 3.09 3.09 7.09-7.09 1.41 1.41-8.5 8.5z"/>
             </svg>
           </div>
+          <div class="popup-chip"><i data-lucide="fingerprint"></i><span id="popupNip">NIP: -</span></div>
 
-          <!-- NIP SALES -->
-          <div id="popupNip" class="text-sm font-mono font-bold text-blue-700 bg-blue-100/80 px-4 py-1.5 rounded-full border border-blue-300 mb-6 shadow-sm inline-block">
-            NIP: -
-          </div>
-
-          <!-- DATA SALES (VALUE SALES, QTY FP, VALUE COMSER) -->
-          <div id="popupDataGrid" class="grid grid-cols-1 sm:grid-cols-3 gap-4 w-full">
-            
-            <div id="boxValueSales" class="bg-emerald-50/90 border-2 border-emerald-300 p-4 rounded-2xl shadow-sm flex flex-col items-center md:items-start transition-all hover:scale-105">
-              <div class="flex items-center gap-1.5 text-emerald-800 text-xs font-black uppercase mb-1">
-                <i data-lucide="badge-dollar-sign" class="w-4 h-4 text-emerald-600"></i> Value Sales
-              </div>
-              <div id="popupValueSales" class="text-xl md:text-2xl font-black font-mono text-emerald-700">-</div>
+          <div id="popupDataGrid">
+            <div id="boxValueSales" class="popup-row" style="--c:#10b981; --c2:#047857; --cl:#6ee7b7;">
+              <div class="popup-row-icon"><i data-lucide="badge-dollar-sign"></i></div>
+              <div><div class="popup-row-label">Value Sales</div><div id="popupValueSales" class="popup-row-value">-</div></div>
             </div>
-
-            <div id="boxQtyFp" class="bg-blue-50/90 border-2 border-blue-300 p-4 rounded-2xl shadow-sm flex flex-col items-center md:items-start transition-all hover:scale-105">
-              <div class="flex items-center gap-1.5 text-blue-800 text-xs font-black uppercase mb-1">
-                <i data-lucide="shield-check" class="w-4 h-4 text-blue-600"></i> Qty FP
-              </div>
-              <div id="popupQtyFp" class="text-xl md:text-2xl font-black font-mono text-blue-700">-</div>
+            <div id="boxQtyFp" class="popup-row" style="--c:#3b82f6; --c2:#1d4ed8; --cl:#93c5fd;">
+              <div class="popup-row-icon"><i data-lucide="shield-check"></i></div>
+              <div><div class="popup-row-label">Qty FP</div><div id="popupQtyFp" class="popup-row-value">-</div></div>
             </div>
-
-            <div id="boxValueComser" class="bg-purple-50/90 border-2 border-purple-300 p-4 rounded-2xl shadow-sm flex flex-col items-center md:items-start transition-all hover:scale-105">
-              <div class="flex items-center gap-1.5 text-purple-800 text-xs font-black uppercase mb-1">
-                <i data-lucide="air-vent" class="w-4 h-4 text-purple-600"></i> Value Comser
-              </div>
-              <div id="popupValueComser" class="text-xl md:text-2xl font-black font-mono text-purple-700">-</div>
+            <div id="boxValueComser" class="popup-row" style="--c:#a855f7; --c2:#7e22ce; --cl:#d8b4fe;">
+              <div class="popup-row-icon"><i data-lucide="air-vent"></i></div>
+              <div><div class="popup-row-label">Value Comser</div><div id="popupValueComser" class="popup-row-value">-</div></div>
             </div>
-
           </div>
         </div>
-
       </div>
 
       <!-- COUNTDOWN TIMER -->
-      <div class="mt-8 text-xs text-slate-500 font-semibold animate-pulse tracking-wide">
-        Pop-up akan tertutup otomatis dalam <span id="popupCountdown" class="font-extrabold text-blue-600 text-sm">5</span> detik...
+      <div class="popup-footer">
+        <div class="popup-progress"><div class="popup-progress-fill"></div></div>
+        <div class="popup-countdown-text">
+          <span class="popup-eq"><span></span><span style="animation-delay:.2s"></span><span style="animation-delay:.4s"></span><span style="animation-delay:.1s"></span></span>
+          <span>Pop-up akan tertutup otomatis dalam <span id="popupCountdown" style="color:#fde047; font-weight:900; font-size:30px;">5</span> detik...</span>
+          <i data-lucide="timer"></i>
+        </div>
       </div>
-
     </div>
   </div>
 
@@ -513,65 +595,8 @@
     let salesList = [], deptList = [], mtdSalesList = [], mtdFurniproList = [], mtdComserList = [];
     let currentSlide = 0; 
     let popupTimer = null;
-
-    // Ganti isi elemen HANYA jika berubah -> tidak ada kedip/reload foto saat data sama
-    function setHtmlIfChanged(el, html) {
-      if (!el) return;
-      if (el.__lastHtml === html) return;
-      el.__lastHtml = html;
-      el.innerHTML = html;
-    }
-
-    // ===== REALTIME SEMUA TABEL =====
-    const _debounceTimers = {};
-    function debounced(key, fn, ms = 400) {
-      clearTimeout(_debounceTimers[key]);
-      _debounceTimers[key] = setTimeout(async () => {
-        try { await fn(); } catch (e) { console.warn('Refresh gagal:', key, e); }
-      }, ms);
-    }
-
-    function refreshAllData() {
-      fetchSalesData();
-      fetchDeptData();
-      fetchMtdSalesData();
-      fetchMtdFurniproData();
-      fetchMtdComserData();
-      fetchTop1MtdSales();
-      fetchTop1MtdFurnipro();
-      fetchTop1MtdComser();
-      fetchRunningText();
-      updateGaugeData();
-    }
-
-    function subscribeTable(table, handler) {
-      supabaseClient
-        .channel('rt_data_' + table)
-        .on('postgres_changes', { event: '*', schema: 'public', table: table }, () => handler())
-        .subscribe(status => {
-          if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
-            console.warn('Realtime bermasalah pada tabel', table, status);
-          }
-        });
-    }
-
-    function setupDataRealtime() {
-      subscribeTable('laporan_sales', () => debounced('sales', fetchSalesData));
-      subscribeTable('daily_furnipro', () => { debounced('sales', fetchSalesData); debounced('gauge', updateGaugeData); });
-      subscribeTable('daily_comser', () => { debounced('sales', fetchSalesData); debounced('gauge', updateGaugeData); });
-      subscribeTable('laporan_departemen', () => { debounced('dept', fetchDeptData); debounced('gauge', updateGaugeData); });
-      subscribeTable('target_today', () => debounced('gauge', updateGaugeData));
-      subscribeTable('mtd_sales', () => { debounced('mtdSales', fetchMtdSalesData); debounced('top1Sales', fetchTop1MtdSales); });
-      subscribeTable('mtd_fp', () => { debounced('mtdFp', fetchMtdFurniproData); debounced('top1Fp', fetchTop1MtdFurnipro); });
-      subscribeTable('mtd_comser', () => { debounced('mtdCnc', fetchMtdComserData); debounced('top1Cnc', fetchTop1MtdComser); });
-      subscribeTable('running_text', () => debounced('runText', fetchRunningText));
-      subscribeTable('data_karyawan', () => debounced('karyawan', async () => { await fetchKaryawanData(); refreshAllData(); }));
-
-      // Cadangan: sinkron ulang berkala (aman, tanpa kedip) bila koneksi realtime sempat terputus
-      setInterval(refreshAllData, 60000);
-      // Sinkron ulang saat koneksi internet kembali
-      window.addEventListener('online', () => debounced('online', refreshAllData, 1000));
-    }
+    let popupActive = false;
+    let popupCountInterval = null;
 
     // Skala otomatis: kanvas 1920x1080 dipaskan ke layar TV apa pun (tanpa terpotong).
     // SAFE_MARGIN = jarak aman tepi layar (1% per sisi) untuk TV yang memiliki overscan.
@@ -591,11 +616,115 @@
     document.addEventListener('fullscreenchange', scaleDashboard);
     window.addEventListener('load', scaleDashboard);
 
-    function unlockAndPlayAudio() {
+    // ===== AUDIO ENGINE (KOMPATIBEL BROWSER TV: Tizen / WebOS / Android TV / Fire TV) =====
+    // Browser TV mewajibkan SETIAP elemen <audio> "dibuka kuncinya" lewat interaksi user (klik / OK remote).
+    // Karena itu kedua elemen audio di-prime (diputar senyap) langsung di dalam event klik/tombol remote,
+    // sehingga pemutaran berikutnya (backsound & sound sales dari data realtime) tidak diblokir lagi.
+    const SILENT_WAV = 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA==';
+    let audioUnlocked = false;
+    let audioUnlockBusy = false;
+    let audioCtx = null;
+    const waitMs = ms => new Promise(r => setTimeout(() => r('timeout'), ms));
+
+    function primeAudioElement(el) {
+      return new Promise(resolve => {
+        if (!el) return resolve('ok');
+        try {
+          el.muted = false; el.volume = 1;
+          if (!el.getAttribute('src')) el.src = SILENT_WAV;
+          const p = el.play();
+          if (p && typeof p.then === 'function') {
+            p.then(() => {
+              if (el.getAttribute('src') === SILENT_WAV) { el.pause(); el.removeAttribute('src'); el.load(); }
+              else if (el.dataset.want !== '1') { el.pause(); }
+              resolve('ok');
+            }).catch(err => resolve(err && err.name === 'NotAllowedError' ? 'blocked' : 'ok'));
+          } else { resolve('ok'); }
+        } catch (e) { resolve('ok'); }
+      });
+    }
+
+    function playSafe(el) {
+      if (!el) return Promise.resolve(false);
+      el.muted = false; el.volume = 1;
+      let p = null;
+      try { p = el.play(); } catch (e) { p = null; }
+      if (p && typeof p.then === 'function') {
+        return p.then(() => true).catch(err => {
+          if (err && err.name === 'NotAllowedError') {
+            if (el.id === 'audioBacksound') showUnlockOverlayAgain();
+          } else {
+            // Belum siap (AbortError dll): coba lagi otomatis saat audio siap diputar
+            const h = function () { el.removeEventListener('canplay', h); if (el.dataset.want === '1') { try { el.play().catch(() => {}); } catch (e) {} } };
+            el.addEventListener('canplay', h);
+          }
+          return false;
+        });
+      }
+      return Promise.resolve(true);
+    }
+
+    function showUnlockOverlayAgain() {
       const overlay = document.getElementById('audioUnlockOverlay');
-      if (overlay) { overlay.style.opacity = '0'; setTimeout(() => overlay.remove(), 500); }
+      if (!overlay) return;
+      audioUnlocked = false;
+      overlay.style.display = '';
+      overlay.style.pointerEvents = '';
+      void overlay.offsetWidth;
+      overlay.style.opacity = '1';
+      if (overlay.focus) overlay.focus();
+    }
+
+    function resumeWantedAudio() {
+      ['audioBacksound', 'audioSoundSales'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el && el.dataset.want === '1' && el.paused) playSafe(el);
+      });
+    }
+
+    async function unlockAndPlayAudio() {
+      if (audioUnlockBusy || audioUnlocked) return;
+      audioUnlockBusy = true;
+      try {
+        const AC = window.AudioContext || window.webkitAudioContext;
+        if (AC) {
+          audioCtx = audioCtx || new AC();
+          if (audioCtx.state === 'suspended') audioCtx.resume();
+          const s = audioCtx.createBufferSource();
+          s.buffer = audioCtx.createBuffer(1, 1, 22050);
+          s.connect(audioCtx.destination);
+          if (s.start) s.start(0); else if (s.noteOn) s.noteOn(0);
+        }
+      } catch (e) {}
+      // Kedua elemen audio di-prime serentak, langsung di dalam gesture user
+      const res = await Promise.all([
+        Promise.race([primeAudioElement(document.getElementById('audioBacksound')), waitMs(1500)]),
+        Promise.race([primeAudioElement(document.getElementById('audioSoundSales')), waitMs(1500)])
+      ]);
+      audioUnlockBusy = false;
+      const hint = document.getElementById('audioUnlockHint');
+      if (res.indexOf('blocked') !== -1) {
+        if (hint) hint.innerText = 'Audio masih diblokir browser. Tekan OK / ENTER sekali lagi.';
+        return;
+      }
+      audioUnlocked = true;
+      const overlay = document.getElementById('audioUnlockOverlay');
+      if (overlay) { overlay.style.opacity = '0'; overlay.style.pointerEvents = 'none'; setTimeout(() => { overlay.style.display = 'none'; }, 500); }
       syncBacksoundState();
     }
+
+    // Klik mouse, sentuh layar, maupun tombol apa pun pada remote akan membuka kunci audio
+    function onAnyUserGesture() {
+      if (!audioUnlocked) { unlockAndPlayAudio(); return; }
+      resumeWantedAudio();
+    }
+    ['click', 'keydown', 'touchstart', 'pointerdown'].forEach(evt => document.addEventListener(evt, onAnyUserGesture, true));
+    // Penjaga: jika audio yang seharusnya aktif ternyata berhenti, nyalakan lagi
+    setInterval(() => { if (audioUnlocked) resumeWantedAudio(); }, 10000);
+    ['audioBacksound', 'audioSoundSales'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.addEventListener('error', () => console.warn('Audio gagal dimuat/diputar (cek format file mp3/aac):', id, el.error));
+    });
 
     // REALTIME MONITORING UNTUK CARD 1 (BACKSOUND) & CARD 2 (SOUND SALES / POPUP)
     function setupRealtimeListeners() {
@@ -625,19 +754,26 @@
 
     async function syncBacksoundState() {
       const audioBacksound = document.getElementById('audioBacksound');
-      const { data } = await supabaseClient.from('status_backsound').select('*').eq('bucket_name', 'BACKSOUND').maybeSingle();
+      if (popupActive) return;
+      try {
+        const { data } = await supabaseClient.from('status_backsound').select('*').eq('bucket_name', 'BACKSOUND').maybeSingle();
 
-      if (data && data.status_lagu === 'AKTIF' && data.nama_lagu) {
-        const { data: pub } = supabaseClient.storage.from('BACKSOUND').getPublicUrl(data.nama_lagu);
-        if (pub?.publicUrl) {
-          if (audioBacksound.src !== pub.publicUrl) {
-            audioBacksound.src = pub.publicUrl;
+        if (data && data.status_lagu === 'AKTIF' && data.nama_lagu) {
+          const { data: pub } = supabaseClient.storage.from('BACKSOUND').getPublicUrl(data.nama_lagu);
+          if (pub && pub.publicUrl) {
+            if (audioBacksound.getAttribute('data-url') !== pub.publicUrl) {
+              audioBacksound.setAttribute('data-url', pub.publicUrl);
+              audioBacksound.src = pub.publicUrl;
+              audioBacksound.load();
+            }
+            audioBacksound.dataset.want = '1';
+            if (audioUnlocked) playSafe(audioBacksound);
           }
-          audioBacksound.play().catch(e => {});
+        } else {
+          audioBacksound.dataset.want = '0';
+          audioBacksound.pause();
         }
-      } else {
-        audioBacksound.pause();
-      }
+      } catch (e) { console.warn('Gagal sinkron backsound:', e); }
     }
 
     async function triggerSalesPopup(data) {
@@ -652,7 +788,10 @@
       const qtyFp = data.qtyfp || '';
       const valComser = data.valuecnc || '';
 
-      document.getElementById('popupFoto').src = `${SUPABASE_URL}/storage/v1/object/public/FOTO SALES/${nip}.jpg`;
+      const fotoEl = document.getElementById('popupFoto');
+      const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(nama)}&background=0D8ABC&color=fff&size=400`;
+      fotoEl.onerror = function () { this.onerror = null; this.src = avatarUrl; };
+      fotoEl.src = `${SUPABASE_URL}/storage/v1/object/public/FOTO SALES/${nip}.jpg`;
       document.getElementById('popupNama').innerText = nama;
       document.getElementById('popupNip').innerText = `NIP: ${nip}`;
 
@@ -665,29 +804,45 @@
       if (valComser) { document.getElementById('popupValueComser').innerText = valComser; boxComser.classList.remove('hidden'); } else { boxComser.classList.add('hidden'); }
 
       generateConfetti();
+      popupActive = true;
+      audioBacksound.dataset.want = '0';
       audioBacksound.pause();
 
-      const { data: soundData } = await supabaseClient
-        .from('status_soundtwibbon')
-        .select('*')
-        .eq('bucket_nametw', 'SOUND SALES')
-        .eq('status_lagutw', 'AKTIF')
-        .maybeSingle();
+      try {
+        const { data: soundData } = await supabaseClient
+          .from('status_soundtwibbon')
+          .select('*')
+          .eq('bucket_nametw', 'SOUND SALES')
+          .eq('status_lagutw', 'AKTIF')
+          .maybeSingle();
 
-      if (soundData && soundData.nama_lagutw) {
-        const { data: pubSound } = supabaseClient.storage.from('SOUND SALES').getPublicUrl(soundData.nama_lagutw);
-        if (pubSound?.publicUrl) {
-          audioSoundSales.src = pubSound.publicUrl;
-          audioSoundSales.play().catch(e => {});
+        if (soundData && soundData.nama_lagutw) {
+          const { data: pubSound } = supabaseClient.storage.from('SOUND SALES').getPublicUrl(soundData.nama_lagutw);
+          if (pubSound && pubSound.publicUrl) {
+            if (audioSoundSales.getAttribute('data-url') !== pubSound.publicUrl) {
+              audioSoundSales.setAttribute('data-url', pubSound.publicUrl);
+              audioSoundSales.src = pubSound.publicUrl;
+              audioSoundSales.load();
+            } else {
+              try { audioSoundSales.currentTime = 0; } catch (e) {}
+            }
+            audioSoundSales.dataset.want = '1';
+            playSafe(audioSoundSales);
+          }
         }
-      }
+      } catch (e) { console.warn('Gagal memuat sound sales:', e); }
 
       overlay.classList.remove('opacity-0', 'pointer-events-none', 'scale-95');
       overlay.classList.add('opacity-100', 'scale-100');
+      // Mulai ulang animasi masuk pop-up setiap kali muncul
+      overlay.classList.remove('popup-live');
+      void overlay.offsetWidth;
+      overlay.classList.add('popup-live');
 
       let countdown = 5;
       document.getElementById('popupCountdown').innerText = countdown;
-      const countInterval = setInterval(() => {
+      if (popupCountInterval) clearInterval(popupCountInterval);
+      popupCountInterval = setInterval(() => {
         countdown--;
         if (countdown >= 0) document.getElementById('popupCountdown').innerText = countdown;
       }, 1000);
@@ -695,28 +850,35 @@
       if (popupTimer) clearTimeout(popupTimer);
 
       popupTimer = setTimeout(async () => {
-        clearInterval(countInterval);
+        clearInterval(popupCountInterval);
         overlay.classList.remove('opacity-100', 'scale-100');
         overlay.classList.add('opacity-0', 'pointer-events-none', 'scale-95');
+        popupActive = false;
+        setTimeout(() => { if (!popupActive) overlay.classList.remove('popup-live'); }, 700);
 
+        audioSoundSales.dataset.want = '0';
         audioSoundSales.pause();
-        audioSoundSales.currentTime = 0;
+        try { audioSoundSales.currentTime = 0; } catch (e) {}
         syncBacksoundState();
 
-        await supabaseClient.from('popup_twibbon').delete().eq('nip', nip);
+        try { await supabaseClient.from('popup_twibbon').delete().eq('nip', nip); } catch (e) {}
       }, 5000);
     }
 
     function generateConfetti() {
       const container = document.getElementById('confettiContainer');
       container.innerHTML = '';
-      const colors = ['#eab308', '#3b82f6', '#10b981', '#ec4899', '#8b5cf6', '#f97316'];
-      for (let i = 0; i < 50; i++) {
+      const colors = ['#eab308', '#3b82f6', '#10b981', '#ec4899', '#8b5cf6', '#f97316', '#fde047', '#ffffff'];
+      for (let i = 0; i < 70; i++) {
         const div = document.createElement('div');
         div.className = 'confetti-piece';
+        const size = 8 + Math.random() * 10;
         div.style.left = Math.random() * 100 + '%';
+        div.style.width = size + 'px';
+        div.style.height = (Math.random() > 0.5 ? size : size * 0.45) + 'px';
         div.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
         div.style.animationDelay = (Math.random() * 2) + 's';
+        div.style.animationDuration = (2.6 + Math.random() * 2) + 's';
         div.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
         container.appendChild(div);
       }
@@ -822,8 +984,8 @@
           </div>
         `;
       });
-      if(orig) setHtmlIfChanged(orig, html);
-      if(clone) setHtmlIfChanged(clone, html);
+      if(orig) orig.innerHTML = html;
+      if(clone) clone.innerHTML = html;
       lucide.createIcons();
     }
 
@@ -865,7 +1027,7 @@
           </div>
         `;
       });
-      setHtmlIfChanged(orig, html); setHtmlIfChanged(clone, html);
+      orig.innerHTML = html; clone.innerHTML = html;
       lucide.createIcons();
     }
 
@@ -904,7 +1066,7 @@
             </div>
           `;
         });
-        setHtmlIfChanged(orig, html); setHtmlIfChanged(clone, html);
+        orig.innerHTML = html; clone.innerHTML = html;
         lucide.createIcons();
       }
     }
@@ -943,7 +1105,7 @@
             </div>
           `;
         });
-        setHtmlIfChanged(orig, html); setHtmlIfChanged(clone, html);
+        orig.innerHTML = html; clone.innerHTML = html;
         lucide.createIcons();
       }
     }
@@ -982,7 +1144,7 @@
             </div>
           `;
         });
-        setHtmlIfChanged(orig, html); setHtmlIfChanged(clone, html);
+        orig.innerHTML = html; clone.innerHTML = html;
         lucide.createIcons();
       }
     }
@@ -998,7 +1160,7 @@
       const img = `${SUPABASE_URL}/storage/v1/object/public/FOTO SALES/${nip}.jpg`;
       const avatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=eab308&color=fff&size=128`;
 
-      setHtmlIfChanged(container, `
+      container.innerHTML = `
         <div class="flex flex-col items-center justify-center text-center w-full relative px-2">
           <div class="relative w-40 h-40 rounded-2xl border-4 border-yellow-500 shadow-lg bg-slate-200 overflow-hidden mb-2">
             <div class="absolute -top-3 left-1/2 -translate-x-1/2 z-20 text-yellow-500"><i data-lucide="crown" class="w-8 h-8 fill-yellow-400"></i></div>
@@ -1011,7 +1173,7 @@
             <div class="text-3xl font-extrabold font-mono text-emerald-600 mt-0.5">Rp ${total.toLocaleString('id-ID')}</div>
           </div>
         </div>
-      `);
+      `;
       lucide.createIcons();
     }
 
@@ -1026,7 +1188,7 @@
       const img = `${SUPABASE_URL}/storage/v1/object/public/FOTO SALES/${nip}.jpg`;
       const avatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=2563eb&color=fff&size=128`;
 
-      setHtmlIfChanged(container, `
+      container.innerHTML = `
         <div class="flex flex-col items-center justify-center text-center w-full relative px-2">
           <div class="relative w-40 h-40 rounded-2xl border-4 border-blue-500 shadow-lg bg-slate-200 overflow-hidden mb-2">
             <img src="${img}" class="w-full h-full object-cover pt-1" onerror="this.onerror=null; this.src='${avatar}';">
@@ -1038,7 +1200,7 @@
             <div class="text-3xl font-extrabold font-mono text-blue-600 mt-0.5">${qty.toLocaleString('id-ID')} PCS</div>
           </div>
         </div>
-      `);
+      `;
       lucide.createIcons();
     }
 
@@ -1053,7 +1215,7 @@
       const img = `${SUPABASE_URL}/storage/v1/object/public/FOTO SALES/${nip}.jpg`;
       const avatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=10b981&color=fff&size=128`;
 
-      setHtmlIfChanged(container, `
+      container.innerHTML = `
         <div class="flex flex-col items-center justify-center text-center w-full relative px-2">
           <div class="relative w-40 h-40 rounded-2xl border-4 border-emerald-500 shadow-lg bg-slate-200 overflow-hidden mb-2">
             <img src="${img}" class="w-full h-full object-cover pt-1" onerror="this.onerror=null; this.src='${avatar}';">
@@ -1065,7 +1227,7 @@
             <div class="text-3xl font-extrabold font-mono text-emerald-600 mt-0.5">Rp ${total.toLocaleString('id-ID')}</div>
           </div>
         </div>
-      `);
+      `;
       lucide.createIcons();
     }
 
@@ -1074,7 +1236,7 @@
       if (!container) return;
       const { data } = await supabaseClient.from('running_text').select('run_text');
       let texts = data && data.length > 0 ? data.map(i => i.run_text).filter(Boolean) : ["SELAMAT DATANG DI INFORMA MOG MALANG (J382)"];
-      setHtmlIfChanged(container, `<span>${texts.join('    •    ')}</span>`);
+      container.innerHTML = `<span>${texts.join('    •    ')}</span>`;
     }
 
     function startCarouselTimer() {
@@ -1143,9 +1305,9 @@
     document.addEventListener("DOMContentLoaded", async () => {
       lucide.createIcons();
       scaleDashboard();
+      { const ov = document.getElementById('audioUnlockOverlay'); if (ov && ov.focus) ov.focus(); }
       await fetchKaryawanData();
       setupRealtimeListeners();
-      setupDataRealtime();
       
       // Load seluruh data dengan lengkap
       fetchSalesData();
