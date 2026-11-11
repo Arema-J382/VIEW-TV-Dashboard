@@ -365,7 +365,7 @@
 
     /* --- Sholat: highlight UNGU --- */
     .hd-prayer {
-      width: 560px; padding: 6px 14px 11px; border-radius: 20px;
+      width: 560px; padding: 6px 14px 8px; border-radius: 20px;
       background: linear-gradient(135deg, rgba(167,139,250,0.22), rgba(99,102,241,0.06));
       border: 1px solid rgba(167,139,250,0.6);
       box-shadow: 0 0 24px rgba(139,92,246,0.16);
@@ -395,8 +395,6 @@
     .hd-chip.passed { opacity: .45; }
     .hd-chip.next { background: linear-gradient(135deg, #8b5cf6, #6366f1); border-color: #c4b5fd; }
     .hd-chip.next .n, .hd-chip.next .t { color: #fff; }
-    .hd-progress { position: absolute; left: 16px; right: 16px; bottom: 4px; height: 3px; border-radius: 3px; background: rgba(255,255,255,0.12); overflow: hidden; }
-    .hd-progress i { display: block; height: 100%; width: 0%; border-radius: 3px; background: linear-gradient(90deg, #a78bfa, #22d3ee); }
 
     /* --- Saat WAKTU ADZAN: highlight ROSE berdenyut (hanya animasi opacity = ringan) --- */
     .hd-prayer.adzan-now { background: linear-gradient(135deg, rgba(251,113,133,0.34), rgba(225,29,72,0.14)); border-color: #fb7185; }
@@ -405,7 +403,6 @@
     .hd-prayer.adzan-now .hd-prayer-label, .hd-prayer.adzan-now .hd-countdown-label { color: #fecdd3; }
     .hd-prayer.adzan-now .hd-countdown { color: #fff1f2; text-shadow: 0 0 16px rgba(251,113,133,0.9); font-size: 26px; }
     .hd-prayer.adzan-now .hd-chip.next { background: linear-gradient(135deg, #fb7185, #e11d48); border-color: #fecdd3; }
-    .hd-prayer.adzan-now .hd-progress i { background: linear-gradient(90deg, #fb7185, #fbbf24); }
     @keyframes adzanPulse { 0%,100% { opacity: .2; } 50% { opacity: 1; } }
 
     .hd-sync-badge { white-space: nowrap; flex-shrink: 0; }
@@ -530,7 +527,6 @@
                 </div>
               </div>
               <div id="prayerList" class="hd-prayer-list"></div>
-              <div class="hd-progress"><i id="prayerProgress"></i></div>
             </div>
             <div class="hd-clock">
               <div id="currentTime" class="hd-time">00:00:00</div>
@@ -770,6 +766,8 @@
 
     function playSafe(el) {
       if (!el) return Promise.resolve(false);
+      // Saat adzan berbunyi, semua sound lain ditahan (mute) sampai adzan selesai
+      if (adzanActive && el.id !== 'audioAdzan') return Promise.resolve(false);
       el.muted = false; el.volume = 1;
       let p = null;
       try { p = el.play(); } catch (e) { p = null; }
@@ -779,7 +777,7 @@
             if (el.id === 'audioBacksound') showUnlockOverlayAgain();
           } else {
             // Belum siap (AbortError dll): coba lagi otomatis saat audio siap diputar
-            const h = function () { el.removeEventListener('canplay', h); if (el.dataset.want === '1') { try { el.play().catch(() => {}); } catch (e) {} } };
+            const h = function () { el.removeEventListener('canplay', h); if (el.dataset.want === '1' && !adzanActive) { try { el.play().catch(() => {}); } catch (e) {} } };
             el.addEventListener('canplay', h);
           }
           return false;
@@ -876,6 +874,49 @@
           }
         })
         .subscribe();
+    }
+
+    // ===== DATA REALTIME: semua tabel dipantau langsung dari database (+ polling cadangan 15 detik) =====
+    const refreshTimers = {};
+    function debounceRun(key, fn, delay) {
+      clearTimeout(refreshTimers[key]);
+      refreshTimers[key] = setTimeout(() => {
+        try { const r = fn(); if (r && r.catch) r.catch(e => console.warn('Refresh gagal:', key, e)); }
+        catch (e) { console.warn('Refresh gagal:', key, e); }
+      }, delay || 300);
+    }
+    function subscribeTable(table, handler) {
+      supabaseClient
+        .channel('rt_data_' + table)
+        .on('postgres_changes', { event: '*', schema: 'public', table: table }, () => debounceRun(table, handler, 300))
+        .subscribe();
+    }
+    function setupRealtimeData() {
+      subscribeTable('laporan_sales',      () => fetchSalesData());
+      subscribeTable('daily_furnipro',     () => Promise.all([fetchSalesData(), updateGaugeData()]));
+      subscribeTable('daily_comser',       () => Promise.all([fetchSalesData(), updateGaugeData()]));
+      subscribeTable('laporan_departemen', () => Promise.all([fetchDeptData(), updateGaugeData()]));
+      subscribeTable('target_today',       () => updateGaugeData());
+      subscribeTable('mtd_sales',          () => Promise.all([fetchMtdSalesData(), fetchTop1MtdSales()]));
+      subscribeTable('mtd_fp',             () => Promise.all([fetchMtdFurniproData(), fetchTop1MtdFurnipro()]));
+      subscribeTable('mtd_comser',         () => Promise.all([fetchMtdComserData(), fetchTop1MtdComser()]));
+      subscribeTable('running_text',       () => fetchRunningText());
+      subscribeTable('data_karyawan',      () => refreshAllData());
+    }
+    let refreshAllBusy = false;
+    async function refreshAllData() {
+      if (refreshAllBusy) return;
+      refreshAllBusy = true;
+      try {
+        await fetchKaryawanData();
+        await Promise.all([
+          fetchSalesData(), fetchDeptData(),
+          fetchMtdSalesData(), fetchMtdFurniproData(), fetchMtdComserData(),
+          fetchTop1MtdSales(), fetchTop1MtdFurnipro(), fetchTop1MtdComser(),
+          fetchRunningText(), updateGaugeData()
+        ]);
+      } catch (e) { console.warn('Refresh semua data gagal:', e); }
+      refreshAllBusy = false;
     }
 
     async function syncBacksoundState() {
@@ -1053,6 +1094,16 @@
       }
     }
 
+    // Render ulang daftar hanya bila isinya berubah (anti-kedip untuk update realtime)
+    function setListHtml(orig, clone, html) {
+      if (!orig || !clone) return false;
+      if (orig._html === html) return false;
+      orig._html = html;
+      orig.innerHTML = html;
+      clone.innerHTML = html;
+      return true;
+    }
+
     async function fetchKaryawanData() {
       const { data } = await supabaseClient.from('data_karyawan').select('nip_kar, nama_kar');
       if (data) {
@@ -1177,6 +1228,11 @@
       if (adzanEndTimer) { clearTimeout(adzanEndTimer); adzanEndTimer = null; }
       if (a) { try { a.pause(); } catch (e) {} }
       setAdzanVisual(false);
+      // Adzan selesai: lanjutkan sound sales bila pop-up masih tampil, lalu backsound
+      if (popupActive) {
+        const ssResume = document.getElementById('audioSoundSales');
+        if (ssResume && ssResume.dataset.want === '1') playSafe(ssResume);
+      }
       if (typeof syncBacksoundState === 'function') syncBacksoundState();   // nyalakan lagi backsound
     }
 
@@ -1186,6 +1242,9 @@
       setAdzanVisual(true, name);
       const bs = document.getElementById('audioBacksound');
       if (bs) { try { bs.pause(); } catch (e) {} }
+      // Sound sales (pop-up) juga di-mute selama adzan; status 'want' dipertahankan agar bisa dilanjutkan
+      const ssAdzan = document.getElementById('audioSoundSales');
+      if (ssAdzan) { try { ssAdzan.pause(); } catch (e) {} }
       const a = document.getElementById('audioAdzan');
       if (a) {
         adzanSrcIndex = 0;
@@ -1253,15 +1312,6 @@
         el('prayerCountdown').textContent = pad2(hh) + ':' + pad2(mm) + ':' + pad2(ss);
       }
 
-      // Bar progres menuju adzan berikutnya
-      const idx = list.indexOf(next);
-      const nextAbs = next.sec + (tomorrow ? 86400 : 0);
-      const prevAbs = tomorrow ? list[list.length - 1].sec : (idx > 0 ? list[idx - 1].sec : list[list.length - 1].sec - 86400);
-      let pct = (nowSec - prevAbs) / (nextAbs - prevAbs) * 100;
-      pct = Math.max(0, Math.min(100, pct));
-      const pb = el('prayerProgress');
-      if (pb) pb.style.width = pct.toFixed(1) + '%';
-
       // Daftar 5 waktu (dirender ulang hanya jika berubah)
       const listKey = prayerTimesDate + '|' + next.key + '|' + (adzanActive ? 1 : 0) + '|' + nowSec;
       const sig = prayerTimesDate + '|' + next.key + '|' + list.map(p => p.time).join(',') + '|' + list.filter(p => p.sec <= nowSec).length;
@@ -1313,7 +1363,7 @@
       const orig = document.getElementById('tableContentOriginal');
       const clone = document.getElementById('tableContentClone');
       const empty = document.getElementById('emptyStatus');
-      if (!salesList || salesList.length === 0) { if(empty) empty.classList.remove('hidden'); return; }
+      if (!salesList || salesList.length === 0) { setListHtml(orig, clone, ''); if(empty) empty.classList.remove('hidden'); return; }
       if(empty) empty.classList.add('hidden');
 
       let html = '';
@@ -1355,9 +1405,7 @@
           </div>
         `;
       });
-      if(orig) orig.innerHTML = html;
-      if(clone) clone.innerHTML = html;
-      lucide.createIcons();
+      if (setListHtml(orig, clone, html)) lucide.createIcons();
     }
 
     async function fetchDeptData() {
@@ -1368,7 +1416,8 @@
     function renderDeptDashboard() {
       const orig = document.getElementById('tableContentOriginalDept');
       const clone = document.getElementById('tableContentCloneDept');
-      if (!orig || !clone || deptList.length === 0) return;
+      if (!orig || !clone) return;
+      if (deptList.length === 0) { setListHtml(orig, clone, ''); return; }
 
       let html = '';
       deptList.forEach((item, index) => {
@@ -1398,8 +1447,7 @@
           </div>
         `;
       });
-      orig.innerHTML = html; clone.innerHTML = html;
-      lucide.createIcons();
+      if (setListHtml(orig, clone, html)) lucide.createIcons();
     }
 
     async function fetchMtdSalesData() {
@@ -1408,7 +1456,8 @@
         mtdSalesList = data;
         const orig = document.getElementById('tableContentOriginalMtdSales');
         const clone = document.getElementById('tableContentCloneMtdSales');
-        if (!orig || !clone || data.length === 0) return;
+        if (!orig || !clone) return;
+        if (data.length === 0) { setListHtml(orig, clone, ''); return; }
         let html = '';
         data.forEach((item, index) => {
           const rank = index + 1;
@@ -1437,8 +1486,7 @@
             </div>
           `;
         });
-        orig.innerHTML = html; clone.innerHTML = html;
-        lucide.createIcons();
+        if (setListHtml(orig, clone, html)) lucide.createIcons();
       }
     }
 
@@ -1447,7 +1495,8 @@
       if (data) {
         const orig = document.getElementById('tableContentOriginalMtdFurnipro');
         const clone = document.getElementById('tableContentCloneMtdFurnipro');
-        if (!orig || !clone || data.length === 0) return;
+        if (!orig || !clone) return;
+        if (data.length === 0) { setListHtml(orig, clone, ''); return; }
         let html = '';
         data.forEach((item, index) => {
           const rank = index + 1;
@@ -1476,8 +1525,7 @@
             </div>
           `;
         });
-        orig.innerHTML = html; clone.innerHTML = html;
-        lucide.createIcons();
+        if (setListHtml(orig, clone, html)) lucide.createIcons();
       }
     }
 
@@ -1486,7 +1534,8 @@
       if (data) {
         const orig = document.getElementById('tableContentOriginalMtdComser');
         const clone = document.getElementById('tableContentCloneMtdComser');
-        if (!orig || !clone || data.length === 0) return;
+        if (!orig || !clone) return;
+        if (data.length === 0) { setListHtml(orig, clone, ''); return; }
         let html = '';
         data.forEach((item, index) => {
           const rank = index + 1;
@@ -1515,19 +1564,20 @@
             </div>
           `;
         });
-        orig.innerHTML = html; clone.innerHTML = html;
-        lucide.createIcons();
+        if (setListHtml(orig, clone, html)) lucide.createIcons();
       }
     }
 
     async function fetchTop1MtdSales() {
       const { data } = await supabaseClient.from('mtd_sales').select('*').order('mtd_total', { ascending: false }).limit(1);
       const container = document.getElementById('mtdTop1Content');
-      if (!container || !data || data.length === 0) return;
+      if (!container || !data) return;
+      if (data.length === 0) { delete container.dataset.sig; container.innerHTML = '<div class="text-slate-500 font-bold text-lg">Belum ada data.</div>'; return; }
       const top = data[0];
       const nip = top.mtd_nip || '-';
       const name = getEmployeeName(nip, top.mtd_nama);
       const total = Number(top.mtd_total || 0);
+      { const sg = nip + '|' + name + '|' + total; if (container.dataset.sig === sg) return; container.dataset.sig = sg; }
       const img = `${SUPABASE_URL}/storage/v1/object/public/FOTO SALES/${nip}.jpg`;
       const avatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=eab308&color=fff&size=128`;
 
@@ -1551,11 +1601,13 @@
     async function fetchTop1MtdFurnipro() {
       const { data } = await supabaseClient.from('mtd_fp').select('*').order('qty_mtdfp', { ascending: false }).limit(1);
       const container = document.getElementById('furniproTop1Content');
-      if (!container || !data || data.length === 0) return;
+      if (!container || !data) return;
+      if (data.length === 0) { delete container.dataset.sig; container.innerHTML = '<div class="text-slate-500 font-bold text-lg">Belum ada data.</div>'; return; }
       const top = data[0];
       const nip = top.nip_mtdfp || '-';
       const name = getEmployeeName(nip, top.nama_mtdfp || top.nama);
       const qty = Number(top.qty_mtdfp || 0);
+      { const sg = nip + '|' + name + '|' + qty; if (container.dataset.sig === sg) return; container.dataset.sig = sg; }
       const img = `${SUPABASE_URL}/storage/v1/object/public/FOTO SALES/${nip}.jpg`;
       const avatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=2563eb&color=fff&size=128`;
 
@@ -1578,11 +1630,13 @@
     async function fetchTop1MtdComser() {
       const { data } = await supabaseClient.from('mtd_comser').select('*').order('total_mtdcnc', { ascending: false }).limit(1);
       const container = document.getElementById('comserTop1Content');
-      if (!container || !data || data.length === 0) return;
+      if (!container || !data) return;
+      if (data.length === 0) { delete container.dataset.sig; container.innerHTML = '<div class="text-slate-500 font-bold text-lg">Belum ada data.</div>'; return; }
       const top = data[0];
       const nip = top.nip_mtdcnc || '-';
       const name = getEmployeeName(nip, top.nama_mtdcnc);
       const total = Number(top.total_mtdcnc || 0);
+      { const sg = nip + '|' + name + '|' + total; if (container.dataset.sig === sg) return; container.dataset.sig = sg; }
       const img = `${SUPABASE_URL}/storage/v1/object/public/FOTO SALES/${nip}.jpg`;
       const avatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=10b981&color=fff&size=128`;
 
@@ -1607,7 +1661,8 @@
       if (!container) return;
       const { data } = await supabaseClient.from('running_text').select('run_text');
       let texts = data && data.length > 0 ? data.map(i => i.run_text).filter(Boolean) : ["SELAMAT DATANG DI INFORMA MOG MALANG (J382)"];
-      container.innerHTML = `<span>${texts.join('    •    ')}</span>`;
+      const newRunHtml = `<span>${texts.join('    •    ')}</span>`;
+      if (container.dataset.sig !== newRunHtml) { container.dataset.sig = newRunHtml; container.innerHTML = newRunHtml; }
     }
 
     function startCarouselTimer() {
@@ -1678,6 +1733,7 @@
       scaleDashboard();
       { const ov = document.getElementById('audioUnlockOverlay'); if (ov && ov.focus) ov.focus(); }
       setupRealtimeListeners();
+      setupRealtimeData();
       loadSoundSalesConfig();
       await fetchKaryawanData();
       
@@ -1693,6 +1749,9 @@
       fetchRunningText();
       updateGaugeData();
       startCarouselTimer();
+      setInterval(refreshAllData, 15000);   // cadangan bila koneksi realtime terputus
+      document.addEventListener('visibilitychange', () => { if (!document.hidden) refreshAllData(); });
+      window.addEventListener('online', refreshAllData);
     });
   </script>
 </body>
