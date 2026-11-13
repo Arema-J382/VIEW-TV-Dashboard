@@ -976,6 +976,47 @@
       height: 100%;
     }
   </style>
+  <style id="tv-bold-running-text-and-awake-css">
+    /* KETERBACAAN TV: teks default dan bobot di bawah Bold dinaikkan menjadi Bold (700).
+       Teks yang sudah Extra Bold tetap dipertahankan agar hierarki visual tidak hilang. */
+    body {
+      font-weight: 700 !important;
+    }
+    body .font-medium,
+    body .font-semibold,
+    body .font-normal,
+    body .font-light,
+    body .font-thin,
+    body .popup-countdown-text {
+      font-weight: 700 !important;
+    }
+    .legacy-mode .font-medium,
+    .legacy-mode .font-semibold,
+    .legacy-mode .font-normal,
+    .legacy-mode .font-light,
+    .legacy-mode .font-thin,
+    .legacy-mode .popup-countdown-text {
+      font-weight: 700 !important;
+    }
+
+    /* RUNNING TEXT: diperbesar, rata tebal, dan selalu huruf kapital. */
+    #runningTextContainer,
+    #runningTextContainer * {
+      font-size: 32px !important;
+      line-height: 1.08 !important;
+      font-weight: 700 !important;
+      text-transform: uppercase !important;
+      letter-spacing: 0.07em !important;
+      white-space: nowrap !important;
+    }
+
+    /* Jangan sampai peningkatan tipografi mengubah tinggi strip ticker. */
+    footer #runningTextContainer {
+      height: 100%;
+      display: flex;
+      align-items: center;
+    }
+  </style>
 </head>
 <body class="bg-slate-950 text-slate-800 select-none overflow-hidden m-0 p-0">
 
@@ -1600,49 +1641,83 @@ function updateTvFullscreenState() {
     else
         document.body.classList.remove('tv-fullscreen-active');
     scaleDashboard();
+    requestTvWakeLock();
 }
 document.addEventListener('fullscreenchange', updateTvFullscreenState);
 document.addEventListener('webkitfullscreenchange', updateTvFullscreenState);
 document.addEventListener('mozfullscreenchange', updateTvFullscreenState);
 document.addEventListener('MSFullscreenChange', updateTvFullscreenState);
-// Sinkronkan skala setelah halaman selesai ditata. Tidak ada kelas yang menyembunyikan header.
+// Sinkronkan skala dan coba fullscreen otomatis jika browser mengizinkan.
+// Bila ditolak karena aturan gesture, fullscreen akan dicoba lagi saat klik/OK/ENTER.
 window.setTimeout(function () {
     scaleDashboard();
+    requestTvFullscreen();
 }, 5000);
 
-// ===== TV SCREEN WAKE LOCK: CEGAH LAYAR TIDUR SELAMA HALAMAN AKTIF =====
-// Memerlukan browser yang mendukung Screen Wake Lock dan umumnya konteks HTTPS (mis. Vercel).
-// Lock akan diminta ulang ketika halaman kembali terlihat/fokus atau pengguna berinteraksi.
+// ===== TV SCREEN WAKE LOCK: PERMINTAAN OTOMATIS + PEMULIHAN BERKALA =====
+// Bekerja pada browser yang mendukung Screen Wake Lock dan halaman HTTPS yang tetap terlihat.
+// Browser/OS tetap dapat menolak atau melepas lock karena kebijakan daya atau kemampuan perangkat.
 var tvWakeLockSentinel = null;
 var tvWakeLockRequestPending = false;
+var tvWakeLockRetryTimer = null;
+var tvWakeLockUnsupportedLogged = false;
+var TV_WAKELOCK_RETRY_INTERVAL = 20000;
 function requestTvWakeLock() {
-    if (!navigator || !navigator.wakeLock || typeof navigator.wakeLock.request !== 'function')
-        return;
+    if (typeof navigator === 'undefined' || !navigator.wakeLock || typeof navigator.wakeLock.request !== 'function') {
+        if (!tvWakeLockUnsupportedLogged && window.console && console.info) {
+            console.info('TV Wake Lock tidak didukung browser ini. Gunakan pengaturan Always On/Kiosk pada perangkat TV.');
+            tvWakeLockUnsupportedLogged = true;
+        }
+        return false;
+    }
     if (document.visibilityState && document.visibilityState !== 'visible')
-        return;
+        return false;
     if (tvWakeLockRequestPending)
-        return;
+        return false;
     if (tvWakeLockSentinel && !tvWakeLockSentinel.released)
-        return;
+        return true;
+
     tvWakeLockRequestPending = true;
     try {
-        navigator.wakeLock.request('screen').then(function (sentinel) {
+        var wakeLockPromise = navigator.wakeLock.request('screen');
+        if (!wakeLockPromise || typeof wakeLockPromise.then !== 'function') {
+            tvWakeLockRequestPending = false;
+            return false;
+        }
+        wakeLockPromise.then(function (sentinel) {
             tvWakeLockSentinel = sentinel;
             tvWakeLockRequestPending = false;
             if (sentinel && sentinel.addEventListener) {
                 sentinel.addEventListener('release', function () {
-                    if (tvWakeLockSentinel === sentinel)
+                    if (tvWakeLockSentinel === sentinel) {
                         tvWakeLockSentinel = null;
+                        // Jika sistem melepas lock, coba ambil kembali ketika halaman masih terlihat.
+                        if (!document.hidden)
+                            window.setTimeout(requestTvWakeLock, 1200);
+                    }
                 });
             }
-        }).catch(function (err) {
+            if (window.console && console.info)
+                console.info('TV Screen Wake Lock aktif.');
+        }, function (err) {
             tvWakeLockRequestPending = false;
             if (window.console && console.info)
-                console.info('Screen Wake Lock tidak tersedia/ditolak oleh browser atau perangkat:', err && err.message ? err.message : err);
+                console.info('Permintaan Screen Wake Lock ditolak; sistem akan mencoba lagi:', err && err.message ? err.message : err);
         });
+        return true;
     }
     catch (err) {
         tvWakeLockRequestPending = false;
+        return false;
+    }
+}
+function startTvWakeLockGuard() {
+    requestTvWakeLock();
+    if (tvWakeLockRetryTimer === null) {
+        tvWakeLockRetryTimer = window.setInterval(function () {
+            if (!document.hidden && (!tvWakeLockSentinel || tvWakeLockSentinel.released))
+                requestTvWakeLock();
+        }, TV_WAKELOCK_RETRY_INTERVAL);
     }
 }
 document.addEventListener('visibilitychange', function () {
@@ -1651,6 +1726,7 @@ document.addEventListener('visibilitychange', function () {
 });
 window.addEventListener('focus', requestTvWakeLock);
 window.addEventListener('pageshow', requestTvWakeLock);
+window.addEventListener('online', requestTvWakeLock);
 // ===== AUDIO ENGINE (KOMPATIBEL BROWSER TV: Tizen / WebOS / Android TV / Fire TV) =====
 // Browser TV mewajibkan SETIAP elemen <audio> "dibuka kuncinya" lewat interaksi user (klik / OK remote).
 // Karena itu kedua elemen audio di-prime (diputar senyap) langsung di dalam event klik/tombol remote,
@@ -2915,7 +2991,7 @@ function fetchRunningText() {
                     return [4 /*yield*/, supabaseClient.from('running_text').select('run_text')];
                 case 1:
                     data = (_a.sent()).data;
-                    texts = data && data.length > 0 ? data.map(function (i) { return i.run_text; }).filter(Boolean) : ["SELAMAT DATANG DI INFORMA MOG MALANG (J382)"];
+                    texts = data && data.length > 0 ? data.map(function (i) { return i.run_text == null ? '' : String(i.run_text).toUpperCase(); }).filter(Boolean) : ["SELAMAT DATANG DI INFORMA MOG MALANG (J382)"];
                     newRunHtml = "<span>".concat(texts.join('    •    '), "</span>");
                     if (container.dataset.sig !== newRunHtml) {
                         container.dataset.sig = newRunHtml;
@@ -3471,11 +3547,24 @@ document.addEventListener("DOMContentLoaded", function () { return __awaiter(voi
             case 0:
                 lucide.createIcons();
                 scaleDashboard();
-                requestTvWakeLock();
+                startTvWakeLockGuard();
                 {
                     ov = document.getElementById('audioUnlockOverlay');
                     if (ov && ov.focus)
                         ov.focus();
+                    // Dashboard tetap terlihat tanpa interaksi: prompt audio bukan layar penghalang permanen.
+                    // Audio baru dapat dibuka oleh klik/OK berikutnya sesuai kebijakan autoplay browser.
+                    window.setTimeout(function () {
+                        var audioPrompt = document.getElementById('audioUnlockOverlay');
+                        if (audioPrompt && !audioUnlocked) {
+                            audioPrompt.style.opacity = '0';
+                            audioPrompt.style.pointerEvents = 'none';
+                            window.setTimeout(function () {
+                                if (!audioUnlocked)
+                                    audioPrompt.style.display = 'none';
+                            }, 600);
+                        }
+                    }, 5000);
                 }
                 setupRealtimeListeners();
                 setupRealtimeData();
