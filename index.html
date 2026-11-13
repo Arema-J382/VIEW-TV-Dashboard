@@ -4,6 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>TV Dashboard - Laporan Sales, Gauge, Departemen & MTD Tables</title>
+  <!-- ROBOTO: tipografi global untuk seluruh teks dashboard. Jika CDN tidak dapat diakses, gunakan fallback sistem. -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;800;900&display=swap" rel="stylesheet">
   
   <script>
   /* Deteksi kemampuan browser TANPA memakai sintaks JavaScript modern di luar string. */
@@ -1015,6 +1019,16 @@
       height: 100%;
       display: flex;
       align-items: center;
+    }
+  </style>
+  <style id="tv-global-roboto-font-css">
+    /* Gunakan Roboto pada SEMUA teks, termasuk konten dinamis dan elemen yang sebelumnya
+       memakai font monospace/Arial. Ikon SVG tetap mempertahankan bentuknya. */
+    html, body, body * {
+      font-family: "Roboto", Arial, Helvetica, sans-serif !important;
+    }
+    html, body {
+      font-synthesis: weight;
     }
   </style>
 </head>
