@@ -962,9 +962,12 @@
     .tv-canvas img {
       -ms-interpolation-mode: bicubic;
     }
-    /* Header dashboard disembunyikan setelah 5 detik dalam mode TV. */
-    body.tv-presentation-mode #mainHeader {
-      display: none !important;
+    /* HEADER DASHBOARD SELALU TAMPIL. Yang disembunyikan adalah UI browser melalui Fullscreen API,
+       bukan header website ini. */
+    #mainHeader {
+      display: flex !important;
+      visibility: visible !important;
+      opacity: 1 !important;
     }
     /* Pastikan kanvas tetap memenuhi area ketika browser masuk fullscreen. */
     body.tv-fullscreen-active,
@@ -1551,10 +1554,10 @@ document.addEventListener('mozfullscreenchange', scaleDashboard);
 document.addEventListener('MSFullscreenChange', scaleDashboard);
 window.addEventListener('load', scaleDashboard);
 
-// ===== MODE TV: sembunyikan header dashboard setelah 5 detik + dukungan fullscreen =====
-// Browser membatasi request fullscreen otomatis tanpa interaksi pengguna. Karena itu:
-// 1) percobaan otomatis dilakukan setelah 5 detik;
-// 2) fullscreen dicoba kembali langsung saat pengguna menekan OK/ENTER/klik/touch.
+// ===== MODE TV: HEADER TETAP TAMPIL + DUKUNGAN FULLSCREEN BROWSER =====
+// Fullscreen diminta saat interaksi pengguna (klik / OK / ENTER / touch), sesuai aturan browser.
+// Fullscreen API dapat menyembunyikan toolbar browser; halaman tidak dapat memaksa browser
+// menyembunyikan UI tersebut tanpa dukungan browser atau mode kiosk.
 function isTvFullscreenActive() {
     return !!(document.fullscreenElement || document.webkitFullscreenElement ||
         document.webkitCurrentFullScreenElement || document.mozFullScreenElement ||
@@ -1602,12 +1605,52 @@ document.addEventListener('fullscreenchange', updateTvFullscreenState);
 document.addEventListener('webkitfullscreenchange', updateTvFullscreenState);
 document.addEventListener('mozfullscreenchange', updateTvFullscreenState);
 document.addEventListener('MSFullscreenChange', updateTvFullscreenState);
+// Sinkronkan skala setelah halaman selesai ditata. Tidak ada kelas yang menyembunyikan header.
 window.setTimeout(function () {
-    if (document.body)
-        document.body.classList.add('tv-presentation-mode');
     scaleDashboard();
-    requestTvFullscreen();
 }, 5000);
+
+// ===== TV SCREEN WAKE LOCK: CEGAH LAYAR TIDUR SELAMA HALAMAN AKTIF =====
+// Memerlukan browser yang mendukung Screen Wake Lock dan umumnya konteks HTTPS (mis. Vercel).
+// Lock akan diminta ulang ketika halaman kembali terlihat/fokus atau pengguna berinteraksi.
+var tvWakeLockSentinel = null;
+var tvWakeLockRequestPending = false;
+function requestTvWakeLock() {
+    if (!navigator || !navigator.wakeLock || typeof navigator.wakeLock.request !== 'function')
+        return;
+    if (document.visibilityState && document.visibilityState !== 'visible')
+        return;
+    if (tvWakeLockRequestPending)
+        return;
+    if (tvWakeLockSentinel && !tvWakeLockSentinel.released)
+        return;
+    tvWakeLockRequestPending = true;
+    try {
+        navigator.wakeLock.request('screen').then(function (sentinel) {
+            tvWakeLockSentinel = sentinel;
+            tvWakeLockRequestPending = false;
+            if (sentinel && sentinel.addEventListener) {
+                sentinel.addEventListener('release', function () {
+                    if (tvWakeLockSentinel === sentinel)
+                        tvWakeLockSentinel = null;
+                });
+            }
+        }).catch(function (err) {
+            tvWakeLockRequestPending = false;
+            if (window.console && console.info)
+                console.info('Screen Wake Lock tidak tersedia/ditolak oleh browser atau perangkat:', err && err.message ? err.message : err);
+        });
+    }
+    catch (err) {
+        tvWakeLockRequestPending = false;
+    }
+}
+document.addEventListener('visibilitychange', function () {
+    if (!document.hidden)
+        requestTvWakeLock();
+});
+window.addEventListener('focus', requestTvWakeLock);
+window.addEventListener('pageshow', requestTvWakeLock);
 // ===== AUDIO ENGINE (KOMPATIBEL BROWSER TV: Tizen / WebOS / Android TV / Fire TV) =====
 // Browser TV mewajibkan SETIAP elemen <audio> "dibuka kuncinya" lewat interaksi user (klik / OK remote).
 // Karena itu kedua elemen audio di-prime (diputar senyap) langsung di dalam event klik/tombol remote,
@@ -1771,6 +1814,7 @@ function unlockAndPlayAudio() {
 function onAnyUserGesture() {
     // Dipanggil sinkron saat klik/tombol remote agar browser mengizinkan fullscreen.
     requestTvFullscreen();
+    requestTvWakeLock();
     if (!audioUnlocked) {
         unlockAndPlayAudio();
         return;
@@ -3427,6 +3471,7 @@ document.addEventListener("DOMContentLoaded", function () { return __awaiter(voi
             case 0:
                 lucide.createIcons();
                 scaleDashboard();
+                requestTvWakeLock();
                 {
                     ov = document.getElementById('audioUnlockOverlay');
                     if (ov && ov.focus)
