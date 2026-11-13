@@ -931,6 +931,48 @@
 .legacy-mode .animate-scroll-infinite,.legacy-mode .screen-marquee-anim{will-change:auto;}
 
   </style>
+  <style id="tv-display-enhancement-css">
+    /* Peningkatan keterbacaan TV: gunakan rasterisasi font standar browser,
+       kontras stabil, dan prefiks transform untuk WebKit/WebView lama. */
+    html, body {
+      -webkit-text-size-adjust: 100%;
+      text-size-adjust: 100%;
+    }
+    .tv-canvas {
+      font-family: Arial, Helvetica, sans-serif;
+      -webkit-font-smoothing: auto;
+      -moz-osx-font-smoothing: auto;
+      text-rendering: optimizeLegibility;
+      -webkit-transform-origin: center center;
+      transform-origin: center center;
+    }
+    .tv-canvas, .tv-canvas * {
+      -webkit-font-smoothing: auto;
+      -moz-osx-font-smoothing: auto;
+    }
+    .tv-canvas .text-slate-500 { color: #475569; }
+    .tv-canvas .text-slate-400 { color: #64748b; }
+    .tv-canvas .hd-time,
+    .tv-canvas .hd-countdown,
+    .tv-canvas .hd-title,
+    .tv-canvas .popup-name,
+    .tv-canvas .sr-title {
+      text-rendering: optimizeLegibility;
+    }
+    .tv-canvas img {
+      -ms-interpolation-mode: bicubic;
+    }
+    /* Header dashboard disembunyikan setelah 5 detik dalam mode TV. */
+    body.tv-presentation-mode #mainHeader {
+      display: none !important;
+    }
+    /* Pastikan kanvas tetap memenuhi area ketika browser masuk fullscreen. */
+    body.tv-fullscreen-active,
+    body.tv-fullscreen-active #tvAspectRatioBox {
+      width: 100%;
+      height: 100%;
+    }
+  </style>
 </head>
 <body class="bg-slate-950 text-slate-800 select-none overflow-hidden m-0 p-0">
 
@@ -1478,11 +1520,14 @@ function scaleDashboard() {
     var canvas = document.getElementById('tvScaleCanvas');
     if (!canvas)
         return;
-    var vw = window.innerWidth || document.documentElement.clientWidth;
-    var vh = window.innerHeight || document.documentElement.clientHeight;
+    var vw = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
+    var vh = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight;
     var raw = Math.min((vw * (1 - SAFE_MARGIN * 2)) / 1920, (vh * (1 - SAFE_MARGIN * 2)) / 1080);
     var scale = Math.round(raw * 10000) / 10000;
-    canvas.style.transform = 'translate(-50%, -50%) scale(' + scale + ')';
+    var canvasTransform = 'translate(-50%, -50%) scale(' + scale + ')';
+    canvas.style.transform = canvasTransform;
+    canvas.style.webkitTransform = canvasTransform;
+    canvas.style.msTransform = canvasTransform;
     if (document.documentElement.style && document.documentElement.style.setProperty)
         document.documentElement.style.setProperty('--tv-scale', scale);
     if (window.__TV_USE_LEGACY__) {
@@ -1501,7 +1546,68 @@ function scaleDashboard() {
 window.addEventListener('resize', scaleDashboard);
 window.addEventListener('orientationchange', scaleDashboard);
 document.addEventListener('fullscreenchange', scaleDashboard);
+document.addEventListener('webkitfullscreenchange', scaleDashboard);
+document.addEventListener('mozfullscreenchange', scaleDashboard);
+document.addEventListener('MSFullscreenChange', scaleDashboard);
 window.addEventListener('load', scaleDashboard);
+
+// ===== MODE TV: sembunyikan header dashboard setelah 5 detik + dukungan fullscreen =====
+// Browser membatasi request fullscreen otomatis tanpa interaksi pengguna. Karena itu:
+// 1) percobaan otomatis dilakukan setelah 5 detik;
+// 2) fullscreen dicoba kembali langsung saat pengguna menekan OK/ENTER/klik/touch.
+function isTvFullscreenActive() {
+    return !!(document.fullscreenElement || document.webkitFullscreenElement ||
+        document.webkitCurrentFullScreenElement || document.mozFullScreenElement ||
+        document.msFullscreenElement);
+}
+function requestTvFullscreen() {
+    if (isTvFullscreenActive())
+        return true;
+    var root = document.documentElement;
+    var request = root.requestFullscreen || root.webkitRequestFullscreen ||
+        root.webkitRequestFullScreen || root.mozRequestFullScreen || root.msRequestFullscreen;
+    if (typeof request !== 'function')
+        return false;
+    try {
+        var result;
+        if (root.requestFullscreen) {
+            // Minta browser menyembunyikan navigation UI saat fullscreen bila didukung.
+            result = root.requestFullscreen({ navigationUI: 'hide' });
+        }
+        else {
+            result = request.call(root);
+        }
+        if (result && typeof result.then === 'function') {
+            result.then(function () {
+                document.body.classList.add('tv-fullscreen-active');
+                scaleDashboard();
+            }, function () {
+                // Browser menolak fullscreen tanpa gesture: percobaan ulang pada input pengguna.
+            });
+        }
+        return true;
+    }
+    catch (e) {
+        return false;
+    }
+}
+function updateTvFullscreenState() {
+    if (isTvFullscreenActive())
+        document.body.classList.add('tv-fullscreen-active');
+    else
+        document.body.classList.remove('tv-fullscreen-active');
+    scaleDashboard();
+}
+document.addEventListener('fullscreenchange', updateTvFullscreenState);
+document.addEventListener('webkitfullscreenchange', updateTvFullscreenState);
+document.addEventListener('mozfullscreenchange', updateTvFullscreenState);
+document.addEventListener('MSFullscreenChange', updateTvFullscreenState);
+window.setTimeout(function () {
+    if (document.body)
+        document.body.classList.add('tv-presentation-mode');
+    scaleDashboard();
+    requestTvFullscreen();
+}, 5000);
 // ===== AUDIO ENGINE (KOMPATIBEL BROWSER TV: Tizen / WebOS / Android TV / Fire TV) =====
 // Browser TV mewajibkan SETIAP elemen <audio> "dibuka kuncinya" lewat interaksi user (klik / OK remote).
 // Karena itu kedua elemen audio di-prime (diputar senyap) langsung di dalam event klik/tombol remote,
@@ -1663,6 +1769,8 @@ function unlockAndPlayAudio() {
 }
 // Klik mouse, sentuh layar, maupun tombol apa pun pada remote akan membuka kunci audio
 function onAnyUserGesture() {
+    // Dipanggil sinkron saat klik/tombol remote agar browser mengizinkan fullscreen.
+    requestTvFullscreen();
     if (!audioUnlocked) {
         unlockAndPlayAudio();
         return;
