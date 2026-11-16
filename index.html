@@ -1049,23 +1049,28 @@
     .brk-name { color: #0f172a; font-weight: 900; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.1; }
     .brk-ket { display: inline-block; margin-top: 3px; padding: 1px 14px; border-radius: 999px; color: #ffffff; font-weight: 800; letter-spacing: 0.08em; line-height: 1.3; white-space: nowrap; }
     .brk-time { -webkit-flex-shrink: 0; flex-shrink: 0; text-align: center; margin-left: 10px; padding: 2px 12px; border-radius: 10px; background: #0f172a; }
+    .brk-start { -webkit-flex-shrink: 0; flex-shrink: 0; text-align: center; margin-left: 10px; padding: 2px 12px; border-radius: 10px; background: #fff7ed; border: 2px solid #fdba74; box-sizing: border-box; }
+    .brk-start .brk-lbl { color: #9a3412; }
+    .brk-val { display: block; color: #0f172a; font-weight: 900; line-height: 1.1; letter-spacing: 0.04em; font-variant-numeric: tabular-nums; }
     .brk-lbl { display: block; color: #94a3b8; font-size: 11px; font-weight: 800; letter-spacing: 0.14em; line-height: 1.1; }
     .brk-timer { display: block; color: #fde047; font-weight: 900; line-height: 1.1; letter-spacing: 0.04em; font-variant-numeric: tabular-nums; }
 
     /* Mode 2 baris (2 orang atau lebih) */
-    .brk-two .brk-col { width: 540px; margin-right: 14px; }
+    .brk-two .brk-col { width: 680px; margin-right: 14px; }
     .brk-two .brk-card { height: 62px; margin-bottom: 6px; padding: 0 10px 0 8px; }
     .brk-two .brk-photo { width: 48px; height: 48px; }
     .brk-two .brk-name { font-size: 22px; }
     .brk-two .brk-ket { font-size: 14px; }
     .brk-two .brk-timer { font-size: 26px; }
+    .brk-two .brk-val { font-size: 22px; }
     /* Mode 1 baris (hanya 1 orang): ukuran dibesarkan menyesuaikan */
-    .brk-one .brk-col { width: 640px; margin-right: 14px; }
+    .brk-one .brk-col { width: 780px; margin-right: 14px; }
     .brk-one .brk-card { height: 76px; margin-bottom: 6px; padding: 0 12px 0 10px; }
     .brk-one .brk-photo { width: 62px; height: 62px; }
     .brk-one .brk-name { font-size: 28px; }
     .brk-one .brk-ket { font-size: 16px; }
     .brk-one .brk-timer { font-size: 32px; }
+    .brk-one .brk-val { font-size: 28px; }
 
     @-webkit-keyframes brkScroll { 0% { -webkit-transform: translate3d(0, 0, 0); } 100% { -webkit-transform: translate3d(-50%, 0, 0); } }
     @keyframes brkScroll { 0% { transform: translate3d(0, 0, 0); } 100% { transform: translate3d(-50%, 0, 0); } }
@@ -3665,7 +3670,7 @@ document.addEventListener("DOMContentLoaded", function () { return __awaiter(voi
 // ===== TEAM ISTIRAHAT HARI INI (tabel: data_istirahat) =====
 // - Hanya data HARI INI (tanggal WIB) dan hanya yang jam_selesai masih kosong (sedang istirahat).
 // - Realtime: langganan perubahan tabel (mode modern) + polling cadangan 5 detik (semua mode, termasuk TV lama).
-// - Durasi dihitung langsung dari jam_mulai dan berjalan per detik (kolom durasi di database baru terisi saat selesai).
+// - Durasi yang tampil = TOTAL durasi istirahat hari ini yang sudah selesai (semua keterangan) + istirahat yang sedang berjalan (per detik).
 // - Bila tidak ada yang istirahat: view disembunyikan dan tinggi 4 tabel bawah kembali ke ukuran semula.
 var BREAK_TABLE = 'data_istirahat';
 var BREAK_POLL_MS = 5000;
@@ -3683,6 +3688,7 @@ function brkSec(hms) {
     var p = String(hms == null ? '' : hms).split('.')[0].split(':');
     return (parseInt(p[0], 10) || 0) * 3600 + (parseInt(p[1], 10) || 0) * 60 + (parseInt(p[2], 10) || 0);
 }
+function brkHms(v) { var x = brkSec(v); return pad2(Math.floor(x / 3600) % 24) + ':' + pad2(Math.floor((x % 3600) / 60)) + ':' + pad2(x % 60); }
 function brkNowSec() { var t = wibNow(); return t.h * 3600 + t.mi * 60 + t.s; }
 function brkFmt(sec) {
     if (sec < 0) sec = 0;
@@ -3696,13 +3702,20 @@ function brkKetColor(ket) {
     if (k.indexOf('TOILET') > -1 || k.indexOf('WC') > -1) return '#2563eb';
     return '#7c3aed';
 }
+function brkClosedSec(r) {
+    // Lama istirahat yang sudah selesai: dari jam_mulai s/d jam_selesai; cadangan: parsing teks kolom durasi.
+    var a = brkSec(r.jam_mulai), b = brkSec(r.jam_selesai);
+    if (r.jam_mulai && r.jam_selesai) return b >= a ? b - a : b + 86400 - a;
+    var m = /(\d+)\s*Jam\s*(\d+)\s*Menit\s*(\d+)\s*Detik/i.exec(String(r.durasi == null ? '' : r.durasi));
+    return m ? (parseInt(m[1], 10) * 3600 + parseInt(m[2], 10) * 60 + parseInt(m[3], 10)) : 0;
+}
 function brkName(r) { return getEmployeeName(r.nip); }
 function brkIsOpen(r) { return r.jam_selesai == null || String(r.jam_selesai).replace(/\s/g, '') === ''; }
 function brkSignature() {
     var parts = [];
     for (var i = 0; i < breakRows.length; i++) {
         var r = breakRows[i];
-        parts.push([r.id, r.nip, r.keterangan, r.jam_mulai, brkName(r)].join('|'));
+        parts.push([r.id, r.nip, r.keterangan, r.jam_mulai, r._base || 0, brkName(r)].join('|'));
     }
     return parts.join(';');
 }
@@ -3718,8 +3731,9 @@ function brkCardHtml(r) {
         '<div class="brk-photo"><img src="' + brkEsc(img) + '" alt="" onerror="' + brkEsc(onerr) + '"></div>' +
         '<div class="brk-info"><div class="brk-name">' + brkEsc(name) + '</div>' +
         '<span class="brk-ket" style="background:' + col + ';">' + brkEsc(ket) + '</span></div>' +
-        '<div class="brk-time"><span class="brk-lbl">DURASI</span>' +
-        '<span class="brk-timer" data-start="' + brkSec(r.jam_mulai) + '">00:00:00</span></div></div>';
+        '<div class="brk-start"><span class="brk-lbl">MULAI</span><span class="brk-val">' + brkEsc(brkHms(r.jam_mulai)) + '</span></div>' +
+        '<div class="brk-time"><span class="brk-lbl">TOTAL HARI INI</span>' +
+        '<span class="brk-timer" data-start="' + brkSec(r.jam_mulai) + '" data-base="' + (r._base || 0) + '">00:00:00</span></div></div>';
 }
 function brkSetBottomHeight(h) {
     var cards = document.querySelectorAll('.bottom-card-container');
@@ -3741,7 +3755,7 @@ function renderBreak() {
     var n = breakRows.length;
     if (n === 0) { brkHide(); return; }
     var two = n >= 2;
-    var pitch = two ? 554 : 654;                 // lebar kolom + jarak
+    var pitch = two ? 694 : 794;                 // lebar kolom + jarak
     var bodyH = two ? 142 : 88;                  // 2 baris atau 1 baris
     var totalH = BREAK_HEADER_H + bodyH;
     var cols = two ? Math.ceil(n / 2) : 1;
@@ -3774,7 +3788,7 @@ function brkTickTimers() {
     nodes = nodes.getElementsByClassName('brk-timer');
     var now = brkNowSec();
     for (var i = 0; i < nodes.length; i++) {
-        var txt = brkFmt(now - (parseInt(nodes[i].getAttribute('data-start'), 10) || 0));
+        var txt = brkFmt((parseInt(nodes[i].getAttribute('data-base'), 10) || 0) + now - (parseInt(nodes[i].getAttribute('data-start'), 10) || 0));
         if (nodes[i].textContent !== txt) nodes[i].textContent = txt;
     }
 }
@@ -3784,17 +3798,18 @@ function brkTick() {
 }
 function applyBreakRows(data, today) {
     // Ambil baris TERBARU per NIP (id terbesar) pada hari ini; tampil hanya jika jam_selesai-nya masih kosong.
-    var latest = {}, i, r, key, prev;
+    var latest = {}, closedSum = {}, i, r, key, prev;
     for (i = 0; i < data.length; i++) {
         r = data[i];
         if (!r || r.nip == null) continue;
         if (r.tanggal && String(r.tanggal).slice(0, 10) !== today) continue;
         key = String(r.nip).trim();
+        if (!brkIsOpen(r)) closedSum[key] = (closedSum[key] || 0) + brkClosedSec(r); // total istirahat selesai hari ini
         prev = latest[key];
         if (!prev || (Number(r.id) || 0) > (Number(prev.id) || 0)) latest[key] = r;
     }
     var list = [];
-    for (key in latest) { if (latest.hasOwnProperty(key) && brkIsOpen(latest[key])) list.push(latest[key]); }
+    for (key in latest) { if (latest.hasOwnProperty(key) && brkIsOpen(latest[key])) { latest[key]._base = closedSum[key] || 0; list.push(latest[key]); } }
     list.sort(function (x, y) {
         var d = brkSec(x.jam_mulai) - brkSec(y.jam_mulai);
         return d !== 0 ? d : (Number(x.id) || 0) - (Number(y.id) || 0);
@@ -3809,7 +3824,7 @@ function fetchBreakData() {
     breakBusySince = nowMs;
     var today = wibDateKey(wibNow());
     try {
-        supabaseClient.from(BREAK_TABLE).select('id,nip,tanggal,jam_mulai,jam_selesai,keterangan').eq('tanggal', today).then(function (res) {
+        supabaseClient.from(BREAK_TABLE).select('id,nip,tanggal,jam_mulai,jam_selesai,durasi,keterangan').eq('tanggal', today).then(function (res) {
             breakBusy = false;
             if (!res || res.error || !(res.data instanceof Array)) {
                 console.warn('Ambil data_istirahat gagal:', res && res.error); // gagal: pertahankan tampilan terakhir
