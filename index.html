@@ -1031,6 +1031,47 @@
       font-synthesis: weight;
     }
   </style>
+  <style id="tv-break-section-css">
+    /* ===== TEAM ISTIRAHAT HARI INI =====
+       View tambahan: tampil memanjang penuh (tepi kiri s/d kanan) tepat di atas footer running text.
+       Tanpa CSS variable / grid / flex-gap agar tetap aman di WebView TV lama (legacy-mode). */
+    #breakSection { display: none; width: 100%; box-sizing: border-box; position: relative; z-index: 40; overflow: hidden; -webkit-flex-shrink: 0; flex-shrink: 0; box-shadow: 0 -6px 18px rgba(15, 23, 42, 0.28); }
+    #breakHeader { position: relative; height: 38px; line-height: 38px; text-align: center; color: #ffffff; font-size: 23px; font-weight: 900; letter-spacing: 0.14em; text-transform: uppercase; background-color: #c2410c; background: -webkit-linear-gradient(left, #9a3412, #ea580c 50%, #9a3412); background: linear-gradient(90deg, #9a3412, #ea580c 50%, #9a3412); text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4); box-sizing: border-box; }
+    #breakDot { position: absolute; left: 26px; top: 12px; width: 14px; height: 14px; border-radius: 50%; background: #fde047; -webkit-animation: brkPulse 1.4s ease-in-out infinite; animation: brkPulse 1.4s ease-in-out infinite; }
+    #breakCount { position: absolute; right: 26px; top: 6px; height: 26px; line-height: 26px; padding: 0 16px; border-radius: 999px; background: rgba(255, 255, 255, 0.22); font-size: 15px; letter-spacing: 0.1em; }
+    #breakBody { position: relative; width: 100%; overflow: hidden; box-sizing: border-box; background-color: #ffedd5; background: -webkit-linear-gradient(top, #fff7ed, #ffedd5); background: linear-gradient(180deg, #fff7ed, #ffedd5); }
+    #breakTrack { position: absolute; left: 0; top: 6px; white-space: nowrap; -webkit-backface-visibility: hidden; backface-visibility: hidden; -webkit-animation: brkScroll linear infinite; animation: brkScroll linear infinite; will-change: transform; }
+    .brk-col { float: left; box-sizing: border-box; }
+    .brk-card { display: -webkit-flex; display: flex; -webkit-align-items: center; align-items: center; box-sizing: border-box; background: #ffffff; border: 2px solid #fed7aa; border-left-width: 8px; border-radius: 12px; box-shadow: 0 3px 8px rgba(154, 52, 18, 0.18); overflow: hidden; }
+    .brk-photo { -webkit-flex-shrink: 0; flex-shrink: 0; box-sizing: border-box; border: 2px solid #fb923c; border-radius: 10px; overflow: hidden; background: #e2e8f0; }
+    .brk-photo img { display: block; width: 100%; height: 100%; -o-object-fit: cover; object-fit: cover; }
+    .brk-info { -webkit-flex: 1; flex: 1; min-width: 0; margin-left: 12px; }
+    .brk-name { color: #0f172a; font-weight: 900; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.1; }
+    .brk-ket { display: inline-block; margin-top: 3px; padding: 1px 14px; border-radius: 999px; color: #ffffff; font-weight: 800; letter-spacing: 0.08em; line-height: 1.3; white-space: nowrap; }
+    .brk-time { -webkit-flex-shrink: 0; flex-shrink: 0; text-align: center; margin-left: 10px; padding: 2px 12px; border-radius: 10px; background: #0f172a; }
+    .brk-lbl { display: block; color: #94a3b8; font-size: 11px; font-weight: 800; letter-spacing: 0.14em; line-height: 1.1; }
+    .brk-timer { display: block; color: #fde047; font-weight: 900; line-height: 1.1; letter-spacing: 0.04em; font-variant-numeric: tabular-nums; }
+
+    /* Mode 2 baris (2 orang atau lebih) */
+    .brk-two .brk-col { width: 540px; margin-right: 14px; }
+    .brk-two .brk-card { height: 62px; margin-bottom: 6px; padding: 0 10px 0 8px; }
+    .brk-two .brk-photo { width: 48px; height: 48px; }
+    .brk-two .brk-name { font-size: 22px; }
+    .brk-two .brk-ket { font-size: 14px; }
+    .brk-two .brk-timer { font-size: 26px; }
+    /* Mode 1 baris (hanya 1 orang): ukuran dibesarkan menyesuaikan */
+    .brk-one .brk-col { width: 640px; margin-right: 14px; }
+    .brk-one .brk-card { height: 76px; margin-bottom: 6px; padding: 0 12px 0 10px; }
+    .brk-one .brk-photo { width: 62px; height: 62px; }
+    .brk-one .brk-name { font-size: 28px; }
+    .brk-one .brk-ket { font-size: 16px; }
+    .brk-one .brk-timer { font-size: 32px; }
+
+    @-webkit-keyframes brkScroll { 0% { -webkit-transform: translate3d(0, 0, 0); } 100% { -webkit-transform: translate3d(-50%, 0, 0); } }
+    @keyframes brkScroll { 0% { transform: translate3d(0, 0, 0); } 100% { transform: translate3d(-50%, 0, 0); } }
+    @-webkit-keyframes brkPulse { 0%, 100% { opacity: 0.35; } 50% { opacity: 1; } }
+    @keyframes brkPulse { 0%, 100% { opacity: 0.35; } 50% { opacity: 1; } }
+  </style>
 </head>
 <body class="bg-slate-950 text-slate-800 select-none overflow-hidden m-0 p-0">
 
@@ -1343,6 +1384,18 @@
 
           </div>
         </main>
+
+        <!-- TEAM ISTIRAHAT HARI INI (otomatis tampil bila ada yang sedang istirahat, otomatis hilang bila tidak ada) -->
+        <section id="breakSection" aria-label="Team Istirahat Hari Ini">
+          <div id="breakHeader">
+            <span id="breakDot"></span>
+            <span>TEAM ISTIRAHAT HARI INI</span>
+            <span id="breakCount">0 ORANG</span>
+          </div>
+          <div id="breakBody">
+            <div id="breakTrack"></div>
+          </div>
+        </section>
 
         <!-- FOOTER RUNNING TEXT -->
         <footer class="w-full h-[52px] flex items-center shrink-0 relative overflow-hidden z-50 bg-red-600">
@@ -3608,6 +3661,190 @@ document.addEventListener("DOMContentLoaded", function () { return __awaiter(voi
     });
 }); });
 
+
+// ===== TEAM ISTIRAHAT HARI INI (tabel: data_istirahat) =====
+// - Hanya data HARI INI (tanggal WIB) dan hanya yang jam_selesai masih kosong (sedang istirahat).
+// - Realtime: langganan perubahan tabel (mode modern) + polling cadangan 5 detik (semua mode, termasuk TV lama).
+// - Durasi dihitung langsung dari jam_mulai dan berjalan per detik (kolom durasi di database baru terisi saat selesai).
+// - Bila tidak ada yang istirahat: view disembunyikan dan tinggi 4 tabel bawah kembali ke ukuran semula.
+var BREAK_TABLE = 'data_istirahat';
+var BREAK_POLL_MS = 5000;
+var BREAK_SPEED_PX = 75;        // kecepatan jalan (px per detik)
+var BREAK_VIEW_W = 1920;        // lebar kanvas TV
+var BREAK_HEADER_H = 38;
+var BREAK_BOTTOM_BASE_H = 480;  // tinggi asli kartu bawah (sama dengan CSS master)
+var breakRows = [];
+var breakSig = null;
+var breakBusy = false, breakBusySince = 0;
+function brkEsc(s) {
+    return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+function brkSec(hms) {
+    var p = String(hms == null ? '' : hms).split('.')[0].split(':');
+    return (parseInt(p[0], 10) || 0) * 3600 + (parseInt(p[1], 10) || 0) * 60 + (parseInt(p[2], 10) || 0);
+}
+function brkNowSec() { var t = wibNow(); return t.h * 3600 + t.mi * 60 + t.s; }
+function brkFmt(sec) {
+    if (sec < 0) sec = 0;
+    return pad2(Math.floor(sec / 3600)) + ':' + pad2(Math.floor((sec % 3600) / 60)) + ':' + pad2(sec % 60);
+}
+function brkKetColor(ket) {
+    var k = String(ket == null ? '' : ket).toUpperCase();
+    if (k.indexOf('MAKAN') > -1) return '#ea580c';
+    if (k.indexOf('SHOLAT') > -1 || k.indexOf('SHALAT') > -1) return '#059669';
+    if (k.indexOf('ROKOK') > -1) return '#64748b';
+    if (k.indexOf('TOILET') > -1 || k.indexOf('WC') > -1) return '#2563eb';
+    return '#7c3aed';
+}
+function brkName(r) { return getEmployeeName(r.nip); }
+function brkIsOpen(r) { return r.jam_selesai == null || String(r.jam_selesai).replace(/\s/g, '') === ''; }
+function brkSignature() {
+    var parts = [];
+    for (var i = 0; i < breakRows.length; i++) {
+        var r = breakRows[i];
+        parts.push([r.id, r.nip, r.keterangan, r.jam_mulai, brkName(r)].join('|'));
+    }
+    return parts.join(';');
+}
+function brkCardHtml(r) {
+    var name = brkName(r);
+    var nip = String(r.nip == null ? '' : r.nip).trim();
+    var img = SUPABASE_URL + '/storage/v1/object/public/FOTO SALES/' + nip + '.jpg';
+    var avatar = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(name).replace(/'/g, '%27') + '&background=0D8ABC&color=fff&size=128';
+    var onerr = "this.onerror=null;this.src='" + avatar + "';";
+    var ket = String(r.keterangan == null || r.keterangan === '' ? '-' : r.keterangan).toUpperCase();
+    var col = brkKetColor(ket);
+    return '<div class="brk-card" style="border-left-color:' + col + ';">' +
+        '<div class="brk-photo"><img src="' + brkEsc(img) + '" alt="" onerror="' + brkEsc(onerr) + '"></div>' +
+        '<div class="brk-info"><div class="brk-name">' + brkEsc(name) + '</div>' +
+        '<span class="brk-ket" style="background:' + col + ';">' + brkEsc(ket) + '</span></div>' +
+        '<div class="brk-time"><span class="brk-lbl">DURASI</span>' +
+        '<span class="brk-timer" data-start="' + brkSec(r.jam_mulai) + '">00:00:00</span></div></div>';
+}
+function brkSetBottomHeight(h) {
+    var cards = document.querySelectorAll('.bottom-card-container');
+    for (var i = 0; i < cards.length; i++) cards[i].style.height = h === null ? '' : h + 'px';
+}
+function brkHide() {
+    var sec = document.getElementById('breakSection'), track = document.getElementById('breakTrack');
+    if (sec) sec.style.display = 'none';
+    if (track) track.innerHTML = '';
+    brkSetBottomHeight(null); // kembali persis seperti master (480px dari CSS)
+}
+function renderBreak() {
+    var sec = document.getElementById('breakSection'), track = document.getElementById('breakTrack');
+    var body = document.getElementById('breakBody'), cnt = document.getElementById('breakCount');
+    if (!sec || !track || !body) return;
+    var sig = brkSignature();
+    if (sig === breakSig) return; // tidak ada perubahan: jangan render ulang (anti-kedip)
+    breakSig = sig;
+    var n = breakRows.length;
+    if (n === 0) { brkHide(); return; }
+    var two = n >= 2;
+    var pitch = two ? 554 : 654;                 // lebar kolom + jarak
+    var bodyH = two ? 142 : 88;                  // 2 baris atau 1 baris
+    var totalH = BREAK_HEADER_H + bodyH;
+    var cols = two ? Math.ceil(n / 2) : 1;
+    var one = '';
+    for (var c = 0; c < cols; c++) {
+        var a = breakRows[two ? c * 2 : 0], b = two ? breakRows[c * 2 + 1] : null;
+        one += '<div class="brk-col">' + brkCardHtml(a) + (b ? brkCardHtml(b) : '') + '</div>';
+    }
+    var setW = cols * pitch;
+    var rep = Math.max(1, Math.ceil(BREAK_VIEW_W / setW));
+    var half = '';
+    for (var k = 0; k < rep; k++) half += one;
+    var halfW = rep * setW;
+    sec.className = two ? 'brk-two' : 'brk-one';
+    sec.style.display = 'block';
+    sec.style.height = totalH + 'px';
+    body.style.height = bodyH + 'px';
+    if (cnt) cnt.textContent = n + ' ORANG';
+    track.style.width = (halfW * 2) + 'px';
+    track.innerHTML = half + half;               // dua salinan sama persis => loop mulus tanpa putus
+    var dur = (halfW / BREAK_SPEED_PX).toFixed(2) + 's';
+    track.style.animationDuration = dur;
+    track.style.webkitAnimationDuration = dur;
+    brkSetBottomHeight(BREAK_BOTTOM_BASE_H - totalH); // 4 tabel bawah dipendekkan, view lain tetap
+    brkTickTimers();
+}
+function brkTickTimers() {
+    var nodes = document.getElementById('breakTrack');
+    if (!nodes) return;
+    nodes = nodes.getElementsByClassName('brk-timer');
+    var now = brkNowSec();
+    for (var i = 0; i < nodes.length; i++) {
+        var txt = brkFmt(now - (parseInt(nodes[i].getAttribute('data-start'), 10) || 0));
+        if (nodes[i].textContent !== txt) nodes[i].textContent = txt;
+    }
+}
+function brkTick() {
+    renderBreak();       // nama karyawan baru termuat / berubah => render ulang otomatis
+    brkTickTimers();
+}
+function applyBreakRows(data, today) {
+    // Ambil baris TERBARU per NIP (id terbesar) pada hari ini; tampil hanya jika jam_selesai-nya masih kosong.
+    var latest = {}, i, r, key, prev;
+    for (i = 0; i < data.length; i++) {
+        r = data[i];
+        if (!r || r.nip == null) continue;
+        if (r.tanggal && String(r.tanggal).slice(0, 10) !== today) continue;
+        key = String(r.nip).trim();
+        prev = latest[key];
+        if (!prev || (Number(r.id) || 0) > (Number(prev.id) || 0)) latest[key] = r;
+    }
+    var list = [];
+    for (key in latest) { if (latest.hasOwnProperty(key) && brkIsOpen(latest[key])) list.push(latest[key]); }
+    list.sort(function (x, y) {
+        var d = brkSec(x.jam_mulai) - brkSec(y.jam_mulai);
+        return d !== 0 ? d : (Number(x.id) || 0) - (Number(y.id) || 0);
+    });
+    breakRows = list;
+    renderBreak();
+}
+function fetchBreakData() {
+    var nowMs = new Date().getTime();
+    if (breakBusy && nowMs - breakBusySince < 20000) return;
+    breakBusy = true;
+    breakBusySince = nowMs;
+    var today = wibDateKey(wibNow());
+    try {
+        supabaseClient.from(BREAK_TABLE).select('id,nip,tanggal,jam_mulai,jam_selesai,keterangan').eq('tanggal', today).then(function (res) {
+            breakBusy = false;
+            if (!res || res.error || !(res.data instanceof Array)) {
+                console.warn('Ambil data_istirahat gagal:', res && res.error); // gagal: pertahankan tampilan terakhir
+                return;
+            }
+            applyBreakRows(res.data, today);
+        }, function (err) {
+            breakBusy = false;
+            console.warn('Ambil data_istirahat gagal:', err);
+        });
+    }
+    catch (e) {
+        breakBusy = false;
+        console.warn('Ambil data_istirahat gagal:', e);
+    }
+}
+function startBreakModule() {
+    try {
+        fetchBreakData();
+        setInterval(fetchBreakData, BREAK_POLL_MS);   // cadangan bila realtime terputus / TV lama
+        setInterval(brkTick, 1000);
+        if (!window.__TV_USE_LEGACY__) {
+            subscribeTable(BREAK_TABLE, function () { return fetchBreakData(); }); // realtime INSERT/UPDATE/DELETE
+        }
+        document.addEventListener('visibilitychange', function () { if (!document.hidden) fetchBreakData(); });
+        window.addEventListener('online', fetchBreakData);
+    }
+    catch (e) {
+        console.warn('Modul team istirahat gagal dijalankan:', e);
+    }
+}
+if (document.readyState === 'loading')
+    document.addEventListener('DOMContentLoaded', startBreakModule);
+else
+    startBreakModule();
 </script>
 </body>
 </html>
