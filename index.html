@@ -177,6 +177,21 @@
   })(window, document);
   </script>
 
+  <script>
+  /* HEMAT EGRESS: Service Worker menyimpan foto (FOTO SALES / PS) di cache perangkat.
+     Jika browser tidak mendukung / bukan HTTPS, dashboard tetap berjalan normal tanpa cache ini. */
+  (function (w) {
+    try {
+      var okProto = w.location.protocol === 'https:' || w.location.hostname === 'localhost';
+      if (okProto && 'serviceWorker' in w.navigator) {
+        w.addEventListener('load', function () {
+          w.navigator.serviceWorker.register('/sw.js').catch(function () {});
+        });
+      }
+    } catch (e) {}
+  })(window);
+  </script>
+
   <style>
     * {
       -webkit-font-smoothing: antialiased;
@@ -1081,6 +1096,42 @@
     @-webkit-keyframes brkPulse { 0%, 100% { opacity: 0.35; } 50% { opacity: 1; } }
     @keyframes brkPulse { 0%, 100% { opacity: 0.35; } 50% { opacity: 1; } }
   </style>
+
+  <style id="tv-beauty-polish-css">
+    /* ===== PERCANTIK TAMPILAN & ANIMASI (hanya visual; tidak mengubah fungsi/layout utama) ===== */
+    /* Foto: muncul halus, tepi lebih lembut */
+    .tv-canvas img { transition: opacity .45s ease, transform .6s ease; }
+    .tv-canvas .object-cover { image-rendering: auto; }
+    /* Baris tabel: transisi warna halus + bayangan lembut */
+    .tv-canvas .grid.items-center.shadow-sm { transition: background-color .5s ease, box-shadow .5s ease, transform .5s ease; }
+    .tv-canvas .bg-slate-50.border.border-slate-200 { box-shadow: 0 1px 2px rgba(15, 23, 42, .06); }
+    /* Badge LIVE SYNC: denyut lembut + cahaya hijau */
+    .hd-sync-badge { box-shadow: 0 0 0 1px rgba(34,197,94,.18), 0 0 18px rgba(34,197,94,.12); transition: box-shadow .6s ease; }
+    .hd-sync-badge span:first-child { box-shadow: 0 0 10px rgba(34,197,94,.9); }
+    /* Jam: titik dua berkedip halus & angka stabil (tidak bergeser) */
+    .hd-time { font-variant-numeric: tabular-nums; -webkit-font-feature-settings: "tnum"; font-feature-settings: "tnum"; letter-spacing: .01em; }
+    .tv-canvas .font-mono { font-variant-numeric: tabular-nums; }
+    /* Kartu juara: kilau emas bergerak pelan di judul */
+    @keyframes tvShine { 0% { background-position: 0% 50%; } 100% { background-position: 200% 50%; } }
+    @supports ((-webkit-background-clip: text) or (background-clip: text)) {
+      .tv-canvas .mtd-top1-container h3 {
+        background: linear-gradient(90deg, #0f172a 0%, #0f172a 40%, #b45309 50%, #0f172a 60%, #0f172a 100%);
+        background-size: 200% 100%;
+        -webkit-background-clip: text; background-clip: text;
+        -webkit-text-fill-color: transparent; color: transparent;
+        animation: tvShine 7s linear infinite;
+      }
+    }
+    /* Kartu istirahat: transisi lembut */
+    .brk-card { transition: box-shadow .4s ease, transform .4s ease; }
+    /* Hormati preferensi 'kurangi gerakan' bila diaktifkan di perangkat */
+    @media (prefers-reduced-motion: reduce) {
+      .tv-canvas .mtd-top1-container h3 { animation: none; }
+    }
+    /* TV lama: matikan efek berat agar tetap lancar */
+    .legacy-mode .tv-canvas .mtd-top1-container h3 { animation: none; background: none; -webkit-text-fill-color: initial; color: inherit; }
+    .legacy-mode .hd-sync-badge { box-shadow: none; }
+  </style>
 </head>
 <body class="bg-slate-950 text-slate-800 select-none overflow-hidden m-0 p-0">
 
@@ -1621,6 +1672,100 @@ var karyawanMap = {};
 var furniproMap = {};
 var comserMap = {};
 var salesList = [], deptList = [], mtdSalesList = [], mtdFurniproList = [], mtdComserList = [];
+
+/* =====================================================================
+   SUPABASE SAVER  —  hemat Log Ingestion & Cached Egress
+   Fungsi dashboard TIDAK berubah. Yang berubah hanya CARA mengambil data:
+   1) Query kembar digabung (dedupe + cache pendek 4 detik, otomatis dibuang saat ada event realtime).
+   2) Polling cadangan 15 detik DIHAPUS bila realtime sehat -> hanya jaring pengaman tiap 5 menit.
+   3) Tabel yang realtime-nya putus tetap dipoll (otomatis) sampai tersambung lagi.
+   4) Data karyawan di-cache (memori + localStorage), tidak diunduh ulang tiap siklus.
+   5) Polling Istirahat & Siaran diperlambat otomatis saat realtime sehat.
+   6) Tidak ada polling saat tab/TV tidak terlihat.
+   ===================================================================== */
+var SBQ_TTL_MS = 4000;                 // umur cache dedupe query (detik-an, hanya untuk menggabungkan request kembar)
+var RT_SAFETY_MS = 5 * 60 * 1000;      // jaring pengaman: segarkan semua data tiap 5 menit (realtime sehat)
+var RT_BACKUP_TICK_MS = 15000;         // interval cek kesehatan realtime (tanpa request jaringan)
+var LEGACY_POLL_MS = 30000;            // TV lama (tanpa realtime): polling semua data
+var KARYAWAN_TTL_MS = 30 * 60 * 1000;  // data karyawan di-cache 30 menit (di-refresh langsung bila ada event realtime)
+var KARYAWAN_LS_KEY = 'tv_karyawan_cache_v1';
+var sbqCache = {}, sbqVer = {};
+var rtStatus = {}, rtEver = {}, rtHandlers = {}, rtLastSafety = new Date().getTime();
+var karyawanAt = 0;
+
+function sbqInvalidate(table) { sbqVer[table] = (sbqVer[table] || 0) + 1; }
+// Ambil tabel (opsional urut). Request kembar dalam SBQ_TTL_MS dipakai bersama. Selalu resolve {data, error}.
+function sbq(table, orderCol, ascending, cols) {
+    var key = table + '|' + (orderCol || '') + '|' + (ascending ? 'a' : 'd') + '|' + (cols || '*');
+    var ver = sbqVer[table] || 0;
+    var now = new Date().getTime();
+    var hit = sbqCache[key];
+    if (hit && hit.ver === ver && now - hit.t < SBQ_TTL_MS)
+        return hit.p;
+    var q = supabaseClient.from(table).select(cols || '*');
+    if (orderCol)
+        q = q.order(orderCol, { ascending: !!ascending });
+    var p = new Promise(function (resolve) {
+        q.then(function (res) { resolve(res || { data: null, error: null }); }, function (err) { resolve({ data: null, error: err }); });
+    });
+    var entry = { t: now, ver: ver, p: p };
+    sbqCache[key] = entry;
+    p.then(function (res) {
+        // gagal => jangan di-cache, agar siklus berikutnya mencoba lagi
+        if (res && res.error && sbqCache[key] === entry)
+            delete sbqCache[key];
+    });
+    return p;
+}
+// Juara #1 diambil dari daftar yang sama (tanpa request tambahan ke database)
+function sbqTop(table, orderCol) {
+    return sbq(table, orderCol, false).then(function (res) {
+        return { data: (res && res.data) ? res.data.slice(0, 1) : (res ? res.data : null), error: res ? res.error : null };
+    });
+}
+// Lacak status koneksi realtime per channel; saat tersambung ulang => kejar data yang terlewat
+function rtTrack(key, onRecover) {
+    return function (status) {
+        var prev = rtStatus[key];
+        rtStatus[key] = status;
+        if (status === 'SUBSCRIBED') {
+            if (rtEver[key] && prev !== 'SUBSCRIBED' && onRecover) {
+                try { onRecover(); } catch (e) { }
+            }
+            rtEver[key] = true;
+        }
+    };
+}
+function rtHealthy(key) { return !window.__TV_USE_LEGACY__ && rtStatus[key] === 'SUBSCRIBED'; }
+// Jaring pengaman: hanya tabel yang realtime-nya tidak sehat yang dipoll; semuanya disegarkan tiap RT_SAFETY_MS
+function rtBackupTick() {
+    if (document.hidden)
+        return;
+    var now = new Date().getTime();
+    if (now - rtLastSafety >= RT_SAFETY_MS) {
+        rtLastSafety = now;
+        refreshAllData();
+        return;
+    }
+    for (var table in rtHandlers) {
+        if (rtHandlers.hasOwnProperty(table) && rtStatus[table] !== 'SUBSCRIBED')
+            debounceRun(table, rtHandlers[table], 300);
+    }
+}
+// Cache data karyawan dari penyimpanan lokal (hemat unduhan saat TV di-reload)
+(function () {
+    try {
+        var raw = window.localStorage && window.localStorage.getItem(KARYAWAN_LS_KEY);
+        if (!raw)
+            return;
+        var obj = JSON.parse(raw);
+        if (obj && obj.map && obj.at && new Date().getTime() - obj.at < KARYAWAN_TTL_MS) {
+            karyawanMap = obj.map;
+            karyawanAt = obj.at;
+        }
+    }
+    catch (e) { }
+})();
 var currentSlide = 0;
 var popupTimer = null;
 var popupActive = false;
@@ -2022,9 +2167,9 @@ function setupLegacyRealtimePolling() {
     legacyPollPopupTwibbon();
     syncBacksoundState();
     loadSoundSalesConfig();
-    setInterval(legacyPollPopupTwibbon, 2500);
-    setInterval(syncBacksoundState, 12000);
-    setInterval(loadSoundSalesConfig, 30000);
+    setInterval(legacyPollPopupTwibbon, 3500);
+    setInterval(syncBacksoundState, 20000);
+    setInterval(loadSoundSalesConfig, 60000);
     var badge = document.querySelector('#mainHeader .hd-sync-badge span:last-child');
     if (badge)
         badge.innerText = 'SYNC POLLING MODE';
@@ -2039,14 +2184,14 @@ function setupRealtimeListeners() {
         .on('postgres_changes', { event: '*', schema: 'public', table: 'status_backsound' }, function () {
         syncBacksoundState();
     })
-        .subscribe();
+        .subscribe(rtTrack('status_backsound', function () { syncBacksoundState(); }));
     supabaseClient
         .channel('public:status_soundtwibbon')
         .on('postgres_changes', { event: '*', schema: 'public', table: 'status_soundtwibbon' }, function () {
         // Sinkronisasi status Sound Sales secara real-time (cache diperbarui di latar belakang)
         loadSoundSalesConfig();
     })
-        .subscribe();
+        .subscribe(rtTrack('status_soundtwibbon', function () { loadSoundSalesConfig(); }));
     supabaseClient
         .channel('public:popup_twibbon')
         .on('postgres_changes', { event: '*', schema: 'public', table: 'popup_twibbon' }, function (payload) {
@@ -2054,7 +2199,7 @@ function setupRealtimeListeners() {
             triggerSalesPopup(payload.new);
         }
     })
-        .subscribe();
+        .subscribe(rtTrack('popup_twibbon'));
 }
 // ===== DATA REALTIME: semua tabel dipantau langsung dari database (+ polling cadangan 15 detik) =====
 var refreshTimers = {};
@@ -2071,11 +2216,16 @@ function debounceRun(key, fn, delay) {
         }
     }, delay || 300);
 }
-function subscribeTable(table, handler) {
+function subscribeTable(table, handler, noBackup) {
+    if (!noBackup)
+        rtHandlers[table] = handler; // dipakai jaring pengaman bila realtime tabel ini putus
     supabaseClient
         .channel('rt_data_' + table)
-        .on('postgres_changes', { event: '*', schema: 'public', table: table }, function () { return debounceRun(table, handler, 300); })
-        .subscribe();
+        .on('postgres_changes', { event: '*', schema: 'public', table: table }, function () {
+        sbqInvalidate(table); // ada perubahan nyata => cache dedupe tabel ini dibuang
+        return debounceRun(table, handler, 300);
+    })
+        .subscribe(rtTrack(table, function () { sbqInvalidate(table); debounceRun(table, handler, 300); }));
 }
 function setupRealtimeData() {
     if (window.__TV_USE_LEGACY__)
@@ -2089,10 +2239,10 @@ function setupRealtimeData() {
     subscribeTable('mtd_fp', function () { return Promise.all([fetchMtdFurniproData(), fetchTop1MtdFurnipro()]); });
     subscribeTable('mtd_comser', function () { return Promise.all([fetchMtdComserData(), fetchTop1MtdComser()]); });
     subscribeTable('running_text', function () { return fetchRunningText(); });
-    subscribeTable('data_karyawan', function () { return refreshAllData(); });
+    subscribeTable('data_karyawan', function () { return refreshAllData(true); });
 }
 var refreshAllBusy = false;
-function refreshAllData() {
+function refreshAllData(force) {
     return __awaiter(this, void 0, void 0, function () {
         var e_1;
         return __generator(this, function (_a) {
@@ -2104,7 +2254,7 @@ function refreshAllData() {
                     _a.label = 1;
                 case 1:
                     _a.trys.push([1, 4, , 5]);
-                    return [4 /*yield*/, fetchKaryawanData()];
+                    return [4 /*yield*/, fetchKaryawanData(force === true)];
                 case 2:
                     _a.sent();
                     return [4 /*yield*/, Promise.all([
@@ -2386,18 +2536,25 @@ function setListHtml(orig, clone, html) {
     clone.innerHTML = html;
     return true;
 }
-function fetchKaryawanData() {
+function fetchKaryawanData(force) {
     return __awaiter(this, void 0, void 0, function () {
         var data;
         return __generator(this, function (_a) {
             switch (_a.label) {
-                case 0: return [4 /*yield*/, supabaseClient.from('data_karyawan').select('nip_kar, nama_kar')];
+                case 0:
+                    // Data karyawan jarang berubah: pakai cache selama KARYAWAN_TTL_MS (event realtime memaksa refresh)
+                    if (!force && karyawanAt && new Date().getTime() - karyawanAt < KARYAWAN_TTL_MS)
+                        return [2 /*return*/];
+                    return [4 /*yield*/, supabaseClient.from('data_karyawan').select('nip_kar, nama_kar')];
                 case 1:
                     data = (_a.sent()).data;
                     if (data) {
                         karyawanMap = {};
                         data.forEach(function (item) { if (item.nip_kar)
                             karyawanMap[String(item.nip_kar).trim()] = item.nama_kar; });
+                        karyawanAt = new Date().getTime();
+                        try { window.localStorage.setItem(KARYAWAN_LS_KEY, JSON.stringify({ at: karyawanAt, map: karyawanMap })); }
+                        catch (e) { }
                     }
                     return [2 /*return*/];
             }
@@ -2409,7 +2566,7 @@ function fetchDailyExtras() {
         var fpData, cncData;
         return __generator(this, function (_a) {
             switch (_a.label) {
-                case 0: return [4 /*yield*/, supabaseClient.from('daily_furnipro').select('*')];
+                case 0: return [4 /*yield*/, sbq('daily_furnipro')];
                 case 1:
                     fpData = (_a.sent()).data;
                     if (fpData) {
@@ -2421,7 +2578,7 @@ function fetchDailyExtras() {
                             }
                         });
                     }
-                    return [4 /*yield*/, supabaseClient.from('daily_comser').select('*')];
+                    return [4 /*yield*/, sbq('daily_comser')];
                 case 2:
                     cncData = (_a.sent()).data;
                     if (cncData) {
@@ -2762,7 +2919,7 @@ function fetchSalesData() {
                 case 0: return [4 /*yield*/, fetchDailyExtras()];
                 case 1:
                     _a.sent();
-                    return [4 /*yield*/, supabaseClient.from('laporan_sales').select('*').order('total', { ascending: false })];
+                    return [4 /*yield*/, sbq('laporan_sales', 'total', false)];
                 case 2:
                     data = (_a.sent()).data;
                     if (data) {
@@ -2806,7 +2963,7 @@ function fetchDeptData() {
         var data;
         return __generator(this, function (_a) {
             switch (_a.label) {
-                case 0: return [4 /*yield*/, supabaseClient.from('laporan_departemen').select('*').order('exclude_ppn', { ascending: false })];
+                case 0: return [4 /*yield*/, sbq('laporan_departemen', 'exclude_ppn', false)];
                 case 1:
                     data = (_a.sent()).data;
                     if (data) {
@@ -2846,7 +3003,7 @@ function fetchMtdSalesData() {
         var data, orig, clone, html_1;
         return __generator(this, function (_a) {
             switch (_a.label) {
-                case 0: return [4 /*yield*/, supabaseClient.from('mtd_sales').select('*').order('mtd_total', { ascending: false })];
+                case 0: return [4 /*yield*/, sbq('mtd_sales', 'mtd_total', false)];
                 case 1:
                     data = (_a.sent()).data;
                     if (data) {
@@ -2883,7 +3040,7 @@ function fetchMtdFurniproData() {
         var data, orig, clone, html_2;
         return __generator(this, function (_a) {
             switch (_a.label) {
-                case 0: return [4 /*yield*/, supabaseClient.from('mtd_fp').select('*').order('qty_mtdfp', { ascending: false })];
+                case 0: return [4 /*yield*/, sbq('mtd_fp', 'qty_mtdfp', false)];
                 case 1:
                     data = (_a.sent()).data;
                     if (data) {
@@ -2919,7 +3076,7 @@ function fetchMtdComserData() {
         var data, orig, clone, html_3;
         return __generator(this, function (_a) {
             switch (_a.label) {
-                case 0: return [4 /*yield*/, supabaseClient.from('mtd_comser').select('*').order('total_mtdcnc', { ascending: false })];
+                case 0: return [4 /*yield*/, sbq('mtd_comser', 'total_mtdcnc', false)];
                 case 1:
                     data = (_a.sent()).data;
                     if (data) {
@@ -2955,7 +3112,7 @@ function fetchTop1MtdSales() {
         var data, container, top, nip, name, total, sg, img, avatar;
         return __generator(this, function (_a) {
             switch (_a.label) {
-                case 0: return [4 /*yield*/, supabaseClient.from('mtd_sales').select('*').order('mtd_total', { ascending: false }).limit(1)];
+                case 0: return [4 /*yield*/, sbqTop('mtd_sales', 'mtd_total')];
                 case 1:
                     data = (_a.sent()).data;
                     container = document.getElementById('mtdTop1Content');
@@ -2990,7 +3147,7 @@ function fetchTop1MtdFurnipro() {
         var data, container, top, nip, name, qty, sg, img, avatar;
         return __generator(this, function (_a) {
             switch (_a.label) {
-                case 0: return [4 /*yield*/, supabaseClient.from('mtd_fp').select('*').order('qty_mtdfp', { ascending: false }).limit(1)];
+                case 0: return [4 /*yield*/, sbqTop('mtd_fp', 'qty_mtdfp')];
                 case 1:
                     data = (_a.sent()).data;
                     container = document.getElementById('furniproTop1Content');
@@ -3025,7 +3182,7 @@ function fetchTop1MtdComser() {
         var data, container, top, nip, name, total, sg, img, avatar;
         return __generator(this, function (_a) {
             switch (_a.label) {
-                case 0: return [4 /*yield*/, supabaseClient.from('mtd_comser').select('*').order('total_mtdcnc', { ascending: false }).limit(1)];
+                case 0: return [4 /*yield*/, sbqTop('mtd_comser', 'total_mtdcnc')];
                 case 1:
                     data = (_a.sent()).data;
                     container = document.getElementById('comserTop1Content');
@@ -3064,7 +3221,7 @@ function fetchRunningText() {
                     container = document.getElementById('runningTextContainer');
                     if (!container)
                         return [2 /*return*/];
-                    return [4 /*yield*/, supabaseClient.from('running_text').select('run_text')];
+                    return [4 /*yield*/, sbq('running_text', null, false, 'run_text')];
                 case 1:
                     data = (_a.sent()).data;
                     texts = data && data.length > 0 ? data.map(function (i) { return i.run_text == null ? '' : String(i.run_text).toUpperCase(); }).filter(Boolean) : ["SELAMAT DATANG DI INFORMA MOG MALANG (J382)"];
@@ -3114,13 +3271,13 @@ function updateGaugeData() {
         var targetData, target, targetFp, targetComser, deptData, realtime, furniproData, realtimeFp, comserData, realtimeComser;
         return __generator(this, function (_a) {
             switch (_a.label) {
-                case 0: return [4 /*yield*/, supabaseClient.from('target_today').select('*')];
+                case 0: return [4 /*yield*/, sbq('target_today')];
                 case 1:
                     targetData = (_a.sent()).data;
                     target = targetData && targetData.length > 0 ? Number(targetData[0].target || targetData[0].nilai || 250000000) : 250000000;
                     targetFp = targetData && targetData.length > 0 ? Number(targetData[0].target_fp || 0) : 0;
                     targetComser = targetData && targetData.length > 0 ? Number(targetData[0].target_comser || 0) : 0;
-                    return [4 /*yield*/, supabaseClient.from('laporan_departemen').select('*')];
+                    return [4 /*yield*/, sbq('laporan_departemen', 'exclude_ppn', false)];
                 case 2:
                     deptData = (_a.sent()).data;
                     realtime = 0;
@@ -3129,7 +3286,7 @@ function updateGaugeData() {
                     }
                     document.getElementById('gaugeRealtimeValue').innerText = 'Rp ' + realtime.toLocaleString('id-ID');
                     document.getElementById('gaugeTargetValue').innerText = 'Rp ' + target.toLocaleString('id-ID');
-                    return [4 /*yield*/, supabaseClient.from('daily_furnipro').select('qty_fp')];
+                    return [4 /*yield*/, sbq('daily_furnipro')];
                 case 3:
                     furniproData = (_a.sent()).data;
                     realtimeFp = 0;
@@ -3138,7 +3295,7 @@ function updateGaugeData() {
                     }
                     document.getElementById('realtimeFpValue').innerText = realtimeFp.toLocaleString('id-ID') + ' PCS';
                     document.getElementById('targetFpValue').innerText = targetFp.toLocaleString('id-ID') + ' PCS';
-                    return [4 /*yield*/, supabaseClient.from('daily_comser').select('total_cnc')];
+                    return [4 /*yield*/, sbq('daily_comser')];
                 case 4:
                     comserData = (_a.sent()).data;
                     realtimeComser = 0;
@@ -3160,6 +3317,8 @@ var SIARAN_TABLE = 'tts_pesan', SIARAN_COLUMN = 'text_pesan', SIARAN_BUCKET = 't
 var SIARAN_REPEAT = 3; // jumlah pengulangan suara
 var SIARAN_GAP_MS = 700; // jeda antar pengulangan
 var SIARAN_DEBOUNCE_MS = 1200; // menunggu teks & audio sama-sama selesai diperbarui
+var SIARAN_POLL_HEALTHY_MS = 20000; // realtime sehat: cek cadangan lebih jarang
+var siaranLastPoll = 0;
 var SIARAN_POLL_MS = 6000; // pemeriksaan cadangan (storage tidak selalu mengirim event realtime)
 var SIARAN_AUDIO_EXT = /\.(mp3|wav|ogg|oga|m4a|aac|opus|webm|weba|flac)$/i;
 var siaranEl = function (id) { return document.getElementById(id); };
@@ -3198,6 +3357,15 @@ function siaranFetchRow() {
     });
 }
 // Mengembalikan: {name, sig, url} file audio TERBARU | null (bucket kosong) | false (gagal query)
+// Hemat egress: minta file TERBARU saja (urut updated_at desc, maks 50). Bila gagal, kembali ke cara lama (200 file).
+function siaranListFiles() {
+    var st = supabaseClient.storage.from(SIARAN_BUCKET);
+    return st.list('', { limit: 50, sortBy: { column: 'updated_at', order: 'desc' } }).then(function (r) {
+        if (r && !r.error)
+            return r;
+        return st.list('', { limit: 200 });
+    });
+}
 function siaranFetchAudio() {
     return __awaiter(this, void 0, void 0, function () {
         var _a, data, error, files, ts_1, f, ver, pub, base, e_8;
@@ -3205,7 +3373,7 @@ function siaranFetchAudio() {
             switch (_b.label) {
                 case 0:
                     _b.trys.push([0, 2, , 3]);
-                    return [4 /*yield*/, supabaseClient.storage.from(SIARAN_BUCKET).list('', { limit: 200 })];
+                    return [4 /*yield*/, siaranListFiles()];
                 case 1:
                     _a = _b.sent(), data = _a.data, error = _a.error;
                     if (error)
@@ -3572,6 +3740,15 @@ function siaranPoll() {
         });
     });
 }
+function siaranPollTick() {
+    if (document.hidden)
+        return;
+    var now = new Date().getTime();
+    if (now - siaranLastPoll < (rtHealthy('rt_siaran_pesan') ? SIARAN_POLL_HEALTHY_MS : SIARAN_POLL_MS) - 500)
+        return;
+    siaranLastPoll = now;
+    siaranPoll();
+}
 function setupSiaran() {
     return __awaiter(this, void 0, void 0, function () {
         var res;
@@ -3585,7 +3762,7 @@ function setupSiaran() {
                         if (payload.eventType === 'INSERT' || payload.eventType === 'UPDATE')
                             siaranSchedule(payload.new);
                     })
-                        .subscribe();
+                        .subscribe(rtTrack('rt_siaran_pesan'));
                     // Realtime: bucket storage (bila fitur realtime storage.objects aktif); cadangan polling tetap berjalan
                     try {
                         supabaseClient
@@ -3604,7 +3781,7 @@ function setupSiaran() {
                     res = _a.sent();
                     siaranSigText = res[0] === false ? '' : siaranRowSig(res[0]);
                     siaranSigAudio = (res[1] && res[1] !== false) ? res[1].sig : '';
-                    setInterval(siaranPoll, SIARAN_POLL_MS);
+                    setInterval(siaranPollTick, SIARAN_POLL_MS);
                     return [2 /*return*/];
             }
         });
@@ -3661,7 +3838,10 @@ document.addEventListener("DOMContentLoaded", function () { return __awaiter(voi
                 fetchRunningText();
                 updateGaugeData();
                 startCarouselTimer();
-                setInterval(refreshAllData, 15000); // cadangan bila koneksi realtime terputus
+                if (window.__TV_USE_LEGACY__)
+                    setInterval(function () { if (!document.hidden) refreshAllData(); }, LEGACY_POLL_MS); // TV lama tanpa realtime
+                else
+                    setInterval(rtBackupTick, RT_BACKUP_TICK_MS); // cadangan cerdas: hanya aktif bila realtime tidak sehat
                 document.addEventListener('visibilitychange', function () { if (!document.hidden)
                     refreshAllData(); });
                 window.addEventListener('online', refreshAllData);
@@ -3677,7 +3857,10 @@ document.addEventListener("DOMContentLoaded", function () { return __awaiter(voi
 // - Durasi yang tampil = TOTAL durasi istirahat hari ini yang sudah selesai (semua keterangan) + istirahat yang sedang berjalan (per detik).
 // - Bila tidak ada yang istirahat: view disembunyikan dan tinggi 4 tabel bawah kembali ke ukuran semula.
 var BREAK_TABLE = 'data_istirahat';
-var BREAK_POLL_MS = 5000;
+var BREAK_POLL_MS = 5000;           // detak pengecekan (tanpa request jaringan)
+var BREAK_POLL_HEALTHY_MS = 60000;   // realtime sehat: ambil ulang tiap 60 detik saja (pergantian hari / jaring pengaman)
+var BREAK_POLL_FALLBACK_MS = 8000;   // realtime putus / TV lama
+var breakLastFetch = 0;
 var BREAK_SPEED_PX = 75;        // kecepatan jalan (px per detik)
 var BREAK_VIEW_W = 1920;        // lebar kanvas TV
 var BREAK_HEADER_H = 38;
@@ -3849,6 +4032,7 @@ function fetchBreakData() {
     if (breakBusy && nowMs - breakBusySince < 20000) return;
     breakBusy = true;
     breakBusySince = nowMs;
+    breakLastFetch = nowMs;
     var today = wibDateKey(wibNow());
     try {
         supabaseClient.from(BREAK_TABLE).select('id,nip,tanggal,jam_mulai,jam_selesai,durasi,keterangan').eq('tanggal', today).then(function (res) {
@@ -3868,13 +4052,18 @@ function fetchBreakData() {
         console.warn('Ambil data_istirahat gagal:', e);
     }
 }
+function breakPollTick() {
+    if (document.hidden) return;
+    var gap = rtHealthy(BREAK_TABLE) ? BREAK_POLL_HEALTHY_MS : BREAK_POLL_FALLBACK_MS;
+    if (new Date().getTime() - breakLastFetch >= gap - 500) fetchBreakData();
+}
 function startBreakModule() {
     try {
         fetchBreakData();
-        setInterval(fetchBreakData, BREAK_POLL_MS);   // cadangan bila realtime terputus / TV lama
+        setInterval(breakPollTick, BREAK_POLL_MS);   // cadangan adaptif: jarang bila realtime sehat
         setInterval(brkTick, 1000);
         if (!window.__TV_USE_LEGACY__) {
-            subscribeTable(BREAK_TABLE, function () { return fetchBreakData(); }); // realtime INSERT/UPDATE/DELETE
+            subscribeTable(BREAK_TABLE, function () { return fetchBreakData(); }, true); // realtime INSERT/UPDATE/DELETE (polling-nya diatur breakPollTick)
         }
         document.addEventListener('visibilitychange', function () { if (!document.hidden) fetchBreakData(); });
         window.addEventListener('online', fetchBreakData);
